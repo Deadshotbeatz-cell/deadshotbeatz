@@ -585,4 +585,14 @@ function selectLicense(el) {
 }
 
 function closeModal(e) {
-  if (e.target===document.getElementById('modal')) document.getElementById('modal').classList.re
+  if (e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('open');
+}
+
+function proceedCheckout() {
+  if (!currentBeatForModal) return;
+  alert('Checkout für: ' + currentBeatForModal.name + ' – ' + selectedLicense.toUpperCase());
+}
+
+// Init
+renderBeats('all');
+</script>
