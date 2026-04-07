@@ -230,7 +230,7 @@
     <a href="#licenses" class="btn-secondary">View Licenses</a>
   </div>
   <div class="hero-stats">
-    <div><div class="stat-num">13</div><div class="stat-label">Beats Available</div></div>
+    <div><div class="stat-num">22</div><div class="stat-label">Beats Available</div></div>
     <div><div class="stat-num">4</div><div class="stat-label">License Types</div></div>
     <div><div class="stat-num">24H</div><div class="stat-label">Delivery</div></div>
   </div>
@@ -241,7 +241,7 @@
   <div class="section-header">
     <div class="section-title">BEATS</div>
     <div class="section-line"></div>
-    <div class="section-count" id="beats-shown">13 TRACKS</div>
+    <div class="section-count" id="beats-shown">22 TRACKS</div>
   </div>
   <div class="filters">
     <button class="filter-btn active" data-filter="all">All</button>
@@ -341,8 +341,8 @@
         <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
           <div class="contact-link-icon">IG</div>@deadshotbeats
         </a>
-        <a href="/cdn-cgi/l/email-protection#b2d1dddcc6d3d1c6f2d6d7d3d6c1daddc6d0d7d3c6c19cd1dddf" class="contact-link">
-          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="ec8f8382988d8f98ac88898d889f8483988e898d989fc28f8381">[email&#160;protected]</span>
+        <a href="mailto:info@deadshotbeats.com" class="contact-link">
+          <div class="contact-link-icon">✉</div>info@deadshotbeats.com
         </a>
       </div>
     </div>
@@ -434,35 +434,43 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
+// ============================================================
+// CONFIG — passe BASE_URL an deine Cloudflare R2 / CDN URL an
+// ============================================================
 const BASE = 'https://audio.deadshotbeats.com/';
 
-const beats = [const beats = [
-  { id:1, name:'21 Savage X Future – Sacrifice', genre:'Trap', bpm:135, key:'Ebm', price:29, yt:'', file:' 21 Savage X Future Type Beat  - Sacrifice 135 Bpm Ebm.mp3' },
-  { id:2, name:'21 Savage – Nolenso', genre:'Trap', bpm:132, key:'Cm', price:29, yt:'', file:'21 Savage Type Beat - Nolenso Cm 132 Bpm.mp3' },
-  { id:3, name:'21 Savage Type Beat 85', genre:'Trap', bpm:85, key:'Bbm', price:29, yt:'', file:'21 Savage Type Beat 85 Bpm Bbm.mp3' },
-  { id:4, name:'Drake – Midnight', genre:'Melodic', bpm:123, key:'Cm', price:29, yt:'', file:'Drake Type Beat - Midnight - Rnb Type Beat - Cm 123 Bpm .mp3' },
-  { id:5, name:'Drake x 21 Savage – NoFeelings', genre:'Dark', bpm:146, key:'Ebmaj', price:29, yt:'', file:'Drake x 21 Savage _ Freestyle Type Beat _ NoFeelings Ebmaj  146 Bpm(3).mp3' },
-  { id:6, name:'Future – Legacy', genre:'Trap', bpm:137, key:'Em', price:29, yt:'', file:'Future Type Beat - Legacy - Em 137 Bpm.mp3' },
-  { id:7, name:'Future x Playboy Carti x Drake – Big Dog', genre:'Dark', bpm:143, key:'Em', price:29, yt:'', file:'Future X Playboy Carti x Drake Type Beat - Big Dog Em 143 Bpm(4).mp3' },
-  { id:8, name:'Future x 21 Savage – Codein Rain', genre:'Melodic', bpm:136, key:'Cm', price:29, yt:'', file:'Future x 21 Savage Type Beat - Codein Rain Cm 136 Bpm.mp3' },
-  { id:9, name:'Future x Southside – Ski Driver', genre:'Trap', bpm:135, key:'Ebmaj', price:29, yt:'', file:'Future x Southsiddde Type Beat - Ski Driver Ebmaj 135 Bpm.mp3' },
-  { id:10, name:'Ghosted', genre:'Melodic', bpm:0, key:'', price:29, yt:'', file:'Ghosted.mp3' },
-  { id:11, name:'Mixdown 2', genre:'Trap', bpm:0, key:'', price:29, yt:'', file:'Mixdown(2).mp3' },
-  { id:12, name:'Mixdown', genre:'Trap', bpm:0, key:'', price:29, yt:'', file:'Mixdown.mp3' },
-  { id:13, name:'A$AP Rocky – Dumb Shit', genre:'Trap', bpm:130, key:'Cm', price:29, yt:'', file:'A$ap Rocky Type Beat - Dumb Shit Cm 130 Bpm.mp3' },
-  { id:14, name:'Florida Type Beat – Big Stepper', genre:'Drill', bpm:156, key:'D#min', price:29, yt:'', file:'Florida Type Beat Big Stepper Bossman Dlow Type Beat D#Min 156 BPM V1.mp3' },
-  { id:15, name:'Larb – 21 Savage Type Beat', genre:'Trap', bpm:165, key:'G#', price:29, yt:'', file:'Larb - 21 Savage Type Beat - G# 165 Bpm.mp3' },
-  { id:16, name:'Put In My Cup – Future', genre:'Trap', bpm:130, key:'Ebm', price:29, yt:'', file:'Put in my cup - Future Type Beat - Ebm 130 Bpm .mp3' },
-  { id:17, name:'Roulete – 21 Savage', genre:'Dark', bpm:77, key:'C#m', price:29, yt:'', file:'Roulete  - 21 Savage Type Beat 77 Bpm C#m(2).mp3' },
-  { id:18, name:'Travis Scott x Ye – Titel', genre:'Dark', bpm:130, key:'Dm', price:29, yt:'', file:'Travis Scott x Ye Type Beat - Titel - Dm 130 Bpm.mp3' },
-  { id:19, name:'DGAF – Future ft. Quavo', genre:'Trap', bpm:135, key:'Bmin', price:29, yt:'', file:'DGAF - Future Ft. Quavo Type Beat Bmin 135 Bpm .mp3' },
-  { id:20, name:'Darkness In My Visions', genre:'Dark', bpm:0, key:'', price:29, yt:'', file:'Darkness in my Visions(3).mp3' },
-  { id:21, name:'Decision – 21 Savage', genre:'Trap', bpm:134, key:'D#m', price:29, yt:'', file:'Decision - 21 Savage Type Beat D#m 134 Bpm.mp3' },
-  { id:22, name:'Draft Day – Future', genre:'Trap', bpm:140, key:'Abm', price:29, yt:'', file:'Draft Day - Future Type Beat Abm 140 Bpm(2).mp3' }
+// ============================================================
+// BEATS ARRAY — FIXED (war doppelt definiert, jetzt korrekt)
+// ============================================================
+const beats = [
+  { id:1,  name:'21 Savage X Future – Sacrifice',           genre:'Trap',    bpm:135, key:'Ebm',   price:29, file:' 21 Savage X Future Type Beat  - Sacrifice 135 Bpm Ebm.mp3' },
+  { id:2,  name:'21 Savage – Nolenso',                      genre:'Trap',    bpm:132, key:'Cm',    price:29, file:'21 Savage Type Beat - Nolenso Cm 132 Bpm.mp3' },
+  { id:3,  name:'21 Savage Type Beat 85',                   genre:'Trap',    bpm:85,  key:'Bbm',   price:29, file:'21 Savage Type Beat 85 Bpm Bbm.mp3' },
+  { id:4,  name:'Drake – Midnight',                         genre:'Melodic', bpm:123, key:'Cm',    price:29, file:'Drake Type Beat - Midnight - Rnb Type Beat - Cm 123 Bpm .mp3' },
+  { id:5,  name:'Drake x 21 Savage – NoFeelings',           genre:'Dark',    bpm:146, key:'Ebmaj', price:29, file:'Drake x 21 Savage _ Freestyle Type Beat _ NoFeelings Ebmaj  146 Bpm(3).mp3' },
+  { id:6,  name:'Future – Legacy',                          genre:'Trap',    bpm:137, key:'Em',    price:29, file:'Future Type Beat - Legacy - Em 137 Bpm.mp3' },
+  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog', genre:'Dark',    bpm:143, key:'Em',    price:29, file:'Future X Playboy Carti x Drake Type Beat - Big Dog Em 143 Bpm(4).mp3' },
+  { id:8,  name:'Future x 21 Savage – Codein Rain',         genre:'Melodic', bpm:136, key:'Cm',    price:29, file:'Future x 21 Savage Type Beat - Codein Rain Cm 136 Bpm.mp3' },
+  { id:9,  name:'Future x Southside – Ski Driver',          genre:'Trap',    bpm:135, key:'Ebmaj', price:29, file:'Future x Southsiddde Type Beat - Ski Driver Ebmaj 135 Bpm.mp3' },
+  { id:10, name:'Ghosted',                                  genre:'Melodic', bpm:0,   key:'',      price:29, file:'Ghosted.mp3' },
+  { id:11, name:'Mixdown 2',                                genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown(2).mp3' },
+  { id:12, name:'Mixdown',                                  genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown.mp3' },
+  { id:13, name:'A$AP Rocky – Dumb Shit',                   genre:'Trap',    bpm:130, key:'Cm',    price:29, file:'A$ap Rocky Type Beat - Dumb Shit Cm 130 Bpm.mp3' },
+  { id:14, name:'Florida Type Beat – Big Stepper',          genre:'Drill',   bpm:156, key:'D#min', price:29, file:'Florida Type Beat Big Stepper Bossman Dlow Type Beat D#Min 156 BPM V1.mp3' },
+  { id:15, name:'Larb – 21 Savage Type Beat',               genre:'Trap',    bpm:165, key:'G#',    price:29, file:'Larb - 21 Savage Type Beat - G# 165 Bpm.mp3' },
+  { id:16, name:'Put In My Cup – Future',                   genre:'Trap',    bpm:130, key:'Ebm',   price:29, file:'Put in my cup - Future Type Beat - Ebm 130 Bpm .mp3' },
+  { id:17, name:'Roulete – 21 Savage',                      genre:'Dark',    bpm:77,  key:'C#m',   price:29, file:'Roulete  - 21 Savage Type Beat 77 Bpm C#m(2).mp3' },
+  { id:18, name:'Travis Scott x Ye – Titel',                genre:'Dark',    bpm:130, key:'Dm',    price:29, file:'Travis Scott x Ye Type Beat - Titel - Dm 130 Bpm.mp3' },
+  { id:19, name:'DGAF – Future ft. Quavo',                  genre:'Trap',    bpm:135, key:'Bmin',  price:29, file:'DGAF - Future Ft. Quavo Type Beat Bmin 135 Bpm .mp3' },
+  { id:20, name:'Darkness In My Visions',                   genre:'Dark',    bpm:0,   key:'',      price:29, file:'Darkness in my Visions(3).mp3' },
+  { id:21, name:'Decision – 21 Savage',                     genre:'Trap',    bpm:134, key:'D#m',   price:29, file:'Decision - 21 Savage Type Beat D#m 134 Bpm.mp3' },
+  { id:22, name:'Draft Day – Future',                       genre:'Trap',    bpm:140, key:'Abm',   price:29, file:'Draft Day - Future Type Beat Abm 140 Bpm(2).mp3' }
 ];
 
-
+// ============================================================
+// STATE
+// ============================================================
 let currentBeat = null;
 let isPlaying = false;
 let currentFilter = 'all';
@@ -470,37 +478,56 @@ let selectedLicense = 'mp3';
 let currentBeatForModal = null;
 const audio = document.getElementById('audio-player');
 
+// ============================================================
+// AUDIO EVENTS
+// ============================================================
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
   document.getElementById('progress-fill').style.width = (audio.currentTime / audio.duration * 100) + '%';
   document.getElementById('current-time').textContent = fmt(audio.currentTime);
 });
-audio.addEventListener('loadedmetadata', () => { document.getElementById('total-time').textContent = fmt(audio.duration); });
+audio.addEventListener('loadedmetadata', () => {
+  document.getElementById('total-time').textContent = fmt(audio.duration);
+});
 audio.addEventListener('ended', nextBeat);
 audio.addEventListener('play', () => { isPlaying = true; updatePlayBtn(true); renderBeats(currentFilter); });
 audio.addEventListener('pause', () => { isPlaying = false; updatePlayBtn(false); renderBeats(currentFilter); });
 
+// ============================================================
+// HELPERS
+// ============================================================
 function fmt(s) {
   if (isNaN(s)) return '0:00';
-  return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+  return Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
 }
 
+// ============================================================
+// RENDER BEATS
+// ============================================================
 function renderBeats(filter) {
   const filtered = filter === 'all' ? beats : beats.filter(b => b.genre.toLowerCase() === filter);
   document.getElementById('beats-shown').textContent = filtered.length + ' TRACKS';
   document.getElementById('beat-list').innerHTML = filtered.map((b, i) => `
-    <div class="beat-row ${currentBeat?.id===b.id?'playing':''}" onclick="playBeat(${b.id})">
-      <div class="beat-num">${currentBeat?.id===b.id ? '<div class="eq-bars"><div class="eq-bar" style="height:8px"></div><div class="eq-bar" style="height:12px"></div><div class="eq-bar" style="height:6px"></div></div>' : (i+1)}</div>
+    <div class="beat-row ${currentBeat?.id === b.id ? 'playing' : ''}" onclick="playBeat(${b.id})">
+      <div class="beat-num">
+        ${currentBeat?.id === b.id
+          ? '<div class="eq-bars"><div class="eq-bar" style="height:8px"></div><div class="eq-bar" style="height:12px"></div><div class="eq-bar" style="height:6px"></div></div>'
+          : (i + 1)}
+      </div>
       <div class="beat-cover">
         <div class="beat-cover-placeholder">DS</div>
-        <div class="play-overlay">${currentBeat?.id===b.id&&isPlaying ? '<div class="pause-icon"><div class="pause-bar"></div><div class="pause-bar"></div></div>' : '<div class="play-icon"></div>'}</div>
+        <div class="play-overlay">
+          ${currentBeat?.id === b.id && isPlaying
+            ? '<div class="pause-icon"><div class="pause-bar"></div><div class="pause-bar"></div></div>'
+            : '<div class="play-icon"></div>'}
+        </div>
       </div>
       <div class="beat-info">
         <div class="beat-name">${b.name}</div>
         <div class="beat-meta">
           <span class="beat-tag">${b.genre}</span>
-          ${b.bpm>0?`<span>${b.bpm} BPM</span>`:''}
-          ${b.key?`<span>${b.key}</span>`:''}
+          ${b.bpm > 0 ? `<span>${b.bpm} BPM</span>` : ''}
+          ${b.key ? `<span>${b.key}</span>` : ''}
         </div>
       </div>
       <div class="beat-duration">—</div>
@@ -510,16 +537,20 @@ function renderBeats(filter) {
   `).join('');
 }
 
+// ============================================================
+// PLAYER FUNCTIONS
+// ============================================================
 function playBeat(id) {
-  const b = beats.find(x => x.id===id);
+  const b = beats.find(x => x.id === id);
   if (!b) return;
-  if (currentBeat?.id===id) { togglePlay(); return; }
+  if (currentBeat?.id === id) { togglePlay(); return; }
   currentBeat = b;
-  audio.src = BASE + encodeURIComponent(b.file);
-  audio.volume = document.getElementById('vol').value;
+  audio.src = BASE + encodeURIComponent(b.file.trim());
+  audio.volume = parseFloat(document.getElementById('vol').value);
   audio.play();
   document.getElementById('player-name').textContent = b.name;
-  document.getElementById('player-tag').textContent = b.genre + (b.bpm>0?' · '+b.bpm+' BPM':'') + (b.key?' · '+b.key:'');
+  document.getElementById('player-tag').textContent =
+    b.genre + (b.bpm > 0 ? ' · ' + b.bpm + ' BPM' : '') + (b.key ? ' · ' + b.key : '');
   document.getElementById('sticky-player').classList.add('visible');
   renderBeats(currentFilter);
 }
@@ -536,14 +567,14 @@ function updatePlayBtn(p) {
 
 function nextBeat() {
   if (!currentBeat) { playBeat(beats[0].id); return; }
-  const i = beats.findIndex(b => b.id===currentBeat.id);
-  playBeat(beats[(i+1)%beats.length].id);
+  const i = beats.findIndex(b => b.id === currentBeat.id);
+  playBeat(beats[(i + 1) % beats.length].id);
 }
 
 function prevBeat() {
   if (!currentBeat) return;
-  const i = beats.findIndex(b => b.id===currentBeat.id);
-  playBeat(beats[(i-1+beats.length)%beats.length].id);
+  const i = beats.findIndex(b => b.id === currentBeat.id);
+  playBeat(beats[(i - 1 + beats.length) % beats.length].id);
 }
 
 function seekAudio(e) {
@@ -553,6 +584,9 @@ function seekAudio(e) {
 
 function setVolume(v) { audio.volume = v; }
 
+// ============================================================
+// FILTER BUTTONS
+// ============================================================
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -562,9 +596,12 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
+// ============================================================
+// MODAL
+// ============================================================
 function openBuyModal(e, id) {
   e.stopPropagation();
-  currentBeatForModal = beats.find(b => b.id===id);
+  currentBeatForModal = beats.find(b => b.id === id);
   document.getElementById('modal-beat-name').textContent = currentBeatForModal.name;
   document.getElementById('modal').classList.add('open');
   document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
@@ -579,4 +616,21 @@ function selectLicense(el) {
 }
 
 function closeModal(e) {
-  if (e.target===document.getElementById('modal')) document.getElementById('modal').classList.re
+  if (e.target === document.getElementById('modal')) {
+    document.getElementById('modal').classList.remove('open');
+  }
+}
+
+function proceedCheckout() {
+  if (!currentBeatForModal) return;
+  const prices = { mp3: 29, wav: 59, trackout: 99, exclusive: 499 };
+  alert(`Checkout: ${currentBeatForModal.name} — ${selectedLicense.toUpperCase()} — ${prices[selectedLicense]}€\n\nStripe-Integration hier einfügen.`);
+}
+
+// ============================================================
+// INIT — Beats beim Laden rendern
+// ============================================================
+renderBeats('all');
+</script>
+</body>
+</html>
