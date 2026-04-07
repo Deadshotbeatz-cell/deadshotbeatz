@@ -1,3 +1,4 @@
+console.log("Check Key:", process.env.STRIPE_SECRET_KEY ? "Key ist da" : "Key ist LEER");
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const LICENSE_PRICES = { mp3:2900, wav:5900, trackout:9900, exclusive:49900 };
