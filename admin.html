@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEADSHOT BEATS — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e01a1a;
+    --red-dark: #a01010;
+    --red-glow: rgba(224,26,26,0.3);
+    --black: #080808;
+    --black2: #111111;
+    --black3: #1a1a1a;
+    --black4: #222222;
+    --white: #f0f0f0;
+    --grey: #888;
+    --grey2: #555;
+    --green: #1a7a1a;
+    --green-light: #22a022;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--black); color: var(--white); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--black2); }
+  ::-webkit-scrollbar-thumb { background: var(--red); }
+
+  /* LOGIN */
+  #login-screen {
+    position: fixed; inset: 0; background: var(--black);
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+  }
+  #login-screen.hidden { display: none; }
+  .login-box {
+    background: var(--black2); border: 1px solid var(--black4);
+    padding: 48px; width: 360px; text-align: center;
+  }
+  .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 4px; margin-bottom: 4px; }
+  .login-logo span { color: var(--red); }
+  .login-sub { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey); margin-bottom: 36px; }
+  .login-input {
+    width: 100%; background: var(--black); border: 1px solid var(--black4);
+    color: var(--white); padding: 14px 16px; font-family: 'Barlow', sans-serif;
+    font-size: 15px; outline: none; margin-bottom: 12px; transition: border-color 0.2s;
+    text-align: center; letter-spacing: 3px;
+  }
+  .login-input:focus { border-color: var(--red); }
+  .login-btn {
+    width: 100%; background: var(--red); border: none; color: var(--white);
+    padding: 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px;
+    font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .login-btn:hover { background: var(--red-dark); }
+  .login-error { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 16px; }
+
+  /* ADMIN LAYOUT */
+  #admin-screen { display: none; }
+  #admin-screen.visible { display: block; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 60px;
+    background: rgba(8,8,8,0.97); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(224,26,26,0.2);
+  }
+  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; }
+  .nav-logo span { color: var(--red); }
+  .nav-badge {
+    background: var(--red); color: white; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 10px; font-weight: 700; letter-spacing: 2px; padding: 3px 10px;
+    text-transform: uppercase;
+  }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .logout-btn {
+    background: transparent; border: 1px solid var(--grey2); color: var(--grey);
+    padding: 6px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+    font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+  .main { padding: 40px; max-width: 1400px; margin: 0 auto; }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex; gap: 24px; margin-bottom: 36px; flex-wrap: wrap;
+  }
+  .stat-card {
+    background: var(--black2); border: 1px solid var(--black4);
+    padding: 20px 28px; flex: 1; min-width: 140px;
+  }
+  .stat-card-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red); line-height: 1; }
+  .stat-card-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-top: 4px; }
+
+  /* TOOLBAR */
+  .toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; gap: 16px; flex-wrap: wrap;
+  }
+  .toolbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
+  .toolbar-actions { display: flex; gap: 10px; align-items: center; }
+
+  .btn-add {
+    background: var(--red); border: none; color: white;
+    padding: 10px 24px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px;
+  }
+  .btn-add:hover { background: var(--red-dark); }
+
+  .btn-export {
+    background: transparent; border: 1px solid var(--grey2); color: var(--grey);
+    padding: 10px 20px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-export:hover { border-color: var(--white); color: var(--white); }
+
+  /* BEAT TABLE */
+  .beat-table { width: 100%; border-collapse: collapse; }
+  .beat-table th {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--grey);
+    padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--black4);
+    background: var(--black2); white-space: nowrap;
+  }
+  .beat-table td {
+    padding: 8px 12px; border-bottom: 1px solid var(--black4);
+    background: var(--black2); vertical-align: middle;
+  }
+  .beat-table tr:hover td { background: var(--black3); }
+  .beat-table tr.editing td { background: #1a1500; border-bottom-color: rgba(224,26,26,0.3); }
+
+  .td-num { color: var(--grey2); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; width: 40px; }
+  .td-file { font-size: 11px; color: var(--grey2); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Inline edit inputs */
+  .edit-input {
+    background: var(--black); border: 1px solid var(--red);
+    color: var(--white); padding: 5px 8px; font-family: 'Barlow', sans-serif;
+    font-size: 13px; outline: none; width: 100%; border-radius: 0;
+  }
+  .edit-input-sm { width: 70px; }
+  .edit-input-xs { width: 50px; }
+
+  .display-text { font-size: 14px; font-weight: 500; }
+  .display-meta { font-size: 12px; color: var(--grey); }
+
+  /* Genre select */
+  .edit-select {
+    background: var(--black); border: 1px solid var(--red);
+    color: var(--white); padding: 5px 8px; font-family: 'Barlow', sans-serif;
+    font-size: 13px; outline: none; appearance: none; cursor: pointer;
+  }
+
+  /* YT field */
+  .yt-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey2); display: inline-block; }
+  .yt-dot.active { background: #ff0000; }
+
+  /* Action buttons */
+  .btn-edit {
+    background: transparent; border: 1px solid var(--black4); color: var(--grey);
+    padding: 5px 12px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .btn-edit:hover { border-color: var(--white); color: var(--white); }
+  .btn-save {
+    background: var(--green); border: none; color: white;
+    padding: 5px 12px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; white-space: nowrap;
+  }
+  .btn-save:hover { background: var(--green-light); }
+  .btn-cancel {
+    background: transparent; border: 1px solid var(--grey2); color: var(--grey);
+    padding: 5px 10px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: var(--grey); color: var(--white); }
+  .btn-delete {
+    background: transparent; border: 1px solid transparent; color: var(--grey2);
+    padding: 5px 8px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-delete:hover { border-color: var(--red); color: var(--red); }
+
+  .action-cell { display: flex; gap: 6px; align-items: center; }
+
+  /* ADD BEAT MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--black2); border: 1px solid var(--black4);
+    width: 90%; max-width: 560px; padding: 40px; position: relative;
+    transform: translateY(20px); transition: transform 0.3s; max-height: 90vh; overflow-y: auto;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-close {
+    position: absolute; top: 16px; right: 20px; background: none; border: none;
+    color: var(--grey); font-size: 20px; cursor: pointer; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--red); }
+  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 28px; }
+
+  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  .form-label {
+    font-family: 'Barlow Condensed', sans-serif; font-size: 11px;
+    font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--grey);
+  }
+  .form-input {
+    background: var(--black); border: 1px solid var(--black4); color: var(--white);
+    padding: 11px 14px; font-family: 'Barlow', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+  }
+  .form-input:focus { border-color: var(--red); }
+  .form-select {
+    background: var(--black); border: 1px solid var(--black4); color: var(--white);
+    padding: 11px 14px; font-family: 'Barlow', sans-serif; font-size: 14px;
+    outline: none; appearance: none; cursor: pointer; width: 100%;
+  }
+  .form-select:focus { border-color: var(--red); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-note { font-size: 11px; color: var(--grey); margin-top: 2px; }
+
+  .btn-submit {
+    width: 100%; background: var(--red); border: none; color: white;
+    padding: 14px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s; margin-top: 8px;
+  }
+  .btn-submit:hover { background: var(--red-dark); }
+
+  /* EXPORT MODAL */
+  .export-code {
+    background: var(--black); border: 1px solid var(--black4);
+    padding: 16px; font-family: monospace; font-size: 11px; color: #aaa;
+    white-space: pre; overflow-x: auto; max-height: 300px; overflow-y: auto;
+    line-height: 1.6; margin-bottom: 16px;
+  }
+  .export-note {
+    font-size: 12px; color: var(--grey); line-height: 1.7; margin-bottom: 16px;
+  }
+  .export-steps { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+  .export-steps li {
+    font-size: 13px; color: var(--grey); display: flex; align-items: flex-start; gap: 10px;
+  }
+  .export-steps li::before {
+    content: attr(data-step); background: var(--red); color: white;
+    font-family: 'Bebas Neue', sans-serif; font-size: 14px;
+    width: 22px; height: 22px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .btn-copy-code {
+    width: 100%; background: var(--red); border: none; color: white;
+    padding: 12px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: background 0.2s;
+  }
+  .btn-copy-code:hover { background: var(--red-dark); }
+  .btn-copy-code.copied { background: var(--green); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 32px; right: 32px; z-index: 9999;
+    background: var(--black2); border: 1px solid var(--red);
+    color: var(--white); padding: 14px 24px;
+    font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600;
+    letter-spacing: 1px; opacity: 0; transform: translateY(10px);
+    transition: all 0.3s; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { border-color: var(--green); }
+
+  /* DELETE CONFIRM */
+  .confirm-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 600;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .confirm-overlay.open { opacity: 1; pointer-events: all; }
+  .confirm-box {
+    background: var(--black2); border: 1px solid var(--red);
+    padding: 36px; max-width: 400px; text-align: center;
+  }
+  .confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--red); margin-bottom: 8px; }
+  .confirm-text { font-size: 14px; color: var(--grey); margin-bottom: 28px; line-height: 1.6; }
+  .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+  .btn-confirm-del {
+    background: var(--red); border: none; color: white;
+    padding: 10px 28px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer;
+  }
+  .btn-confirm-cancel {
+    background: transparent; border: 1px solid var(--grey2); color: var(--grey);
+    padding: 10px 28px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-confirm-cancel:hover { border-color: var(--white); color: var(--white); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">DEAD<span>SHOT</span> BEATS</div>
+    <div class="login-sub">Admin Panel</div>
+    <input class="login-input" type="password" id="pw-input" placeholder="••••••••"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Einloggen</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-screen">
+  <nav>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="nav-logo">DEAD<span>SHOT</span> BEATS</div>
+      <div class="nav-badge">Admin</div>
+    </div>
+    <div class="nav-right">
+      <a href="/" style="color:var(--grey);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;" target="_blank">↗ Live-Seite</a>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </nav>
+
+  <div class="main">
+    <!-- Stats -->
+    <div class="stats-bar" id="stats-bar"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-title">BEATS VERWALTEN</div>
+      <div class="toolbar-actions">
+        <button class="btn-export" onclick="openExport()">⬇ Code exportieren</button>
+        <button class="btn-add" onclick="openAddModal()">+ Neuen Beat hinzufügen</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div style="overflow-x:auto;">
+      <table class="beat-table" id="beat-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Titel</th>
+            <th>Genre</th>
+            <th>BPM</th>
+            <th>Key</th>
+            <th>Preis</th>
+            <th>YouTube</th>
+            <th>Datei</th>
+            <th>Aktionen</th>
+          </tr>
+        </thead>
+        <tbody id="beat-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD BEAT MODAL -->
+<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddModal()">✕</button>
+    <div class="modal-title">NEUEN BEAT</div>
+    <div class="form-group">
+      <label class="form-label">Titel *</label>
+      <input class="form-input" id="new-name" placeholder="z.B. Future x 21 Savage – Codein Rain">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Genre *</label>
+        <select class="form-select" id="new-genre">
+          <option value="Trap">Trap</option>
+          <option value="Dark">Dark</option>
+          <option value="Melodic">Melodic</option>
+          <option value="Drill">Drill</option>
+          <option value="Boom Bap">Boom Bap</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preis (€)</label>
+        <input class="form-input" id="new-price" type="number" value="29" min="1">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">BPM</label>
+        <input class="form-input" id="new-bpm" type="number" placeholder="135">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Key</label>
+        <input class="form-input" id="new-key" placeholder="z.B. Cm, Ebm">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dateiname (MP3 in R2) *</label>
+      <input class="form-input" id="new-file" placeholder="Mein Beat - 135 Bpm Cm.mp3">
+      <div class="form-note">Genau wie die Datei in deinem Cloudflare R2 Bucket heißt</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">YouTube URL (optional)</label>
+      <input class="form-input" id="new-yt" placeholder="https://www.youtube.com/watch?v=...">
+    </div>
+    <button class="btn-submit" onclick="addBeat()">Beat hinzufügen →</button>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="modal-overlay" id="export-modal" onclick="if(event.target===this)closeExport()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeExport()">✕</button>
+    <div class="modal-title">CODE EXPORTIEREN</div>
+    <div class="export-note">
+      Kopiere diesen Code und ersetze den <code style="color:var(--red)">const beats = [...]</code> Block in deiner <strong>index.html</strong> auf GitHub.
+    </div>
+    <ul class="export-steps">
+      <li data-step="1">Code unten kopieren (Button klicken)</li>
+      <li data-step="2">GitHub → index.html öffnen → Bleistift-Icon (Edit)</li>
+      <li data-step="3">Den alten <code style="color:var(--red)">const beats = [...]</code> Block suchen und durch den kopierten ersetzen</li>
+      <li data-step="4">Commit → Vercel deployed automatisch</li>
+    </ul>
+    <div class="export-code" id="export-code"></div>
+    <button class="btn-copy-code" id="copy-code-btn" onclick="copyExportCode()">Code kopieren</button>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title">Beat löschen?</div>
+    <div class="confirm-text" id="confirm-text">Dieser Beat wird aus der Liste entfernt.</div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">Abbrechen</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── CONFIG ──────────────────────────────────────────────
+const ADMIN_PASSWORD = 'deadshot2024'; // Passwort hier ändern
+
+// ─── BEATS DATA ──────────────────────────────────────────
+let beats = [
+  { id:1,  name:'21 Savage X Future – Sacrifice',            genre:'Trap',    bpm:135, key:'Ebm',   price:29, yt:'', file:' 21 Savage X Future Type Beat  - Sacrifice 135 Bpm Ebm.mp3' },
+  { id:2,  name:'21 Savage – Nolenso',                       genre:'Trap',    bpm:132, key:'Cm',    price:29, yt:'', file:'21 Savage Type Beat - Nolenso Cm 132 Bpm.mp3' },
+  { id:3,  name:'21 Savage Type Beat 85',                    genre:'Trap',    bpm:85,  key:'Bbm',   price:29, yt:'', file:'21 Savage Type Beat 85 Bpm Bbm.mp3' },
+  { id:4,  name:'Drake – Midnight',                          genre:'Melodic', bpm:123, key:'Cm',    price:29, yt:'', file:'Drake Type Beat - Midnight - Rnb Type Beat - Cm 123 Bpm .mp3' },
+  { id:5,  name:'Drake x 21 Savage – NoFeelings',           genre:'Dark',    bpm:146, key:'Ebmaj', price:29, yt:'', file:'Drake x 21 Savage _ Freestyle Type Beat _ NoFeelings Ebmaj  146 Bpm(3).mp3' },
+  { id:6,  name:'Future – Legacy',                           genre:'Trap',    bpm:137, key:'Em',    price:29, yt:'', file:'Future Type Beat - Legacy - Em 137 Bpm.mp3' },
+  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog',  genre:'Dark',    bpm:143, key:'Em',    price:29, yt:'', file:'Future X Playboy Carti x Drake Type Beat - Big Dog Em 143 Bpm(4).mp3' },
+  { id:8,  name:'Future x 21 Savage – Codein Rain',         genre:'Melodic', bpm:136, key:'Cm',    price:29, yt:'', file:'Future x 21 Savage Type Beat - Codein Rain Cm 136 Bpm.mp3' },
+  { id:9,  name:'Future x Southside – Ski Driver',          genre:'Trap',    bpm:135, key:'Ebmaj', price:29, yt:'', file:'Future x Southsiddde Type Beat - Ski Driver Ebmaj 135 Bpm.mp3' },
+  { id:10, name:'Ghosted',                                   genre:'Melodic', bpm:0,   key:'',      price:29, yt:'', file:'Ghosted.mp3' },
+  { id:11, name:'Mixdown 2',                                 genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown(2).mp3' },
+  { id:12, name:'Mixdown',                                   genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown.mp3' },
+  { id:13, name:'A$AP Rocky – Dumb Shit',                   genre:'Trap',    bpm:130, key:'Cm',    price:29, yt:'', file:'A$ap Rocky Type Beat - Dumb Shit Cm 130 Bpm.mp3' },
+  { id:14, name:'Florida Type Beat – Big Stepper',          genre:'Drill',   bpm:156, key:'D#min', price:29, yt:'', file:'Florida Type Beat Big Stepper Bossman Dlow Type Beat D#Min 156 BPM V1.mp3' },
+  { id:15, name:'Larb – 21 Savage Type Beat',               genre:'Trap',    bpm:165, key:'G#',    price:29, yt:'', file:'Larb - 21 Savage Type Beat - G# 165 Bpm.mp3' },
+  { id:16, name:'Put In My Cup – Future',                   genre:'Trap',    bpm:130, key:'Ebm',   price:29, yt:'', file:'Put in my cup - Future Type Beat - Ebm 130 Bpm .mp3' },
+  { id:17, name:'Roulete – 21 Savage',                      genre:'Dark',    bpm:77,  key:'C#m',   price:29, yt:'', file:'Roulete  - 21 Savage Type Beat 77 Bpm C#m(2).mp3' },
+  { id:18, name:'Travis Scott x Ye – Titel',                genre:'Dark',    bpm:130, key:'Dm',    price:29, yt:'', file:'Travis Scott x Ye Type Beat - Titel - Dm 130 Bpm.mp3' },
+  { id:19, name:'DGAF – Future ft. Quavo',                  genre:'Trap',    bpm:135, key:'Bmin',  price:29, yt:'', file:'DGAF - Future Ft. Quavo Type Beat Bmin 135 Bpm .mp3' },
+  { id:20, name:'Darkness In My Visions',                   genre:'Dark',    bpm:0,   key:'',      price:29, yt:'', file:'Darkness in my Visions(3).mp3' },
+  { id:21, name:'Decision – 21 Savage',                     genre:'Trap',    bpm:134, key:'D#m',   price:29, yt:'', file:'Decision - 21 Savage Type Beat D#m 134 Bpm.mp3' },
+  { id:22, name:'Draft Day – Future',                       genre:'Trap',    bpm:140, key:'Abm',   price:29, yt:'', file:'Draft Day - Future Type Beat Abm 140 Bpm(2).mp3' },
+];
+
+const GENRES = ['Trap','Dark','Melodic','Drill','Boom Bap'];
+let editingId = null;
+let deleteTargetId = null;
+
+// ─── LOGIN ────────────────────────────────────────────────
+function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-screen').classList.add('visible');
+    renderAll();
+  } else {
+    document.getElementById('login-error').textContent = 'Falsches Passwort.';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function doLogout() {
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('admin-screen').classList.remove('visible');
+  document.getElementById('pw-input').value = '';
+  document.getElementById('login-error').textContent = '';
+}
+
+// ─── RENDER ───────────────────────────────────────────────
+function renderAll() {
+  renderStats();
+  renderTable();
+}
+
+function renderStats() {
+  const genres = {};
+  beats.forEach(b => { genres[b.genre] = (genres[b.genre]||0)+1; });
+  const topGenre = Object.entries(genres).sort((a,b)=>b[1]-a[1])[0];
+  const withYT = beats.filter(b=>b.yt).length;
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-card"><div class="stat-card-num">${beats.length}</div><div class="stat-card-label">Beats Total</div></div>
+    <div class="stat-card"><div class="stat-card-num">${topGenre?topGenre[0]:'-'}</div><div class="stat-card-label">Top Genre</div></div>
+    <div class="stat-card"><div class="stat-card-num">${withYT}</div><div class="stat-card-label">Mit YouTube</div></div>
+    <div class="stat-card"><div class="stat-card-num">${beats.filter(b=>b.price===29).length}</div><div class="stat-card-label">Standard (29€)</div></div>
+  `;
+}
+
+function renderTable() {
+  document.getElementById('beat-tbody').innerHTML = beats.map((b, i) => {
+    const isEditing = editingId === b.id;
+    return `<tr class="${isEditing?'editing':''}">
+      <td class="td-num">${i+1}</td>
+      <td style="min-width:200px;">
+        ${isEditing
+          ? `<input class="edit-input" id="e-name" value="${escHtml(b.name)}">`
+          : `<div class="display-text">${escHtml(b.name)}</div>`}
+      </td>
+      <td>
+        ${isEditing
+          ? `<select class="edit-select" id="e-genre">${GENRES.map(g=>`<option value="${g}"${b.genre===g?' selected':''}>${g}</option>`).join('')}</select>`
+          : `<span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--grey);">${b.genre}</span>`}
+      </td>
+      <td>
+        ${isEditing
+          ? `<input class="edit-input edit-input-sm" id="e-bpm" type="number" value="${b.bpm}">`
+          : `<span class="display-meta">${b.bpm>0?b.bpm:'—'}</span>`}
+      </td>
+      <td>
+        ${isEditing
+          ? `<input class="edit-input edit-input-sm" id="e-key" value="${escHtml(b.key)}">`
+          : `<span class="display-meta">${b.key||'—'}</span>`}
+      </td>
+      <td>
+        ${isEditing
+          ? `<input class="edit-input edit-input-xs" id="e-price" type="number" value="${b.price}">€`
+          : `<span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${b.price}€</span>`}
+      </td>
+      <td style="text-align:center;">
+        ${isEditing
+          ? `<input class="edit-input" id="e-yt" value="${escHtml(b.yt||'')}" placeholder="YouTube URL" style="min-width:200px;">`
+          : `<span class="yt-dot ${b.yt?'active':''}" title="${b.yt||'Kein YouTube Link'}"></span>`}
+      </td>
+      <td class="td-file" title="${escHtml(b.file)}">${escHtml(b.file)}</td>
+      <td>
+        <div class="action-cell">
+          ${isEditing ? `
+            <button class="btn-save" onclick="saveEdit(${b.id})">✓ Speichern</button>
+            <button class="btn-cancel" onclick="cancelEdit()">✕</button>
+          ` : `
+            <button class="btn-edit" onclick="startEdit(${b.id})">Bearbeiten</button>
+            <button class="btn-delete" onclick="openConfirm(${b.id})" title="Löschen">🗑</button>
+          `}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── EDIT ─────────────────────────────────────────────────
+function startEdit(id) {
+  editingId = id;
+  renderTable();
+  document.getElementById('e-name')?.focus();
+}
+
+function cancelEdit() {
+  editingId = null;
+  renderTable();
+}
+
+function saveEdit(id) {
+  const b = beats.find(x => x.id === id);
+  if (!b) return;
+  b.name   = document.getElementById('e-name').value.trim() || b.name;
+  b.genre  = document.getElementById('e-genre').value;
+  b.bpm    = parseInt(document.getElementById('e-bpm').value) || 0;
+  b.key    = document.getElementById('e-key').value.trim();
+  b.price  = parseInt(document.getElementById('e-price').value) || 29;
+  b.yt     = document.getElementById('e-yt').value.trim();
+  editingId = null;
+  renderAll();
+  showToast('✓ Beat gespeichert', 'success');
+}
+
+// ─── DELETE ───────────────────────────────────────────────
+function openConfirm(id) {
+  deleteTargetId = id;
+  const b = beats.find(x => x.id === id);
+  document.getElementById('confirm-text').textContent = `"${b?.name}" wird aus der Liste entfernt. Diese Aktion kann nicht rückgängig gemacht werden.`;
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  deleteTargetId = null;
+}
+
+function confirmDelete() {
+  if (!deleteTargetId) return;
+  beats = beats.filter(b => b.id !== deleteTargetId);
+  closeConfirm();
+  editingId = null;
+  renderAll();
+  showToast('Beat gelöscht', '');
+}
+
+// ─── ADD BEAT ─────────────────────────────────────────────
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+  document.getElementById('new-name').focus();
+}
+
+function closeAddModal() {
+  document.getElementById('add-modal').classList.remove('open');
+  ['new-name','new-file','new-bpm','new-key','new-yt'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('new-price').value = '29';
+}
+
+function addBeat() {
+  const name = document.getElementById('new-name').value.trim();
+  const file = document.getElementById('new-file').value.trim();
+  if (!name || !file) {
+    showToast('Titel und Dateiname sind Pflichtfelder', '');
+    return;
+  }
+  const maxId = beats.length ? Math.max(...beats.map(b=>b.id)) : 0;
+  beats.push({
+    id: maxId + 1,
+    name,
+    genre: document.getElementById('new-genre').value,
+    bpm: parseInt(document.getElementById('new-bpm').value) || 0,
+    key: document.getElementById('new-key').value.trim(),
+    price: parseInt(document.getElementById('new-price').value) || 29,
+    yt: document.getElementById('new-yt').value.trim(),
+    file
+  });
+  closeAddModal();
+  renderAll();
+  showToast('✓ Beat hinzugefügt!', 'success');
+}
+
+// ─── EXPORT ───────────────────────────────────────────────
+function openExport() {
+  const code = generateCode();
+  document.getElementById('export-code').textContent = code;
+  document.getElementById('copy-code-btn').textContent = 'Code kopieren';
+  document.getElementById('copy-code-btn').classList.remove('copied');
+  document.getElementById('export-modal').classList.add('open');
+}
+
+function closeExport() {
+  document.getElementById('export-modal').classList.remove('open');
+}
+
+function generateCode() {
+  const lines = beats.map((b, i) => {
+    const comma = i < beats.length - 1 ? ',' : '';
+    return `  { id:${b.id}, name:'${b.name.replace(/'/g,"\\'")}', genre:'${b.genre}', bpm:${b.bpm}, key:'${b.key}', price:${b.price}, yt:'${(b.yt||'').replace(/'/g,"\\'")}', file:'${b.file.replace(/'/g,"\\'")}' }${comma}`;
+  });
+  return `const beats = [\n${lines.join('\n')}\n];`;
+}
+
+function copyExportCode() {
+  navigator.clipboard.writeText(generateCode()).then(() => {
+    const btn = document.getElementById('copy-code-btn');
+    btn.textContent = '✓ Kopiert! Jetzt in GitHub einfügen';
+    btn.classList.add('copied');
+  });
+}
+
+// ─── UTILS ────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type?' '+type:'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = 'toast'; }, 2800);
+}
+
+// Enter key on login
+document.getElementById('pw-input').focus();
+</script>
+</body>
+</html>
