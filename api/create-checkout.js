@@ -1,7 +1,7 @@
 console.log("Check Key:", process.env.STRIPE_SECRET_KEY ? "Key ist da" : "Key ist LEER");
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const LICENSE_PRICES = { mp3: 0, wav: 0, trackout: 0, exclusive: 0 };
+const LICENSE_PRICES = { mp3: 1900, wav: 5900, trackout: 7500, exclusive offer };
 const LICENSE_NAMES  = { mp3:'MP3 Lease', wav:'WAV Lease', trackout:'Trackout Lease', exclusive:'Exclusive Rights' };
 
 module.exports = async (req, res) => {
