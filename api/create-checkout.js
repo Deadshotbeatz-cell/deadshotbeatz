@@ -36,5 +36,12 @@ module.exports = async (req, res) => {
   } catch (err) {
     console.error('Stripe error:', err);
     res.status(500).json({ error: 'Checkout konnte nicht erstellt werden.' });
-  }
+  }const session = await stripe.checkout.sessions.create({
+  payment_method_types: ['card'],
+  line_items: lineItems,
+  mode: 'payment',
+  allow_promotion_codes: true, // <--- Diese Zeile hier einfügen!
+  success_url: `${YOUR_DOMAIN}/success.html`,
+  cancel_url: `${YOUR_DOMAIN}/cancel.html`,
+  metadata: { ... }
 };
