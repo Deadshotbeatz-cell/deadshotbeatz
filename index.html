@@ -342,8 +342,8 @@
         <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
           <div class="contact-link-icon">IG</div>@deadshotbeats
         </a>
-        <a href="mailto:contact@deadshotbeats.com" class="contact-link">
-          <div class="contact-link-icon">✉</div>contact@deadshotbeats.com
+        <a href="/cdn-cgi/l/email-protection#b1d2dedfc5d0d2c5f1d5d4d0d5c2d9dec5d3d4d0c5c29fd2dedc" class="contact-link">
+          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="42212d2c362321360226272326312a2d3620272336316c212d2f">[email&#160;protected]</span>
         </a>
       </div>
     </div>
@@ -435,7 +435,7 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const BASE = 'https://audio.deadshotbeats.com/';
 
 const beats = [
@@ -460,7 +460,7 @@ const beats = [
   { id:19, name:'DGAF – Future ft. Quavo',                 genre:'Trap',    bpm:135, key:'Bmin',  price:29, yt:'', file:'DGAF - Future Ft. Quavo Type Beat Bmin 135 Bpm .mp3' },
   { id:20, name:'Darkness In My Visions',                  genre:'Dark',    bpm:0,   key:'',      price:29, yt:'', file:'Darkness in my Visions(3).mp3' },
   { id:21, name:'Decision – 21 Savage',                    genre:'Trap',    bpm:134, key:'D#m',   price:29, yt:'', file:'Decision - 21 Savage Type Beat D#m 134 Bpm.mp3' },
-  { id:22, name:'Draft Day – Future',                      genre:'Trap',    bpm:140, key:'Abm',   price:29, yt:'', file:'Draft Day - Future Type Beat Abm 140 Bpm(2
+  { id:22, name:'Draft Day – Future',                      genre:'Trap',    bpm:140, key:'Abm',   price:29, yt:'', file:'Draft Day - Future Type Beat Abm 140 Bpm(2).mp3' },
 ];
 
 let currentBeat = null;
@@ -505,7 +505,7 @@ function renderBeats(filter) {
       </div>
       <div class="beat-duration">—</div>
       <div class="beat-price">${b.price}<span>€</span></div>
-      <button class="buy-btn" onclick="openBuyModal(event,${b.id})">Kaufen</button>
+      <button class="buy-btn" onclick="openBuyModal(event,${b.id})">Buy</button>
     </div>
   `).join('');
 }
@@ -573,10 +573,4 @@ function openBuyModal(e, id) {
 }
 
 function selectLicense(el) {
-  document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
-  el.classList.add('selected');
-  selectedLicense = el.dataset.license;
-}
-
-function closeModal(e) {
-  if (e.target===document.getElementById('modal')) document.getElementById('modal').classList.re
+  document.querySelectorAll('.licen
