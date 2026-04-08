@@ -439,19 +439,28 @@
 const BASE = 'https://audio.deadshotbeats.com/';
 
 const beats = [
-  { id:1,  name:'21 Savage X Future – Sacrifice',       genre:'Trap',    bpm:135, key:'Ebm',   price:29, file:'21 Savage X Future Type Beat - Sacrifice 135 Bpm Ebm.mp3' },
-  { id:2,  name:'21 Savage – Nolenso',                  genre:'Trap',    bpm:132, key:'Cm',    price:29, file:'21 Savage Type Beat - Nolenso Cm 132 Bpm.mp3' },
-  { id:3,  name:'21 Savage Type Beat 85',               genre:'Trap',    bpm:85,  key:'Bbm',   price:29, file:'21 Savage Type Beat 85 Bpm Bbm.mp3' },
-  { id:4,  name:'Drake – Midnight',                     genre:'Melodic', bpm:123, key:'Cm',    price:29, file:'Drake Type Beat - Midnight - Rnb Type Beat - Cm 123 Bpm .mp3' },
-  { id:5,  name:'Drake x 21 Savage – NoFeelings',      genre:'Dark',    bpm:146, key:'Ebmaj', price:29, file:'Drake x 21 Savage _ Freestyle Type Beat _ NoFeelings Ebmaj 146 ...' },
-  { id:6,  name:'Future – Legacy',                      genre:'Trap',    bpm:137, key:'Em',    price:29, file:'Future Type Beat - Legacy - Em 137 Bpm.mp3' },
-  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog', genre:'Dark', bpm:143, key:'Em',  price:29, file:'Future X Playboy Carti x Drake Type Beat - Big Dog Em 143 Bpm(' },
-  { id:8,  name:'Future x 21 Savage – Codein Rain',    genre:'Melodic', bpm:136, key:'Cm',    price:29, file:'Future x 21 Savage Type Beat - Codein Rain Cm 136 Bpm.mp3' },
-  { id:9,  name:'Future x Southside – Ski Driver',     genre:'Trap',    bpm:135, key:'Ebmaj', price:29, file:'Future x Southsiddde Type Beat - Ski Driver Ebmaj 135 Bpm.mp3' },
-  { id:10, name:'Future x Southside – Night Invasion',  genre:'Dark',    bpm:145, key:'Am',    price:29, file:'Future x Southside Type Beat - Night Invasion Am 145 Bpm (6).m...' },
-  { id:11, name:'Ghosted',                              genre:'Melodic', bpm:0,   key:'',      price:29, file:'Ghosted.mp3' },
-  { id:12, name:'Mixdown 2',                            genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown(2).mp3' },
-  { id:13, name:'Mixdown',                              genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown.mp3' },
+   { id:1,  name:'21 Savage X Future – Sacrifice',           genre:'Trap',    bpm:135, key:'Ebm',   price:29, yt:'', file:' 21 Savage X Future Type Beat  - Sacrifice 135 Bpm Ebm.mp3' },
+  { id:2,  name:'21 Savage – Nolenso',                      genre:'Trap',    bpm:132, key:'Cm',    price:29, yt:'', file:'21 Savage Type Beat - Nolenso Cm 132 Bpm.mp3' },
+  { id:3,  name:'21 Savage Type Beat 85',                   genre:'Trap',    bpm:85,  key:'Bbm',   price:29, yt:'', file:'21 Savage Type Beat 85 Bpm Bbm.mp3' },
+  { id:4,  name:'Drake – Midnight',                         genre:'Melodic', bpm:123, key:'Cm',    price:29, yt:'', file:'Drake Type Beat - Midnight - Rnb Type Beat - Cm 123 Bpm .mp3' },
+  { id:5,  name:'Drake x 21 Savage – NoFeelings',          genre:'Dark',    bpm:146, key:'Ebmaj', price:29, yt:'', file:'Drake x 21 Savage _ Freestyle Type Beat _ NoFeelings Ebmaj  146 Bpm(3).mp3' },
+  { id:6,  name:'Future – Legacy',                          genre:'Trap',    bpm:137, key:'Em',    price:29, yt:'', file:'Future Type Beat - Legacy - Em 137 Bpm.mp3' },
+  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog', genre:'Dark',    bpm:143, key:'Em',    price:29, yt:'', file:'Future X Playboy Carti x Drake Type Beat - Big Dog Em 143 Bpm(4).mp3' },
+  { id:8,  name:'Future x 21 Savage – Codein Rain',        genre:'Melodic', bpm:136, key:'Cm',    price:29, yt:'', file:'Future x 21 Savage Type Beat - Codein Rain Cm 136 Bpm.mp3' },
+  { id:9,  name:'Future x Southside – Ski Driver',         genre:'Trap',    bpm:135, key:'Ebmaj', price:29, yt:'', file:'Future x Southsiddde Type Beat - Ski Driver Ebmaj 135 Bpm.mp3' },
+  { id:10, name:'Ghosted',                                  genre:'Melodic', bpm:0,   key:'',      price:29, yt:'', file:'Ghosted.mp3' },
+  { id:11, name:'Mixdown 2',                                genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown(2).mp3' },
+  { id:12, name:'Mixdown',                                  genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown.mp3' },
+  { id:13, name:'A$AP Rocky – Dumb Shit',                  genre:'Trap',    bpm:130, key:'Cm',    price:29, yt:'', file:'A$ap Rocky Type Beat - Dumb Shit Cm 130 Bpm.mp3' },
+  { id:14, name:'Florida Type Beat – Big Stepper',         genre:'Drill',   bpm:156, key:'D#min', price:29, yt:'', file:'Florida Type Beat Big Stepper Bossman Dlow Type Beat D#Min 156 BPM V1.mp3' },
+  { id:15, name:'Larb – 21 Savage Type Beat',              genre:'Trap',    bpm:165, key:'G#',    price:29, yt:'', file:'Larb - 21 Savage Type Beat - G# 165 Bpm.mp3' },
+  { id:16, name:'Put In My Cup – Future',                  genre:'Trap',    bpm:130, key:'Ebm',   price:29, yt:'', file:'Put in my cup - Future Type Beat - Ebm 130 Bpm .mp3' },
+  { id:17, name:'Roulete – 21 Savage',                     genre:'Dark',    bpm:77,  key:'C#m',   price:29, yt:'', file:'Roulete  - 21 Savage Type Beat 77 Bpm C#m(2).mp3' },
+  { id:18, name:'Travis Scott x Ye – Titel',               genre:'Dark',    bpm:130, key:'Dm',    price:29, yt:'', file:'Travis Scott x Ye Type Beat - Titel - Dm 130 Bpm.mp3' },
+  { id:19, name:'DGAF – Future ft. Quavo',                 genre:'Trap',    bpm:135, key:'Bmin',  price:29, yt:'', file:'DGAF - Future Ft. Quavo Type Beat Bmin 135 Bpm .mp3' },
+  { id:20, name:'Darkness In My Visions',                  genre:'Dark',    bpm:0,   key:'',      price:29, yt:'', file:'Darkness in my Visions(3).mp3' },
+  { id:21, name:'Decision – 21 Savage',                    genre:'Trap',    bpm:134, key:'D#m',   price:29, yt:'', file:'Decision - 21 Savage Type Beat D#m 134 Bpm.mp3' },
+  { id:22, name:'Draft Day – Future',                      genre:'Trap',    bpm:140, key:'Abm',   price:29, yt:'', file:'Draft Day - Future Type Beat Abm 140 Bpm(2
 ];
 
 let currentBeat = null;
