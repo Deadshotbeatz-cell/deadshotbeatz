@@ -87,7 +87,8 @@ module.exports = async (req, res) => {
 
     try {
       await resend.emails.send({
-        from: 'Deadshot Beats <noreply@deadshotbeats.com>',
+        from: 'Deadshot Beats <beats@deadshotbeats.com>',
+
         to: customerEmail,
         subject: `Your Beat is Ready — ${beatName} 🔥`,
         html: `
