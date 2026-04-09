@@ -460,10 +460,10 @@ function renderBeats(filter) {
   `).join('');
 }
 
-function playBeat(id) {
+window.playBeat = function(id) {
   const b = beats.find(x => x.id===id);
   if (!b) return;
-  if (currentBeat?.id===id) { togglePlay(); return; }
+  if (currentBeat?.id===id) { window.togglePlay(); return; }
   currentBeat = b;
   audio.src = BASE + b.file;
   audio.volume = document.getElementById('vol').value;
@@ -472,36 +472,36 @@ function playBeat(id) {
   document.getElementById('player-tag').textContent = b.genre + (b.bpm>0?' · '+b.bpm+' BPM':'') + (b.key?' · '+b.key:'');
   document.getElementById('sticky-player').classList.add('visible');
   renderBeats(currentFilter);
-}
+};
 
-function togglePlay() {
+window.togglePlay = function() {
   if (!currentBeat) return;
   audio.paused ? audio.play() : audio.pause();
-}
+};
 
 function updatePlayBtn(p) {
   document.getElementById('play-svg').style.display = p ? 'none' : 'block';
   document.getElementById('pause-svg').style.display = p ? 'block' : 'none';
 }
 
-function nextBeat() {
-  if (!currentBeat) { playBeat(beats[0].id); return; }
+window.nextBeat = function() {
+  if (!currentBeat) { window.playBeat(beats[0].id); return; }
   const i = beats.findIndex(b => b.id===currentBeat.id);
-  playBeat(beats[(i+1)%beats.length].id);
-}
+  window.playBeat(beats[(i+1)%beats.length].id);
+};
 
-function prevBeat() {
+window.prevBeat = function() {
   if (!currentBeat) return;
   const i = beats.findIndex(b => b.id===currentBeat.id);
-  playBeat(beats[(i-1+beats.length)%beats.length].id);
-}
+  window.playBeat(beats[(i-1+beats.length)%beats.length].id);
+};
 
-function seekAudio(e) {
+window.seekAudio = function(e) {
   if (!audio.duration) return;
   audio.currentTime = (e.offsetX / document.getElementById('progress-bar').offsetWidth) * audio.duration;
-}
+};
 
-function setVolume(v) { audio.volume = v; }
+window.setVolume = function(v) { audio.volume = v; };
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -512,7 +512,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
-function openBuyModal(e, id) {
+window.openBuyModal = function(e, id) {
   e.stopPropagation();
   currentBeatForModal = beats.find(b => b.id===id);
   document.getElementById('modal-beat-name').textContent = currentBeatForModal.name;
@@ -520,17 +520,17 @@ function openBuyModal(e, id) {
   document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
   document.querySelector('.license-option[data-license="mp3"]').classList.add('selected');
   selectedLicense = 'mp3';
-}
+};
 
-function selectLicense(el) {
+window.selectLicense = function(el) {
   document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   selectedLicense = el.dataset.license;
-}
+};
 
-function closeModal(e) {
+window.closeModal = function(e) {
   if (e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('open');
-}
+};
 
 async function proceedCheckout() {
   if (!currentBeatForModal) return;
