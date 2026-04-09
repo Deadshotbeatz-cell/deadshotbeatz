@@ -7,16 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --red: #e01a1a;
-    --red-dark: #a01010;
-    --red-glow: rgba(224,26,26,0.3);
-    --black: #080808;
-    --black2: #111111;
-    --black3: #1a1a1a;
-    --black4: #222222;
-    --white: #f0f0f0;
-    --grey: #888;
-    --grey2: #555;
+    --red: #e01a1a; --red-dark: #a01010; --red-glow: rgba(224,26,26,0.3);
+    --black: #080808; --black2: #111111; --black3: #1a1a1a; --black4: #222222;
+    --white: #f0f0f0; --grey: #888; --grey2: #555;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
@@ -24,22 +17,8 @@
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: var(--black2); }
   ::-webkit-scrollbar-thumb { background: var(--red); }
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.4;
-  }
-  nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 48px; height: 64px;
-    background: rgba(8,8,8,0.92); backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(224,26,26,0.15);
-  }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 9999; opacity: 0.4; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; background: rgba(8,8,8,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(224,26,26,0.15); }
   .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--white); text-decoration: none; }
   .nav-logo span { color: var(--red); }
   .nav-links { display: flex; gap: 36px; list-style: none; }
@@ -194,18 +173,16 @@
   .checkout-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (max-width: 900px) {
-    nav { padding: 0 24px; }
-    .nav-links { display: none; }
-    section { padding: 72px 24px; }
-    .hero { padding: 100px 24px 72px; }
+    nav { padding: 0 24px; } .nav-links { display: none; }
+    section { padding: 72px 24px; } .hero { padding: 100px 24px 72px; }
     .license-grid { grid-template-columns: 1fr 1fr; }
     .about { grid-template-columns: 1fr; gap: 40px; }
     .contact-grid { grid-template-columns: 1fr; gap: 40px; }
     footer { flex-direction: column; gap: 20px; text-align: center; }
     .beat-row { grid-template-columns: 40px 44px 1fr auto auto; gap: 8px; }
-    .beat-price, .buy-btn { display: none; }
-    .sticky-player { padding: 0 20px; gap: 16px; }
-    .player-volume { display: none; }
+    .beat-price { display: none; }
+    .buy-btn { display: inline-block; padding: 6px 10px; font-size: 10px; }
+    .sticky-player { padding: 0 20px; gap: 16px; } .player-volume { display: none; }
     .hero::after { font-size: 240px; right: -30px; }
     .form-row { grid-template-columns: 1fr; }
   }
@@ -232,7 +209,7 @@
     <a href="#licenses" class="btn-secondary">View Licenses</a>
   </div>
   <div class="hero-stats">
-    <div><div class="stat-num">22</div><div class="stat-label">Beats Available</div></div>
+    <div><div class="stat-num" id="hero-beat-count">—</div><div class="stat-label">Beats Available</div></div>
     <div><div class="stat-num">4</div><div class="stat-label">License Types</div></div>
     <div><div class="stat-num">24H</div><div class="stat-label">Delivery</div></div>
   </div>
@@ -243,7 +220,7 @@
   <div class="section-header">
     <div class="section-title">BEATS</div>
     <div class="section-line"></div>
-    <div class="section-count" id="beats-shown">13 TRACKS</div>
+    <div class="section-count" id="beats-shown">— TRACKS</div>
   </div>
   <div class="filters">
     <button class="filter-btn active" data-filter="all">All</button>
@@ -253,7 +230,9 @@
     <button class="filter-btn" data-filter="dark">Dark</button>
     <button class="filter-btn" data-filter="melodic">Melodic</button>
   </div>
-  <div class="beat-list" id="beat-list"></div>
+  <div class="beat-list" id="beat-list">
+    <div style="padding:40px;text-align:center;color:var(--grey);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;">LOADING BEATS...</div>
+  </div>
 </section>
 
 <section class="licenses" id="licenses">
@@ -262,51 +241,8 @@
     <div class="section-line"></div>
   </div>
   <p style="color:var(--grey);font-size:14px;max-width:560px;line-height:1.7;">Choose the license that fits your project. For custom deals or exclusive rights, reach out directly.</p>
-  <div class="license-grid">
-    <div class="license-card">
-      <div class="license-type">Basic</div>
-      <div class="license-name">MP3 LEASE</div>
-      <div class="license-price">29<span>€</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>MP3 High Quality (320kbps)</li><li>Up to 100,000 Streams</li><li>Music videos allowed</li><li>Non-profit performances</li>
-        <li class="disabled">WAV File</li><li class="disabled">Trackout Stems</li><li class="disabled">Exclusive Rights</li>
-      </ul>
-      <button class="btn-primary" style="width:100%;text-align:center;">Buy Now</button>
-    </div>
-    <div class="license-card featured">
-      <div class="license-badge">Popular</div>
-      <div class="license-type">Standard</div>
-      <div class="license-name">WAV LEASE</div>
-      <div class="license-price">59<span>€</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>WAV + MP3 (Studio Quality)</li><li>Up to 500,000 Streams</li><li>Music videos allowed</li><li>Commercial performances</li><li>Radio broadcasts</li>
-        <li class="disabled">Trackout Stems</li><li class="disabled">Exclusive Rights</li>
-      </ul>
-      <button class="btn-primary" style="width:100%;text-align:center;">Buy Now</button>
-    </div>
-    <div class="license-card">
-      <div class="license-type">Premium</div>
-      <div class="license-name">TRACKOUT</div>
-      <div class="license-price">99<span>€</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>All Stems / Individual Tracks</li><li>WAV + MP3 included</li><li>Unlimited Streams</li><li>Full commercial use</li><li>TV & Film Sync</li><li>Free to edit</li>
-        <li class="disabled">Exclusive Rights</li>
-      </ul>
-      <button class="btn-primary" style="width:100%;text-align:center;">Buy Now</button>
-    </div>
-    <div class="license-card">
-      <div class="license-type">One-Time</div>
-      <div class="license-name">EXCLUSIVE</div>
-      <div class="license-price">499<span>€+</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>100% Exclusive Rights</li><li>Beat removed from store</li><li>All stems & file formats</li><li>Full commercial use</li><li>Label deals possible</li><li>Price on request</li>
-      </ul>
-      <button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire</button>
-    </div>
+  <div class="license-grid" id="license-grid">
+    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--grey);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;">LOADING...</div>
   </div>
 </section>
 
@@ -381,22 +317,16 @@
   </div>
   <div class="player-controls">
     <div class="player-buttons">
-      <button class="ctrl-btn" onclick="prevBeat()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
-      </button>
+      <button class="ctrl-btn" onclick="prevBeat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
       <button class="ctrl-btn main-play" onclick="togglePlay()">
         <svg id="play-svg" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
         <svg id="pause-svg" width="14" height="14" viewBox="0 0 24 24" fill="white" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
       </button>
-      <button class="ctrl-btn" onclick="nextBeat()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-      </button>
+      <button class="ctrl-btn" onclick="nextBeat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
     </div>
     <div class="progress-container">
       <span class="time-label" id="current-time">0:00</span>
-      <div class="progress-bar" id="progress-bar" onclick="seekAudio(event)">
-        <div class="progress-fill" id="progress-fill"></div>
-      </div>
+      <div class="progress-bar" id="progress-bar" onclick="seekAudio(event)"><div class="progress-fill" id="progress-fill"></div></div>
       <span class="time-label" id="total-time">0:00</span>
     </div>
   </div>
@@ -414,19 +344,19 @@
     <div class="license-options">
       <div class="license-option selected" data-license="mp3" onclick="selectLicense(this)">
         <div><div class="license-option-name">MP3 LEASE</div><div class="license-option-desc">MP3 · up to 100k Streams</div></div>
-        <div class="license-option-price">29€</div>
+        <div class="license-option-price" id="price-mp3">29€</div>
       </div>
       <div class="license-option" data-license="wav" onclick="selectLicense(this)">
         <div><div class="license-option-name">WAV LEASE</div><div class="license-option-desc">WAV + MP3 · up to 500k Streams</div></div>
-        <div class="license-option-price">59€</div>
+        <div class="license-option-price" id="price-wav">59€</div>
       </div>
       <div class="license-option" data-license="trackout" onclick="selectLicense(this)">
         <div><div class="license-option-name">TRACKOUT</div><div class="license-option-desc">All Stems · Unlimited Streams</div></div>
-        <div class="license-option-price">99€</div>
+        <div class="license-option-price" id="price-trackout">99€</div>
       </div>
       <div class="license-option" data-license="exclusive" onclick="selectLicense(this)">
         <div><div class="license-option-name">EXCLUSIVE</div><div class="license-option-desc">100% Exclusive Rights</div></div>
-        <div class="license-option-price">499€+</div>
+        <div class="license-option-price" id="price-exclusive">499€+</div>
       </div>
     </div>
     <button class="modal-checkout-btn" id="checkout-btn" onclick="proceedCheckout()">Proceed to Checkout →</button>
@@ -436,34 +366,24 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
+  authDomain: "deadshot-beats.firebaseapp.com",
+  projectId: "deadshot-beats",
+  storageBucket: "deadshot-beats.firebasestorage.app",
+  messagingSenderId: "252096563375",
+  appId: "1:252096563375:web:58193b52e325147f592c5a"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 const BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
 
-const beats = [
-  { id:1,  name:'21 Savage X Future – Sacrifice',            genre:'Trap',    bpm:135, key:'Ebm',   price:29, file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3' },
-  { id:2,  name:'21 Savage – Nolenso',                       genre:'Trap',    bpm:132, key:'Cm',    price:29, file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3' },
-  { id:3,  name:'21 Savage Type Beat 85',                    genre:'Trap',    bpm:85,  key:'Bbm',   price:29, file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3' },
-  { id:4,  name:'Drake – Midnight',                          genre:'Melodic', bpm:123, key:'Cm',    price:29, file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3' },
-  { id:5,  name:'Drake x 21 Savage – NoFeelings',           genre:'Dark',    bpm:146, key:'Ebmaj', price:29, file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3' },
-  { id:6,  name:'Future – Legacy',                           genre:'Trap',    bpm:137, key:'Em',    price:29, file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3' },
-  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog',  genre:'Dark',    bpm:143, key:'Em',    price:29, file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3' },
-  { id:8,  name:'Future x 21 Savage – Codein Rain',         genre:'Melodic', bpm:136, key:'Cm',    price:29, file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3' },
-  { id:9,  name:'Future x Southside – Ski Driver',          genre:'Trap',    bpm:135, key:'Ebmaj', price:29, file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3' },
-  { id:10, name:'Ghosted',                                   genre:'Melodic', bpm:0,   key:'',      price:29, file:'Ghosted.mp3' },
-  { id:11, name:'Mixdown 2',                                 genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown(2).mp3' },
-  { id:12, name:'Mixdown',                                   genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown.mp3' },
-  { id:13, name:'A$AP Rocky – Dumb Shit',                   genre:'Trap',    bpm:130, key:'Cm',    price:29, file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3' },
-  { id:14, name:'Florida Type Beat – Big Stepper',          genre:'Drill',   bpm:156, key:'D#min', price:29, file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3' },
-  { id:15, name:'Larb – 21 Savage Type Beat',               genre:'Trap',    bpm:165, key:'G#',    price:29, file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3' },
-  { id:16, name:'Put In My Cup – Future',                   genre:'Trap',    bpm:130, key:'Ebm',   price:29, file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3' },
-  { id:17, name:'Roulete – 21 Savage',                      genre:'Dark',    bpm:77,  key:'C#m',   price:29, file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3' },
-  { id:18, name:'Travis Scott x Ye – Titel',                genre:'Dark',    bpm:130, key:'Dm',    price:29, file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3' },
-  { id:19, name:'DGAF – Future ft. Quavo',                  genre:'Trap',    bpm:135, key:'Bmin',  price:29, file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3' },
-  { id:20, name:'Darkness In My Visions',                   genre:'Dark',    bpm:0,   key:'',      price:29, file:'Darkness%20in%20my%20Visions(3).mp3' },
-  { id:21, name:'Decision – 21 Savage',                     genre:'Trap',    bpm:134, key:'D#m',   price:29, file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3' },
-  { id:22, name:'Draft Day – Future',                       genre:'Trap',    bpm:140, key:'Abm',   price:29, file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3' },
-];
-
+let beats = [];
 let currentBeat = null;
 let isPlaying = false;
 let currentFilter = 'all';
@@ -471,14 +391,15 @@ let selectedLicense = 'mp3';
 let currentBeatForModal = null;
 const audio = document.getElementById('audio-player');
 
+// ── AUDIO EVENTS ──────────────────────────────────────────
 audio.addEventListener('timeupdate', () => {
   if (!audio.duration) return;
   document.getElementById('progress-fill').style.width = (audio.currentTime / audio.duration * 100) + '%';
   document.getElementById('current-time').textContent = fmt(audio.currentTime);
 });
 audio.addEventListener('loadedmetadata', () => { document.getElementById('total-time').textContent = fmt(audio.duration); });
-audio.addEventListener('ended', nextBeat);
-audio.addEventListener('play', () => { isPlaying = true; updatePlayBtn(true); renderBeats(currentFilter); });
+audio.addEventListener('ended', () => nextBeat());
+audio.addEventListener('play',  () => { isPlaying = true;  updatePlayBtn(true);  renderBeats(currentFilter); });
 audio.addEventListener('pause', () => { isPlaying = false; updatePlayBtn(false); renderBeats(currentFilter); });
 
 function fmt(s) {
@@ -486,11 +407,14 @@ function fmt(s) {
   return Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
 }
 
+// ── RENDER BEATS ──────────────────────────────────────────
 function renderBeats(filter) {
-  const filtered = filter === 'all' ? beats : beats.filter(b => b.genre.toLowerCase() === filter);
+  const filtered = filter === 'all' ? beats : beats.filter(b => (b.genre||'').toLowerCase() === filter);
   document.getElementById('beats-shown').textContent = filtered.length + ' TRACKS';
-  document.getElementById('beat-list').innerHTML = filtered.map((b, i) => `
-    <div class="beat-row ${currentBeat?.id===b.id?'playing':''}" onclick="playBeat(${b.id})">
+  document.getElementById('beat-list').innerHTML = filtered.length === 0
+    ? '<div style="padding:40px;text-align:center;color:var(--grey);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:2px;">NO BEATS IN THIS GENRE YET</div>'
+    : filtered.map((b, i) => `
+    <div class="beat-row ${currentBeat?.id===b.id?'playing':''}" onclick="window._playBeat(${b.id})">
       <div class="beat-num">${currentBeat?.id===b.id ? '<div class="eq-bars"><div class="eq-bar" style="height:8px"></div><div class="eq-bar" style="height:12px"></div><div class="eq-bar" style="height:6px"></div></div>' : (i+1)}</div>
       <div class="beat-cover">
         <div class="beat-cover-placeholder">DS</div>
@@ -499,61 +423,58 @@ function renderBeats(filter) {
       <div class="beat-info">
         <div class="beat-name">${b.name}</div>
         <div class="beat-meta">
-          <span class="beat-tag">${b.genre}</span>
+          <span class="beat-tag">${b.genre||''}</span>
           ${b.bpm>0?`<span>${b.bpm} BPM</span>`:''}
           ${b.key?`<span>${b.key}</span>`:''}
         </div>
       </div>
       <div class="beat-duration">—</div>
-      <div class="beat-price">${b.price}<span>€</span></div>
-      <button class="buy-btn" onclick="openBuyModal(event,${b.id})">Buy</button>
-    </div>
-  `).join('');
+      <div class="beat-price">${b.price||29}<span>€</span></div>
+      <button class="buy-btn" onclick="window._openBuyModal(event,${b.id})">Buy</button>
+    </div>`).join('');
 }
 
-function playBeat(id) {
+// ── PLAY ──────────────────────────────────────────────────
+window._playBeat = function(id) {
   const b = beats.find(x => x.id===id);
   if (!b) return;
-  if (currentBeat?.id===id) { togglePlay(); return; }
+  if (currentBeat?.id===id) { window._togglePlay(); return; }
   currentBeat = b;
+  // file is already URL-encoded in Firestore
   audio.src = BASE + b.file;
   audio.volume = document.getElementById('vol').value;
   audio.play();
   document.getElementById('player-name').textContent = b.name;
-  document.getElementById('player-tag').textContent = b.genre + (b.bpm>0?' · '+b.bpm+' BPM':'') + (b.key?' · '+b.key:'');
+  document.getElementById('player-tag').textContent = (b.genre||'') + (b.bpm>0?' · '+b.bpm+' BPM':'') + (b.key?' · '+b.key:'');
   document.getElementById('sticky-player').classList.add('visible');
   renderBeats(currentFilter);
-}
+};
 
-function togglePlay() {
+window._togglePlay = function() {
   if (!currentBeat) return;
   audio.paused ? audio.play() : audio.pause();
-}
+};
+
+window.togglePlay  = window._togglePlay;
+window.prevBeat    = function() {
+  if (!currentBeat) { window._playBeat(beats[0].id); return; }
+  const i = beats.findIndex(b => b.id===currentBeat.id);
+  window._playBeat(beats[(i-1+beats.length)%beats.length].id);
+};
+window.nextBeat    = function() {
+  if (!currentBeat) { window._playBeat(beats[0]?.id); return; }
+  const i = beats.findIndex(b => b.id===currentBeat.id);
+  window._playBeat(beats[(i+1)%beats.length].id);
+};
+window.seekAudio   = function(e) { if (!audio.duration) return; audio.currentTime = (e.offsetX / document.getElementById('progress-bar').offsetWidth) * audio.duration; };
+window.setVolume   = function(v) { audio.volume = v; };
 
 function updatePlayBtn(p) {
-  document.getElementById('play-svg').style.display = p ? 'none' : 'block';
+  document.getElementById('play-svg').style.display  = p ? 'none'  : 'block';
   document.getElementById('pause-svg').style.display = p ? 'block' : 'none';
 }
 
-function nextBeat() {
-  if (!currentBeat) { playBeat(beats[0].id); return; }
-  const i = beats.findIndex(b => b.id===currentBeat.id);
-  playBeat(beats[(i+1)%beats.length].id);
-}
-
-function prevBeat() {
-  if (!currentBeat) return;
-  const i = beats.findIndex(b => b.id===currentBeat.id);
-  playBeat(beats[(i-1+beats.length)%beats.length].id);
-}
-
-function seekAudio(e) {
-  if (!audio.duration) return;
-  audio.currentTime = (e.offsetX / document.getElementById('progress-bar').offsetWidth) * audio.duration;
-}
-
-function setVolume(v) { audio.volume = v; }
-
+// ── FILTERS ───────────────────────────────────────────────
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -563,7 +484,8 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   });
 });
 
-function openBuyModal(e, id) {
+// ── BUY MODAL ─────────────────────────────────────────────
+window._openBuyModal = function(e, id) {
   e.stopPropagation();
   currentBeatForModal = beats.find(b => b.id===id);
   document.getElementById('modal-beat-name').textContent = currentBeatForModal.name;
@@ -571,48 +493,115 @@ function openBuyModal(e, id) {
   document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
   document.querySelector('.license-option[data-license="mp3"]').classList.add('selected');
   selectedLicense = 'mp3';
-}
+};
 
-function selectLicense(el) {
+window.selectLicense = function(el) {
   document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
   el.classList.add('selected');
   selectedLicense = el.dataset.license;
-}
+};
 
-function closeModal(e) {
+window.closeModal = function(e) {
   if (e.target===document.getElementById('modal')) document.getElementById('modal').classList.remove('open');
-}
+};
 
-async function proceedCheckout() {
+window.proceedCheckout = async function() {
   if (!currentBeatForModal) return;
   const btn = document.getElementById('checkout-btn');
-  if (!btn) return;
   btn.disabled = true;
   btn.innerHTML = '<span class="checkout-spinner"></span>Loading...';
   try {
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        beatName: currentBeatForModal.name,
-        beatId: currentBeatForModal.id,
-        license: selectedLicense
-      })
+      body: JSON.stringify({ beatName: currentBeatForModal.name, beatId: currentBeatForModal.id, license: selectedLicense })
     });
     const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || 'Unknown error');
-    }
+    if (data.url) { window.location.href = data.url; }
+    else { throw new Error(data.error || 'Unknown error'); }
   } catch (err) {
     btn.disabled = false;
     btn.innerHTML = 'Proceed to Checkout →';
     alert('Error: ' + err.message);
   }
+};
+
+// ── RENDER LICENSES ───────────────────────────────────────
+const DEFAULT_LICENSES = [
+  { id:'mp3',      order:1, type:'Basic',    name:'MP3 LEASE', price:'29',  priceUnit:'€',  featured:false, inquire:false,
+    features:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],
+    disabled:['WAV File','Trackout Stems','Exclusive Rights'] },
+  { id:'wav',      order:2, type:'Standard', name:'WAV LEASE', price:'59',  priceUnit:'€',  featured:true,  inquire:false,
+    features:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],
+    disabled:['Trackout Stems','Exclusive Rights'] },
+  { id:'trackout', order:3, type:'Premium',  name:'TRACKOUT',  price:'99',  priceUnit:'€',  featured:false, inquire:false,
+    features:['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],
+    disabled:['Exclusive Rights'] },
+  { id:'exclusive',order:4, type:'One-Time', name:'EXCLUSIVE', price:'499', priceUnit:'€+', featured:false, inquire:true,
+    features:['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price on request'],
+    disabled:[] },
+];
+
+function renderLicenses(list) {
+  // Update modal prices from license data
+  list.forEach(l => {
+    const el = document.getElementById('price-' + l.id);
+    if (el) el.textContent = l.price + l.priceUnit;
+  });
+
+  document.getElementById('license-grid').innerHTML = list.map(l => {
+    const features = Array.isArray(l.features) ? l.features : (l.features||'').split('\n').filter(x=>x);
+    const disabled = Array.isArray(l.disabled)  ? l.disabled  : (l.disabled||'').split('\n').filter(x=>x);
+    return `
+    <div class="license-card ${l.featured?'featured':''}">
+      ${l.featured ? '<div class="license-badge">Popular</div>' : ''}
+      <div class="license-type">${l.type}</div>
+      <div class="license-name">${l.name}</div>
+      <div class="license-price">${l.price}<span>${l.priceUnit}</span></div>
+      <div class="license-divider"></div>
+      <ul class="license-features">
+        ${features.map(f=>`<li>${f}</li>`).join('')}
+        ${disabled.map(f=>`<li class="disabled">${f}</li>`).join('')}
+      </ul>
+      ${l.inquire
+        ? `<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire</button>`
+        : `<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById('beats').scrollIntoView({behavior:'smooth'})">Buy Now</button>`}
+    </div>`;
+  }).join('');
 }
 
-renderBeats('all');
+// ── LOAD FROM FIRESTORE ───────────────────────────────────
+async function loadBeats() {
+  try {
+    const snap = await getDocs(query(collection(db, 'beats'), orderBy('id')));
+    if (!snap.empty) {
+      beats = snap.docs.map(d => d.data());
+    }
+  } catch(e) {
+    console.error('Firestore beats error:', e);
+  }
+  // Update hero count dynamically
+  document.getElementById('hero-beat-count').textContent = beats.length || '—';
+  renderBeats('all');
+}
+
+async function loadLicenses() {
+  try {
+    const snap = await getDocs(collection(db, 'licenses'));
+    if (!snap.empty) {
+      const list = snap.docs.map(d => d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
+      renderLicenses(list);
+      return;
+    }
+  } catch(e) {
+    console.error('Firestore licenses error:', e);
+  }
+  renderLicenses(DEFAULT_LICENSES);
+}
+
+// ── INIT ──────────────────────────────────────────────────
+loadBeats();
+loadLicenses();
 </script>
 </body>
 </html>
