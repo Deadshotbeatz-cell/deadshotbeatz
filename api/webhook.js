@@ -1,3 +1,9 @@
+// MUSS exportiert werden – deaktiviert den Body-Parser
+module.exports.config = {
+  api: {
+    bodyParser: false,
+  },
+};
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
