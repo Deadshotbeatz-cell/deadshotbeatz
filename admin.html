@@ -19,7 +19,6 @@ import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, 
 const firebaseConfig = {
   apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
   authDomain: "deadshot-beats.firebaseapp.com",
-  databaseURL: "https://deadshot-beats-default-rtdb.firebaseio.com",
   projectId: "deadshot-beats",
   storageBucket: "deadshot-beats.firebasestorage.app",
   messagingSenderId: "252096563375",
@@ -76,6 +75,7 @@ onAuthStateChanged(auth, async user => {
     document.getElementById('admin-screen').classList.add('visible');
     document.getElementById('user-email').textContent = user.email;
     await loadBeats();
+    await loadLicenses();
   } else {
     document.getElementById('login-screen').classList.remove('hidden');
     document.getElementById('admin-screen').classList.remove('visible');
@@ -363,7 +363,95 @@ window.copyExportCode = function() {
   });
 };
 
-// ─── UTILS ────────────────────────────────────────────────────────────────────
+// ─── LIZENZEN ────────────────────────────────────────────────────────────────
+const DEFAULT_LICENSES = [
+  { id:'mp3',       order:1, type:'Basic',    name:'MP3 LEASE',  price:'29',  priceUnit:'€',  featured:false, inquire:false,
+    features:'MP3 High Quality (320kbps)\nUp to 100,000 Streams\nMusic videos allowed\nNon-profit performances',
+    disabled:'WAV File\nTrackout Stems\nExclusive Rights' },
+  { id:'wav',       order:2, type:'Standard', name:'WAV LEASE',  price:'59',  priceUnit:'€',  featured:true,  inquire:false,
+    features:'WAV + MP3 (Studio Quality)\nUp to 500,000 Streams\nMusic videos allowed\nCommercial performances\nRadio broadcasts',
+    disabled:'Trackout Stems\nExclusive Rights' },
+  { id:'trackout',  order:3, type:'Premium',  name:'TRACKOUT',   price:'99',  priceUnit:'€',  featured:false, inquire:false,
+    features:'All Stems / Individual Tracks\nWAV + MP3 included\nUnlimited Streams\nFull commercial use\nTV & Film Sync\nFree to edit',
+    disabled:'Exclusive Rights' },
+  { id:'exclusive', order:4, type:'One-Time', name:'EXCLUSIVE',  price:'499', priceUnit:'€+', featured:false, inquire:true,
+    features:'100% Exclusive Rights\nBeat removed from store\nAll stems & file formats\nFull commercial use\nLabel deals possible\nPrice on request',
+    disabled:'' },
+];
+
+let licenses = [];
+
+async function loadLicenses() {
+  try {
+    const snap = await getDocs(collection(db, 'licenses'));
+    if (!snap.empty) {
+      licenses = snap.docs.map(d => d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
+    } else {
+      // Defaults zu Firestore migrieren
+      const batch = writeBatch(db);
+      DEFAULT_LICENSES.forEach(l => batch.set(doc(db,'licenses',l.id), l));
+      await batch.commit();
+      licenses = [...DEFAULT_LICENSES];
+      showToast('✓ Standard-Lizenzen importiert', 'success');
+    }
+  } catch(e) { showToast('Fehler Lizenzen: '+e.message,'error'); }
+  renderLicenseTable();
+}
+
+function renderLicenseTable() {
+  document.getElementById('license-tbody').innerHTML = licenses.map(l => `
+    <tr>
+      <td><div class="display-text">${l.name}</div></td>
+      <td><span class="display-meta">${l.type}</span></td>
+      <td><span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${l.price}${l.priceUnit}</span></td>
+      <td style="text-align:center;"><span class="yt-dot ${l.featured?'active':''}"></span></td>
+      <td><div class="action-cell">
+        <button class="btn-edit" onclick="openLicenseModal('${l.id}')">Bearbeiten</button>
+      </div></td>
+    </tr>`).join('');
+}
+
+window.openLicenseModal = function(id) {
+  const l = licenses.find(x=>x.id===id);
+  if (!l) return;
+  document.getElementById('lic-id').value = l.id;
+  document.getElementById('lic-name').value = l.name;
+  document.getElementById('lic-type').value = l.type;
+  document.getElementById('lic-price').value = l.price;
+  document.getElementById('lic-priceunit').value = l.priceUnit;
+  document.getElementById('lic-featured').checked = l.featured;
+  document.getElementById('lic-inquire').checked = l.inquire;
+  document.getElementById('lic-features').value = Array.isArray(l.features) ? l.features.join('\n') : (l.features||'');
+  document.getElementById('lic-disabled').value = Array.isArray(l.disabled) ? l.disabled.join('\n') : (l.disabled||'');
+  document.getElementById('license-modal').classList.add('open');
+};
+
+window.closeLicenseModal = () => document.getElementById('license-modal').classList.remove('open');
+
+window.saveLicense = async function() {
+  const id = document.getElementById('lic-id').value;
+  const updated = {
+    id,
+    name:      document.getElementById('lic-name').value.trim(),
+    type:      document.getElementById('lic-type').value.trim(),
+    price:     document.getElementById('lic-price').value.trim(),
+    priceUnit: document.getElementById('lic-priceunit').value.trim(),
+    featured:  document.getElementById('lic-featured').checked,
+    inquire:   document.getElementById('lic-inquire').checked,
+    features:  document.getElementById('lic-features').value.trim().split('\n').filter(x=>x),
+    disabled:  document.getElementById('lic-disabled').value.trim().split('\n').filter(x=>x),
+    order:     (licenses.find(x=>x.id===id)?.order||0),
+  };
+  try {
+    await setDoc(doc(db,'licenses',id), updated);
+    const idx = licenses.findIndex(x=>x.id===id);
+    if (idx>=0) licenses[idx]=updated; else licenses.push(updated);
+    closeLicenseModal();
+    renderLicenseTable();
+    showToast('✓ Lizenz gespeichert', 'success');
+  } catch(e) { showToast('Fehler: '+e.message,'error'); }
+};
+
 function escHtml(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -597,6 +685,69 @@ function showToast(msg, type) {
         <tbody id="beat-tbody"></tbody>
       </table>
     </div>
+
+    <!-- LIZENZEN -->
+    <div style="margin-top:48px;">
+      <div class="toolbar">
+        <div class="toolbar-title">LIZENZEN VERWALTEN</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="beat-table">
+          <thead>
+            <tr><th>Name</th><th>Typ</th><th>Preis</th><th>Popular</th><th>Aktion</th></tr>
+          </thead>
+          <tbody id="license-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LICENSE MODAL -->
+<div class="modal-overlay" id="license-modal" onclick="if(event.target===this)window.closeLicenseModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="window.closeLicenseModal()">✕</button>
+    <div class="modal-title">LIZENZ BEARBEITEN</div>
+    <input type="hidden" id="lic-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="lic-name" placeholder="MP3 LEASE">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Typ</label>
+        <input class="form-input" id="lic-type" placeholder="Basic">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Preis</label>
+        <input class="form-input" id="lic-price" placeholder="29">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Einheit (€ oder €+)</label>
+        <input class="form-input" id="lic-priceunit" placeholder="€">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+        <input type="checkbox" id="lic-featured" style="width:16px;height:16px;accent-color:var(--red);">
+        <label class="form-label" style="margin:0;">Popular (hervorgehoben)</label>
+      </div>
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+        <input type="checkbox" id="lic-inquire" style="width:16px;height:16px;accent-color:var(--red);">
+        <label class="form-label" style="margin:0;">Anfrage statt Kaufen</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Features (eine pro Zeile)</label>
+      <textarea class="form-input" id="lic-features" rows="5" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="MP3 High Quality&#10;Up to 100,000 Streams"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Deaktivierte Features (eine pro Zeile, durchgestrichen)</label>
+      <textarea class="form-input" id="lic-disabled" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="WAV File&#10;Exclusive Rights"></textarea>
+    </div>
+    <button class="btn-submit" onclick="window.saveLicense()">Lizenz speichern →</button>
   </div>
 </div>
 
