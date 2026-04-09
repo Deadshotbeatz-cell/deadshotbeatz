@@ -232,7 +232,7 @@
     <a href="#licenses" class="btn-secondary">View Licenses</a>
   </div>
   <div class="hero-stats">
-    <div><div class="stat-num">22</div><div class="stat-label">Beats Available</div></div>
+    <div><div class="stat-num" id="hero-beat-count">—</div><div class="stat-label">Beats Available</div></div>
     <div><div class="stat-num">4</div><div class="stat-label">License Types</div></div>
     <div><div class="stat-num">24H</div><div class="stat-label">Delivery</div></div>
   </div>
@@ -262,51 +262,8 @@
     <div class="section-line"></div>
   </div>
   <p style="color:var(--grey);font-size:14px;max-width:560px;line-height:1.7;">Choose the license that fits your project. For custom deals or exclusive rights, reach out directly.</p>
-  <div class="license-grid">
-    <div class="license-card">
-      <div class="license-type">Basic</div>
-      <div class="license-name">MP3 LEASE</div>
-      <div class="license-price">29<span>€</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>MP3 High Quality (320kbps)</li><li>Up to 100,000 Streams</li><li>Music videos allowed</li><li>Non-profit performances</li>
-        <li class="disabled">WAV File</li><li class="disabled">Trackout Stems</li><li class="disabled">Exclusive Rights</li>
-      </ul>
-      <button class="btn-primary" style="width:100%;text-align:center;">Buy Now</button>
-    </div>
-    <div class="license-card featured">
-      <div class="license-badge">Popular</div>
-      <div class="license-type">Standard</div>
-      <div class="license-name">WAV LEASE</div>
-      <div class="license-price">59<span>€</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>WAV + MP3 (Studio Quality)</li><li>Up to 500,000 Streams</li><li>Music videos allowed</li><li>Commercial performances</li><li>Radio broadcasts</li>
-        <li class="disabled">Trackout Stems</li><li class="disabled">Exclusive Rights</li>
-      </ul>
-      <button class="btn-primary" style="width:100%;text-align:center;">Buy Now</button>
-    </div>
-    <div class="license-card">
-      <div class="license-type">Premium</div>
-      <div class="license-name">TRACKOUT</div>
-      <div class="license-price">99<span>€</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>All Stems / Individual Tracks</li><li>WAV + MP3 included</li><li>Unlimited Streams</li><li>Full commercial use</li><li>TV & Film Sync</li><li>Free to edit</li>
-        <li class="disabled">Exclusive Rights</li>
-      </ul>
-      <button class="btn-primary" style="width:100%;text-align:center;">Buy Now</button>
-    </div>
-    <div class="license-card">
-      <div class="license-type">One-Time</div>
-      <div class="license-name">EXCLUSIVE</div>
-      <div class="license-price">499<span>€+</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        <li>100% Exclusive Rights</li><li>Beat removed from store</li><li>All stems & file formats</li><li>Full commercial use</li><li>Label deals possible</li><li>Price on request</li>
-      </ul>
-      <button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire</button>
-    </div>
+  <div class="license-grid" id="license-grid">
+    <!-- wird dynamisch aus Firestore geladen -->
   </div>
 </section>
 
@@ -438,7 +395,7 @@
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, getDocs, query, orderBy }
+import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -603,6 +560,41 @@ async function proceedCheckout() {
   }
 }
 
+// Default Lizenzen (Fallback wenn Firestore noch keine hat)
+const DEFAULT_LICENSES = [
+  { id:'mp3',       type:'Basic',    name:'MP3 LEASE',  price:'29',   priceUnit:'€',  featured:false, inquire:false,
+    features: ['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],
+    disabled: ['WAV File','Trackout Stems','Exclusive Rights'] },
+  { id:'wav',       type:'Standard', name:'WAV LEASE',  price:'59',   priceUnit:'€',  featured:true,  inquire:false,
+    features: ['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],
+    disabled: ['Trackout Stems','Exclusive Rights'] },
+  { id:'trackout',  type:'Premium',  name:'TRACKOUT',   price:'99',   priceUnit:'€',  featured:false, inquire:false,
+    features: ['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],
+    disabled: ['Exclusive Rights'] },
+  { id:'exclusive', type:'One-Time', name:'EXCLUSIVE',  price:'499',  priceUnit:'€+', featured:false, inquire:true,
+    features: ['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price on request'],
+    disabled: [] },
+];
+
+function renderLicenses(licenses) {
+  document.getElementById('license-grid').innerHTML = licenses.map(l => `
+    <div class="license-card ${l.featured ? 'featured' : ''}">
+      ${l.featured ? '<div class="license-badge">Popular</div>' : ''}
+      <div class="license-type">${l.type}</div>
+      <div class="license-name">${l.name}</div>
+      <div class="license-price">${l.price}<span>${l.priceUnit}</span></div>
+      <div class="license-divider"></div>
+      <ul class="license-features">
+        ${(l.features||[]).map(f => `<li>${f}</li>`).join('')}
+        ${(l.disabled||[]).map(f => `<li class="disabled">${f}</li>`).join('')}
+      </ul>
+      ${l.inquire
+        ? `<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire</button>`
+        : `<button class="btn-primary" style="width:100%;text-align:center;">Buy Now</button>`}
+    </div>
+  `).join('');
+}
+
 // Beats von Firestore laden und dann rendern
 async function loadBeats() {
   try {
@@ -610,12 +602,31 @@ async function loadBeats() {
     beats = snap.docs.map(d => d.data());
   } catch(e) {
     console.error('Firestore Fehler:', e);
-    beats = [];
   }
+  // Hero-Zahl dynamisch setzen
+  const heroCount = document.getElementById('hero-beat-count');
+  if (heroCount) heroCount.textContent = beats.length;
   renderBeats('all');
 }
 
+// Lizenzen von Firestore laden
+async function loadLicenses() {
+  try {
+    const snap = await getDocs(collection(db, 'licenses'));
+    if (!snap.empty) {
+      const licenses = snap.docs.map(d => d.data()).sort((a,b) => (a.order||0)-(b.order||0));
+      renderLicenses(licenses);
+      return;
+    }
+  } catch(e) {
+    console.error('Lizenz-Fehler:', e);
+  }
+  // Fallback: Default Lizenzen anzeigen
+  renderLicenses(DEFAULT_LICENSES);
+}
+
 loadBeats();
+loadLicenses();
 </script>
 </body>
 </html>
