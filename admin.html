@@ -5,646 +5,117 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DEADSHOT BEATS — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
-
-<!-- Firebase SDK -->
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, query, orderBy }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-// ─── FIREBASE CONFIG (keine sensiblen Keys – nur public config) ───────────────
-// ERSETZE DIESE WERTE MIT DEINEN EIGENEN AUS DEM FIREBASE CONSOLE
-const firebaseConfig = {
-  apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
-  authDomain: "deadshot-beats.firebaseapp.com",
-  projectId: "deadshot-beats",
-  storageBucket: "deadshot-beats.firebasestorage.app",
-  messagingSenderId: "252096563375",
-  appId: "1:252096563375:web:58193b52e325147f592c5a"
-};
-
-// ─── CLOUDFLARE R2 WORKER URL ─────────────────────────────────────────────────
-// Erstelle einen Cloudflare Worker der den Upload handelt (kein Secret im HTML!)
-// Beispiel Worker URL: https://upload.DEIN_SUBDOMAIN.workers.dev
-const R2_UPLOAD_WORKER = 'https://broad-resonance-69c2.deadshotbeatz.workers.dev/upload';
-const R2_BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
-
-// ─── DEFAULT BEATS (nur für erste Migration zu Firestore) ────────────────────
-const DEFAULT_BEATS = [
-  { id:1,  name:'21 Savage X Future – Sacrifice',            genre:'Trap',    bpm:135, key:'Ebm',   price:29, yt:'', file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3' },
-  { id:2,  name:'21 Savage – Nolenso',                       genre:'Trap',    bpm:132, key:'Cm',    price:29, yt:'', file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3' },
-  { id:3,  name:'21 Savage Type Beat 85',                    genre:'Trap',    bpm:85,  key:'Bbm',   price:29, yt:'', file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3' },
-  { id:4,  name:'Drake – Midnight',                          genre:'Melodic', bpm:123, key:'Cm',    price:29, yt:'', file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3' },
-  { id:5,  name:'Drake x 21 Savage – NoFeelings',            genre:'Dark',    bpm:146, key:'Ebmaj', price:29, yt:'', file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3' },
-  { id:6,  name:'Future – Legacy',                           genre:'Trap',    bpm:137, key:'Em',    price:29, yt:'', file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3' },
-  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog',  genre:'Dark',    bpm:143, key:'Em',    price:29, yt:'', file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3' },
-  { id:8,  name:'Future x 21 Savage – Codein Rain',          genre:'Melodic', bpm:136, key:'Cm',    price:29, yt:'', file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3' },
-  { id:9,  name:'Future x Southside – Ski Driver',           genre:'Trap',    bpm:135, key:'Ebmaj', price:29, yt:'', file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3' },
-  { id:10, name:'Ghosted',                                   genre:'Melodic', bpm:0,   key:'',      price:29, yt:'', file:'Ghosted.mp3' },
-  { id:11, name:'Mixdown 2',                                 genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown(2).mp3' },
-  { id:12, name:'Mixdown',                                   genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown.mp3' },
-  { id:13, name:'A$AP Rocky – Dumb Shit',                    genre:'Trap',    bpm:130, key:'Cm',    price:29, yt:'', file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3' },
-  { id:14, name:'Florida Type Beat – Big Stepper',           genre:'Drill',   bpm:156, key:'D#min', price:29, yt:'', file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3' },
-  { id:15, name:'Larb – 21 Savage Type Beat',                genre:'Trap',    bpm:165, key:'G#',    price:29, yt:'', file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3' },
-  { id:16, name:'Put In My Cup – Future',                    genre:'Trap',    bpm:130, key:'Ebm',   price:29, yt:'', file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3' },
-  { id:17, name:'Roulete – 21 Savage',                       genre:'Dark',    bpm:77,  key:'C#m',   price:29, yt:'', file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3' },
-  { id:18, name:'Travis Scott x Ye – Titel',                 genre:'Dark',    bpm:130, key:'Dm',    price:29, yt:'', file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3' },
-  { id:19, name:'DGAF – Future ft. Quavo',                   genre:'Trap',    bpm:135, key:'Bmin',  price:29, yt:'', file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3' },
-  { id:20, name:'Darkness In My Visions',                    genre:'Dark',    bpm:0,   key:'',      price:29, yt:'', file:'Darkness%20in%20my%20Visions(3).mp3' },
-  { id:21, name:'Decision – 21 Savage',                      genre:'Trap',    bpm:134, key:'D#m',   price:29, yt:'', file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3' },
-  { id:22, name:'Draft Day – Future',                        genre:'Trap',    bpm:140, key:'Abm',   price:29, yt:'', file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3' },
-];
-
-const GENRES = ['Trap','Dark','Melodic','Drill','Boom Bap'];
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
-
-let beats = [];
-let editingId = null;
-let deleteTargetId = null;
-
-// ─── AUTH STATE ───────────────────────────────────────────────────────────────
-onAuthStateChanged(auth, async user => {
-  if (user) {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('admin-screen').classList.add('visible');
-    document.getElementById('user-email').textContent = user.email;
-    await loadBeats();
-    await loadLicenses();
-  } else {
-    document.getElementById('login-screen').classList.remove('hidden');
-    document.getElementById('admin-screen').classList.remove('visible');
-  }
-});
-
-// ─── LOGIN ────────────────────────────────────────────────────────────────────
-window.doLogin = async function() {
-  const email = document.getElementById('email-input').value.trim();
-  const pw    = document.getElementById('pw-input').value;
-  const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-  if (!email || !pw) { errEl.textContent = 'E-Mail und Passwort eingeben.'; return; }
-  try {
-    await signInWithEmailAndPassword(auth, email, pw);
-  } catch(e) {
-    errEl.textContent = e.code === 'auth/invalid-credential'
-      ? 'Falsche E-Mail oder Passwort.'
-      : 'Fehler: ' + e.message;
-  }
-};
-
-window.doLogout = async function() {
-  await signOut(auth);
-};
-
-document.getElementById('pw-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') window.doLogin();
-});
-document.getElementById('email-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('pw-input').focus();
-});
-
-// ─── LOAD BEATS FROM FIRESTORE ────────────────────────────────────────────────
-async function loadBeats() {
-  showLoading(true);
-  try {
-    const snap = await getDocs(query(collection(db, 'beats'), orderBy('id')));
-    if (snap.empty) {
-      // Erste Nutzung: Default Beats zu Firestore migrieren
-      await migrateDefaults();
-    } else {
-      beats = snap.docs.map(d => d.data());
-    }
-  } catch(e) {
-    showToast('Fehler beim Laden: ' + e.message, 'error');
-  }
-  showLoading(false);
-  renderAll();
-}
-
-async function migrateDefaults() {
-  const batch = writeBatch(db);
-  DEFAULT_BEATS.forEach(b => {
-    const ref = doc(db, 'beats', String(b.id));
-    batch.set(ref, b);
-  });
-  await batch.commit();
-  beats = [...DEFAULT_BEATS];
-  showToast('✓ ' + DEFAULT_BEATS.length + ' Beats aus Backup importiert!', 'success');
-}
-
-// ─── SAVE SINGLE BEAT TO FIRESTORE ───────────────────────────────────────────
-async function saveBeatToFirestore(beat) {
-  await setDoc(doc(db, 'beats', String(beat.id)), beat);
-}
-
-async function deleteBeatFromFirestore(id) {
-  await deleteDoc(doc(db, 'beats', String(id)));
-}
-
-// ─── RENDER ───────────────────────────────────────────────────────────────────
-function renderAll() { renderStats(); renderTable(); }
-
-function renderStats() {
-  const genres = {};
-  beats.forEach(b => { genres[b.genre] = (genres[b.genre]||0)+1; });
-  const topGenre = Object.entries(genres).sort((a,b)=>b[1]-a[1])[0];
-  const withYT = beats.filter(b=>b.yt).length;
-  document.getElementById('stats-bar').innerHTML = `
-    <div class="stat-card"><div class="stat-card-num">${beats.length}</div><div class="stat-card-label">Beats Total</div></div>
-    <div class="stat-card"><div class="stat-card-num">${topGenre?topGenre[0]:'-'}</div><div class="stat-card-label">Top Genre</div></div>
-    <div class="stat-card"><div class="stat-card-num">${withYT}</div><div class="stat-card-label">Mit YouTube</div></div>
-    <div class="stat-card"><div class="stat-card-num">${beats.filter(b=>b.price===29).length}</div><div class="stat-card-label">Standard (29€)</div></div>
-  `;
-}
-
-function renderTable() {
-  document.getElementById('beat-tbody').innerHTML = beats.map((b, i) => {
-    const isEditing = editingId === b.id;
-    return `<tr class="${isEditing?'editing':''}">
-      <td class="td-num">${i+1}</td>
-      <td style="min-width:200px;">
-        ${isEditing ? `<input class="edit-input" id="e-name" value="${escHtml(b.name)}">` : `<div class="display-text">${escHtml(b.name)}</div>`}
-      </td>
-      <td>
-        ${isEditing
-          ? `<select class="edit-select" id="e-genre">${GENRES.map(g=>`<option value="${g}"${b.genre===g?' selected':''}>${g}</option>`).join('')}</select>`
-          : `<span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--grey);">${b.genre}</span>`}
-      </td>
-      <td>
-        ${isEditing ? `<input class="edit-input edit-input-sm" id="e-bpm" type="number" value="${b.bpm}">` : `<span class="display-meta">${b.bpm>0?b.bpm:'—'}</span>`}
-      </td>
-      <td>
-        ${isEditing ? `<input class="edit-input edit-input-sm" id="e-key" value="${escHtml(b.key)}">` : `<span class="display-meta">${b.key||'—'}</span>`}
-      </td>
-      <td>
-        ${isEditing ? `<input class="edit-input edit-input-xs" id="e-price" type="number" value="${b.price}">€` : `<span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${b.price}€</span>`}
-      </td>
-      <td style="text-align:center;">
-        ${isEditing
-          ? `<input class="edit-input" id="e-yt" value="${escHtml(b.yt||'')}" placeholder="YouTube URL" style="min-width:200px;">`
-          : `<span class="yt-dot ${b.yt?'active':''}" title="${b.yt||'Kein YouTube Link'}"></span>`}
-      </td>
-      <td class="td-file" title="${escHtml(b.file)}">${escHtml(decodeURIComponent(b.file))}</td>
-      <td>
-        <div class="action-cell">
-          ${isEditing ? `
-            <button class="btn-save" onclick="saveEdit(${b.id})">✓ Speichern</button>
-            <button class="btn-cancel" onclick="cancelEdit()">✕</button>
-          ` : `
-            <button class="btn-edit" onclick="startEdit(${b.id})">Bearbeiten</button>
-            <button class="btn-delete" onclick="openConfirm(${b.id})" title="Löschen">🗑</button>
-          `}
-        </div>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-// ─── EDIT ─────────────────────────────────────────────────────────────────────
-window.startEdit  = id => { editingId = id; renderTable(); document.getElementById('e-name')?.focus(); };
-window.cancelEdit = ()  => { editingId = null; renderTable(); };
-
-window.saveEdit = async function(id) {
-  const b = beats.find(x => x.id === id);
-  if (!b) return;
-  b.name  = document.getElementById('e-name').value.trim() || b.name;
-  b.genre = document.getElementById('e-genre').value;
-  b.bpm   = parseInt(document.getElementById('e-bpm').value)   || 0;
-  b.key   = document.getElementById('e-key').value.trim();
-  b.price = parseInt(document.getElementById('e-price').value) || 29;
-  b.yt    = document.getElementById('e-yt').value.trim();
-  editingId = null;
-  try {
-    await saveBeatToFirestore(b);
-    renderAll();
-    showToast('✓ Beat gespeichert', 'success');
-  } catch(e) {
-    showToast('Fehler: ' + e.message, 'error');
-  }
-};
-
-// ─── DELETE ───────────────────────────────────────────────────────────────────
-window.openConfirm = function(id) {
-  deleteTargetId = id;
-  const b = beats.find(x => x.id === id);
-  document.getElementById('confirm-text').textContent = `"${b?.name}" wird gelöscht.`;
-  document.getElementById('confirm-overlay').classList.add('open');
-};
-window.closeConfirm = () => { document.getElementById('confirm-overlay').classList.remove('open'); deleteTargetId = null; };
-
-window.confirmDelete = async function() {
-  if (!deleteTargetId) return;
-  try {
-    await deleteBeatFromFirestore(deleteTargetId);
-    beats = beats.filter(b => b.id !== deleteTargetId);
-    closeConfirm(); editingId = null;
-    renderAll();
-    showToast('Beat gelöscht', '');
-  } catch(e) {
-    showToast('Fehler beim Löschen: ' + e.message, 'error');
-  }
-};
-
-// ─── ADD BEAT ─────────────────────────────────────────────────────────────────
-window.openAddModal  = () => { document.getElementById('add-modal').classList.add('open'); document.getElementById('new-name').focus(); resetUploadState(); };
-window.closeAddModal = () => {
-  document.getElementById('add-modal').classList.remove('open');
-  ['new-name','new-bpm','new-key','new-yt'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('new-price').value = '29';
-  resetUploadState();
-};
-
-function resetUploadState() {
-  document.getElementById('upload-status').innerHTML = '';
-  document.getElementById('upload-filename').textContent = 'Keine Datei ausgewählt';
-  document.getElementById('audio-file-input').value = '';
-  window._uploadedFileName = null;
-}
-
-window.addBeat = async function() {
-  const name = document.getElementById('new-name').value.trim();
-  if (!name) { showToast('Titel ist Pflichtfeld', ''); return; }
-  if (!window._uploadedFileName) { showToast('Bitte zuerst eine Audio-Datei hochladen', ''); return; }
-
-  const maxId = beats.length ? Math.max(...beats.map(b=>b.id)) : 0;
-  const newBeat = {
-    id: maxId + 1,
-    name,
-    genre: document.getElementById('new-genre').value,
-    bpm:   parseInt(document.getElementById('new-bpm').value)   || 0,
-    key:   document.getElementById('new-key').value.trim(),
-    price: parseInt(document.getElementById('new-price').value) || 29,
-    yt:    document.getElementById('new-yt').value.trim(),
-    file:  encodeURIComponent(window._uploadedFileName)
-  };
-
-  try {
-    await saveBeatToFirestore(newBeat);
-    beats.push(newBeat);
-    closeAddModal();
-    renderAll();
-    showToast('✓ Beat hinzugefügt!', 'success');
-  } catch(e) {
-    showToast('Fehler beim Speichern: ' + e.message, 'error');
-  }
-};
-
-// ─── R2 UPLOAD (via Cloudflare Worker – kein Secret im HTML) ─────────────────
-window.handleFileSelect = function(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const allowed = ['audio/mpeg','audio/wav','audio/x-wav','audio/mp3'];
-  const ext = file.name.split('.').pop().toLowerCase();
-  if (!['mp3','wav'].includes(ext)) {
-    showToast('Nur MP3 und WAV erlaubt', 'error'); return;
-  }
-  document.getElementById('upload-filename').textContent = file.name;
-  uploadToR2(file);
-};
-
-async function uploadToR2(file) {
-  const statusEl = document.getElementById('upload-status');
-  statusEl.innerHTML = '<span class="upload-progress">⏳ Upload läuft...</span>';
-
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', file.name);
-
-    const res = await fetch(R2_UPLOAD_WORKER, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || 'Upload fehlgeschlagen');
-    }
-
-    const data = await res.json();
-    window._uploadedFileName = data.filename || file.name;
-    statusEl.innerHTML = `<span class="upload-ok">✓ Hochgeladen: ${window._uploadedFileName}</span>`;
-    showToast('✓ Datei erfolgreich hochgeladen', 'success');
-  } catch(e) {
-    statusEl.innerHTML = `<span class="upload-error">✕ Fehler: ${e.message}</span>`;
-    showToast('Upload fehlgeschlagen: ' + e.message, 'error');
-    window._uploadedFileName = null;
-  }
-}
-
-// ─── EXPORT ───────────────────────────────────────────────────────────────────
-window.openExport = function() {
-  document.getElementById('export-code').textContent = generateCode();
-  document.getElementById('copy-code-btn').textContent = 'Code kopieren';
-  document.getElementById('copy-code-btn').classList.remove('copied');
-  document.getElementById('export-modal').classList.add('open');
-};
-window.closeExport = () => document.getElementById('export-modal').classList.remove('open');
-
-function generateCode() {
-  const lines = beats.map((b, i) => {
-    const comma = i < beats.length - 1 ? ',' : '';
-    return `  { id:${b.id}, name:'${b.name.replace(/'/g,"\\'")}', genre:'${b.genre}', bpm:${b.bpm}, key:'${b.key}', price:${b.price}, yt:'${(b.yt||'').replace(/'/g,"\\'")}', file:'${b.file.replace(/'/g,"\\'")}' }${comma}`;
-  });
-  return `const beats = [\n${lines.join('\n')}\n];`;
-}
-
-window.copyExportCode = function() {
-  navigator.clipboard.writeText(generateCode()).then(() => {
-    const btn = document.getElementById('copy-code-btn');
-    btn.textContent = '✓ Kopiert! Jetzt in GitHub einfügen';
-    btn.classList.add('copied');
-  });
-};
-
-// ─── LIZENZEN ────────────────────────────────────────────────────────────────
-const DEFAULT_LICENSES = [
-  { id:'mp3',       order:1, type:'Basic',    name:'MP3 LEASE',  price:'29',  priceUnit:'€',  featured:false, inquire:false,
-    features:'MP3 High Quality (320kbps)\nUp to 100,000 Streams\nMusic videos allowed\nNon-profit performances',
-    disabled:'WAV File\nTrackout Stems\nExclusive Rights' },
-  { id:'wav',       order:2, type:'Standard', name:'WAV LEASE',  price:'59',  priceUnit:'€',  featured:true,  inquire:false,
-    features:'WAV + MP3 (Studio Quality)\nUp to 500,000 Streams\nMusic videos allowed\nCommercial performances\nRadio broadcasts',
-    disabled:'Trackout Stems\nExclusive Rights' },
-  { id:'trackout',  order:3, type:'Premium',  name:'TRACKOUT',   price:'99',  priceUnit:'€',  featured:false, inquire:false,
-    features:'All Stems / Individual Tracks\nWAV + MP3 included\nUnlimited Streams\nFull commercial use\nTV & Film Sync\nFree to edit',
-    disabled:'Exclusive Rights' },
-  { id:'exclusive', order:4, type:'One-Time', name:'EXCLUSIVE',  price:'499', priceUnit:'€+', featured:false, inquire:true,
-    features:'100% Exclusive Rights\nBeat removed from store\nAll stems & file formats\nFull commercial use\nLabel deals possible\nPrice on request',
-    disabled:'' },
-];
-
-let licenses = [];
-
-async function loadLicenses() {
-  try {
-    const snap = await getDocs(collection(db, 'licenses'));
-    if (!snap.empty) {
-      licenses = snap.docs.map(d => d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
-    } else {
-      // Defaults zu Firestore migrieren
-      const batch = writeBatch(db);
-      DEFAULT_LICENSES.forEach(l => batch.set(doc(db,'licenses',l.id), l));
-      await batch.commit();
-      licenses = [...DEFAULT_LICENSES];
-      showToast('✓ Standard-Lizenzen importiert', 'success');
-    }
-  } catch(e) { showToast('Fehler Lizenzen: '+e.message,'error'); }
-  renderLicenseTable();
-}
-
-function renderLicenseTable() {
-  document.getElementById('license-tbody').innerHTML = licenses.map(l => `
-    <tr>
-      <td><div class="display-text">${l.name}</div></td>
-      <td><span class="display-meta">${l.type}</span></td>
-      <td><span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${l.price}${l.priceUnit}</span></td>
-      <td style="text-align:center;"><span class="yt-dot ${l.featured?'active':''}"></span></td>
-      <td><div class="action-cell">
-        <button class="btn-edit" onclick="openLicenseModal('${l.id}')">Bearbeiten</button>
-      </div></td>
-    </tr>`).join('');
-}
-
-window.openLicenseModal = function(id) {
-  const l = licenses.find(x=>x.id===id);
-  if (!l) return;
-  document.getElementById('lic-id').value = l.id;
-  document.getElementById('lic-name').value = l.name;
-  document.getElementById('lic-type').value = l.type;
-  document.getElementById('lic-price').value = l.price;
-  document.getElementById('lic-priceunit').value = l.priceUnit;
-  document.getElementById('lic-featured').checked = l.featured;
-  document.getElementById('lic-inquire').checked = l.inquire;
-  document.getElementById('lic-features').value = Array.isArray(l.features) ? l.features.join('\n') : (l.features||'');
-  document.getElementById('lic-disabled').value = Array.isArray(l.disabled) ? l.disabled.join('\n') : (l.disabled||'');
-  document.getElementById('license-modal').classList.add('open');
-};
-
-window.closeLicenseModal = () => document.getElementById('license-modal').classList.remove('open');
-
-window.saveLicense = async function() {
-  const id = document.getElementById('lic-id').value;
-  const updated = {
-    id,
-    name:      document.getElementById('lic-name').value.trim(),
-    type:      document.getElementById('lic-type').value.trim(),
-    price:     document.getElementById('lic-price').value.trim(),
-    priceUnit: document.getElementById('lic-priceunit').value.trim(),
-    featured:  document.getElementById('lic-featured').checked,
-    inquire:   document.getElementById('lic-inquire').checked,
-    features:  document.getElementById('lic-features').value.trim().split('\n').filter(x=>x),
-    disabled:  document.getElementById('lic-disabled').value.trim().split('\n').filter(x=>x),
-    order:     (licenses.find(x=>x.id===id)?.order||0),
-  };
-  try {
-    await setDoc(doc(db,'licenses',id), updated);
-    const idx = licenses.findIndex(x=>x.id===id);
-    if (idx>=0) licenses[idx]=updated; else licenses.push(updated);
-    closeLicenseModal();
-    renderLicenseTable();
-    showToast('✓ Lizenz gespeichert', 'success');
-  } catch(e) { showToast('Fehler: '+e.message,'error'); }
-};
-
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function showLoading(on) {
-  document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
-}
-
-let toastTimer;
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (type ? ' ' + type : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = 'toast'; }, 2800);
-}
-</script>
-
 <style>
-  :root {
-    --red: #e01a1a; --red-dark: #a01010; --red-glow: rgba(224,26,26,0.3);
-    --black: #080808; --black2: #111111; --black3: #1a1a1a; --black4: #222222;
-    --white: #f0f0f0; --grey: #888; --grey2: #555;
-    --green: #1a7a1a; --green-light: #22a022;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--black); color: var(--white); font-family: 'Barlow', sans-serif; min-height: 100vh; }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--black2); }
-  ::-webkit-scrollbar-thumb { background: var(--red); }
-
-  /* LOGIN */
-  #login-screen { position: fixed; inset: 0; background: var(--black); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-  #login-screen.hidden { display: none; }
-  .login-box { background: var(--black2); border: 1px solid var(--black4); padding: 48px; width: 380px; text-align: center; }
-  .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 4px; margin-bottom: 4px; }
-  .login-logo span { color: var(--red); }
-  .login-sub { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey); margin-bottom: 36px; }
-  .login-input { width: 100%; background: var(--black); border: 1px solid var(--black4); color: var(--white); padding: 14px 16px; font-family: 'Barlow', sans-serif; font-size: 15px; outline: none; margin-bottom: 12px; transition: border-color 0.2s; text-align: center; letter-spacing: 1px; }
-  .login-input:focus { border-color: var(--red); }
-  .login-btn { width: 100%; background: var(--red); border: none; color: var(--white); padding: 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
-  .login-btn:hover { background: var(--red-dark); }
-  .login-error { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 16px; }
-  .login-note { font-size: 11px; color: var(--grey2); margin-top: 16px; line-height: 1.5; }
-
-  /* ADMIN */
-  #admin-screen { display: none; }
-  #admin-screen.visible { display: block; }
-
-  nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 60px; background: rgba(8,8,8,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(224,26,26,0.2); }
-  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; }
-  .nav-logo span { color: var(--red); }
-  .nav-badge { background: var(--red); color: white; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; padding: 3px 10px; text-transform: uppercase; }
-  .nav-right { display: flex; align-items: center; gap: 16px; }
-  .nav-email { font-size: 12px; color: var(--grey); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
-  .logout-btn { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 6px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-  .logout-btn:hover { border-color: var(--red); color: var(--red); }
-
-  .main { padding: 40px; max-width: 1400px; margin: 0 auto; }
-  .stats-bar { display: flex; gap: 24px; margin-bottom: 36px; flex-wrap: wrap; }
-  .stat-card { background: var(--black2); border: 1px solid var(--black4); padding: 20px 28px; flex: 1; min-width: 140px; }
-  .stat-card-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red); line-height: 1; }
-  .stat-card-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-top: 4px; }
-
-  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
-  .toolbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
-  .toolbar-actions { display: flex; gap: 10px; align-items: center; }
-
-  .btn-add { background: var(--red); border: none; color: white; padding: 10px 24px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
-  .btn-add:hover { background: var(--red-dark); }
-  .btn-export { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 10px 20px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-  .btn-export:hover { border-color: var(--white); color: var(--white); }
-
-  .beat-table { width: 100%; border-collapse: collapse; }
-  .beat-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--black4); background: var(--black2); white-space: nowrap; }
-  .beat-table td { padding: 8px 12px; border-bottom: 1px solid var(--black4); background: var(--black2); vertical-align: middle; }
-  .beat-table tr:hover td { background: var(--black3); }
-  .beat-table tr.editing td { background: #1a1500; border-bottom-color: rgba(224,26,26,0.3); }
-
-  .td-num { color: var(--grey2); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; width: 40px; }
-  .td-file { font-size: 11px; color: var(--grey2); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .edit-input { background: var(--black); border: 1px solid var(--red); color: var(--white); padding: 5px 8px; font-family: 'Barlow', sans-serif; font-size: 13px; outline: none; width: 100%; }
-  .edit-input-sm { width: 70px; }
-  .edit-input-xs { width: 50px; }
-  .edit-select { background: var(--black); border: 1px solid var(--red); color: var(--white); padding: 5px 8px; font-family: 'Barlow', sans-serif; font-size: 13px; outline: none; appearance: none; cursor: pointer; }
-  .display-text { font-size: 14px; font-weight: 500; }
-  .display-meta { font-size: 12px; color: var(--grey); }
-  .yt-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey2); display: inline-block; }
-  .yt-dot.active { background: #ff0000; }
-  .action-cell { display: flex; gap: 6px; align-items: center; }
-
-  .btn-edit { background: transparent; border: 1px solid var(--black4); color: var(--grey); padding: 5px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .btn-edit:hover { border-color: var(--white); color: var(--white); }
-  .btn-save { background: var(--green); border: none; color: white; padding: 5px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-  .btn-save:hover { background: var(--green-light); }
-  .btn-cancel { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 5px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-  .btn-cancel:hover { border-color: var(--grey); color: var(--white); }
-  .btn-delete { background: transparent; border: 1px solid transparent; color: var(--grey2); padding: 5px 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.2s; }
-  .btn-delete:hover { border-color: var(--red); color: var(--red); }
-
-  /* MODALS */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px); }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal { background: var(--black2); border: 1px solid var(--black4); width: 90%; max-width: 580px; padding: 40px; position: relative; transform: translateY(20px); transition: transform 0.3s; max-height: 90vh; overflow-y: auto; }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--grey); font-size: 20px; cursor: pointer; transition: color 0.2s; }
-  .modal-close:hover { color: var(--red); }
-  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 28px; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-  .form-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); }
-  .form-input { background: var(--black); border: 1px solid var(--black4); color: var(--white); padding: 11px 14px; font-family: 'Barlow', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%; }
-  .form-input:focus { border-color: var(--red); }
-  .form-select { background: var(--black); border: 1px solid var(--black4); color: var(--white); padding: 11px 14px; font-family: 'Barlow', sans-serif; font-size: 14px; outline: none; appearance: none; cursor: pointer; width: 100%; }
-  .form-select:focus { border-color: var(--red); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .form-note { font-size: 11px; color: var(--grey); margin-top: 2px; }
-  .btn-submit { width: 100%; background: var(--red); border: none; color: white; padding: 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
-  .btn-submit:hover { background: var(--red-dark); }
-
-  /* UPLOAD ZONE */
-  .upload-zone { border: 2px dashed var(--black4); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; position: relative; }
-  .upload-zone:hover { border-color: var(--red); }
-  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-icon { font-size: 28px; margin-bottom: 8px; }
-  .upload-hint { font-size: 13px; color: var(--grey); }
-  .upload-hint strong { color: var(--red); }
-  .upload-filename { font-size: 12px; color: var(--grey); margin-top: 8px; font-style: italic; }
-  .upload-status { margin-top: 8px; font-size: 12px; }
-  .upload-progress { color: var(--grey); }
-  .upload-ok { color: var(--green-light); }
-  .upload-error { color: var(--red); }
-
-  /* EXPORT */
-  .export-code { background: var(--black); border: 1px solid var(--black4); padding: 16px; font-family: monospace; font-size: 11px; color: #aaa; white-space: pre; overflow-x: auto; max-height: 300px; overflow-y: auto; line-height: 1.6; margin-bottom: 16px; }
-  .export-note { font-size: 12px; color: var(--grey); line-height: 1.7; margin-bottom: 16px; }
-  .export-steps { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-  .export-steps li { font-size: 13px; color: var(--grey); display: flex; align-items: flex-start; gap: 10px; }
-  .export-steps li::before { content: attr(data-step); background: var(--red); color: white; font-family: 'Bebas Neue', sans-serif; font-size: 14px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-  .btn-copy-code { width: 100%; background: var(--red); border: none; color: white; padding: 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
-  .btn-copy-code:hover { background: var(--red-dark); }
-  .btn-copy-code.copied { background: var(--green); }
-
-  /* CONFIRM */
-  .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 600; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-  .confirm-overlay.open { opacity: 1; pointer-events: all; }
-  .confirm-box { background: var(--black2); border: 1px solid var(--red); padding: 36px; max-width: 400px; text-align: center; }
-  .confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--red); margin-bottom: 8px; }
-  .confirm-text { font-size: 14px; color: var(--grey); margin-bottom: 28px; line-height: 1.6; }
-  .confirm-actions { display: flex; gap: 10px; justify-content: center; }
-  .btn-confirm-del { background: var(--red); border: none; color: white; padding: 10px 28px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-  .btn-confirm-cancel { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 10px 28px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-  .btn-confirm-cancel:hover { border-color: var(--white); color: var(--white); }
-
-  /* LOADING */
-  #loading-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.9); z-index: 900; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
-  .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--black4); border-top-color: var(--red); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  .loading-text { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey); }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* TOAST */
-  .toast { position: fixed; bottom: 32px; right: 32px; z-index: 9999; background: var(--black2); border: 1px solid var(--red); color: var(--white); padding: 14px 24px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 1px; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.success { border-color: var(--green); }
-  .toast.error { border-color: var(--red); background: rgba(224,26,26,0.1); }
-
-  /* SETUP HINT */
-  .setup-banner { background: rgba(224,26,26,0.08); border: 1px solid rgba(224,26,26,0.3); padding: 16px 20px; margin-bottom: 24px; font-size: 13px; color: var(--grey); line-height: 1.7; }
-  .setup-banner strong { color: var(--red); display: block; margin-bottom: 4px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; font-size: 14px; }
-  .setup-banner code { background: var(--black); padding: 1px 6px; font-size: 12px; color: var(--white); }
+  :root{--red:#e01a1a;--red-dark:#a01010;--black:#080808;--black2:#111111;--black3:#1a1a1a;--black4:#222222;--white:#f0f0f0;--grey:#888;--grey2:#555;--green:#1a7a1a;--green-light:#22a022;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;min-height:100vh;}
+  ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--black2);}::-webkit-scrollbar-thumb{background:var(--red);}
+  #login-screen{position:fixed;inset:0;background:var(--black);display:flex;align-items:center;justify-content:center;z-index:1000;}
+  #login-screen.hidden{display:none;}
+  .login-box{background:var(--black2);border:1px solid var(--black4);padding:48px;width:380px;text-align:center;}
+  .login-logo{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;margin-bottom:4px;}
+  .login-logo span{color:var(--red);}
+  .login-sub{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--grey);margin-bottom:36px;}
+  .login-input{width:100%;background:var(--black);border:1px solid var(--black4);color:var(--white);padding:14px 16px;font-family:'Barlow',sans-serif;font-size:15px;outline:none;margin-bottom:12px;transition:border-color 0.2s;text-align:center;}
+  .login-input:focus{border-color:var(--red);}
+  .login-btn{width:100%;background:var(--red);border:none;color:var(--white);padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;margin-top:4px;}
+  .login-btn:hover{background:var(--red-dark);}
+  .login-error{color:var(--red);font-size:12px;margin-top:10px;min-height:16px;}
+  #admin-screen{display:none;}
+  #admin-screen.visible{display:block;}
+  nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(8,8,8,0.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(224,26,26,0.2);}
+  .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;}
+  .nav-logo span{color:var(--red);}
+  .nav-badge{background:var(--red);color:white;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px;text-transform:uppercase;}
+  .nav-right{display:flex;align-items:center;gap:16px;}
+  .fb-status{display:flex;align-items:center;gap:6px;font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:1px;color:var(--grey);}
+  .fb-dot{width:7px;height:7px;border-radius:50%;background:var(--grey2);}
+  .fb-dot.ok{background:#22a022;}
+  .logout-btn{background:transparent;border:1px solid var(--grey2);color:var(--grey);padding:6px 16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .logout-btn:hover{border-color:var(--red);color:var(--red);}
+  .main{padding:40px;max-width:1400px;margin:0 auto;}
+  .stats-bar{display:flex;gap:24px;margin-bottom:36px;flex-wrap:wrap;}
+  .stat-card{background:var(--black2);border:1px solid var(--black4);padding:20px 28px;flex:1;min-width:140px;}
+  .stat-card-num{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--red);line-height:1;}
+  .stat-card-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);margin-top:4px;}
+  .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap;}
+  .toolbar-title{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;}
+  .toolbar-actions{display:flex;gap:10px;align-items:center;}
+  .btn-add{background:var(--red);border:none;color:white;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
+  .btn-add:hover{background:var(--red-dark);}
+  .beat-table{width:100%;border-collapse:collapse;}
+  .beat-table th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--grey);padding:10px 12px;text-align:left;border-bottom:1px solid var(--black4);background:var(--black2);white-space:nowrap;}
+  .beat-table td{padding:8px 12px;border-bottom:1px solid var(--black4);background:var(--black2);vertical-align:middle;}
+  .beat-table tr:hover td{background:var(--black3);}
+  .beat-table tr.editing td{background:#1a1500;border-bottom-color:rgba(224,26,26,0.3);}
+  .td-num{color:var(--grey2);font-family:'Barlow Condensed',sans-serif;font-size:13px;width:40px;}
+  .td-file{font-size:11px;color:var(--grey2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .edit-input{background:var(--black);border:1px solid var(--red);color:var(--white);padding:5px 8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;width:100%;}
+  .edit-input-sm{width:70px;}.edit-input-xs{width:50px;}
+  .edit-select{background:var(--black);border:1px solid var(--red);color:var(--white);padding:5px 8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;appearance:none;cursor:pointer;}
+  .display-text{font-size:14px;font-weight:500;}
+  .display-meta{font-size:12px;color:var(--grey);}
+  .yt-dot{width:8px;height:8px;border-radius:50%;background:var(--grey2);display:inline-block;}
+  .yt-dot.active{background:#ff0000;}
+  .action-cell{display:flex;gap:6px;align-items:center;}
+  .btn-edit{background:transparent;border:1px solid var(--black4);color:var(--grey);padding:5px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+  .btn-edit:hover{border-color:var(--white);color:var(--white);}
+  .btn-save{background:var(--green);border:none;color:white;padding:5px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;white-space:nowrap;}
+  .btn-save:hover{background:var(--green-light);}
+  .btn-cancel{background:transparent;border:1px solid var(--grey2);color:var(--grey);padding:5px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;}
+  .btn-cancel:hover{border-color:var(--grey);color:var(--white);}
+  .btn-delete{background:transparent;border:1px solid transparent;color:var(--grey2);padding:5px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;cursor:pointer;transition:all 0.2s;}
+  .btn-delete:hover{border-color:var(--red);color:var(--red);}
+  .section-divider{margin:48px 0 0;border-top:1px solid var(--black4);padding-top:40px;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(4px);}
+  .modal-overlay.open{opacity:1;pointer-events:all;}
+  .modal{background:var(--black2);border:1px solid var(--black4);width:90%;max-width:580px;padding:40px;position:relative;transform:translateY(20px);transition:transform 0.3s;max-height:90vh;overflow-y:auto;}
+  .modal-overlay.open .modal{transform:translateY(0);}
+  .modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--grey);font-size:20px;cursor:pointer;transition:color 0.2s;}
+  .modal-close:hover{color:var(--red);}
+  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:28px;}
+  .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .form-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--grey);}
+  .form-input{background:var(--black);border:1px solid var(--black4);color:var(--white);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;width:100%;}
+  .form-input:focus{border-color:var(--red);}
+  .form-select{background:var(--black);border:1px solid var(--black4);color:var(--white);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;appearance:none;cursor:pointer;width:100%;}
+  .form-select:focus{border-color:var(--red);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .form-note{font-size:11px;color:var(--grey);margin-top:2px;}
+  .form-check{display:flex;align-items:center;gap:10px;}
+  .form-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--red);}
+  .btn-submit{width:100%;background:var(--red);border:none;color:white;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;margin-top:8px;}
+  .btn-submit:hover{background:var(--red-dark);}
+  .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s;}
+  .confirm-overlay.open{opacity:1;pointer-events:all;}
+  .confirm-box{background:var(--black2);border:1px solid var(--red);padding:36px;max-width:400px;text-align:center;}
+  .confirm-title{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--red);margin-bottom:8px;}
+  .confirm-text{font-size:14px;color:var(--grey);margin-bottom:28px;line-height:1.6;}
+  .confirm-actions{display:flex;gap:10px;justify-content:center;}
+  .btn-confirm-del{background:var(--red);border:none;color:white;padding:10px 28px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+  .btn-confirm-cancel{background:transparent;border:1px solid var(--grey2);color:var(--grey);padding:10px 28px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+  .btn-confirm-cancel:hover{border-color:var(--white);color:var(--white);}
+  .toast{position:fixed;bottom:32px;right:32px;z-index:9999;background:var(--black2);border:1px solid var(--red);color:var(--white);padding:14px 24px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;opacity:0;transform:translateY(10px);transition:all 0.3s;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateY(0);}
+  .toast.success{border-color:var(--green);}
+  .loading-row td{text-align:center;color:var(--grey);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;padding:32px;}
+  /* price multiplier info */
+  .mult-info{background:var(--black3);border:1px solid var(--black4);padding:16px 20px;margin-bottom:20px;font-size:13px;color:var(--grey);line-height:1.8;}
+  .mult-info strong{color:var(--white);}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div id="loading-overlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">Beats werden geladen…</div>
-</div>
-
-<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box">
     <div class="login-logo">DEAD<span>SHOT</span> BEATS</div>
     <div class="login-sub">Admin Panel</div>
-    <input class="login-input" type="email" id="email-input" placeholder="admin@email.com" autocomplete="email">
-    <input class="login-input" type="password" id="pw-input" placeholder="••••••••" autocomplete="current-password">
-    <button class="login-btn" onclick="window.doLogin()">Einloggen</button>
+    <input class="login-input" type="password" id="pw-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Einloggen</button>
     <div class="login-error" id="login-error"></div>
-    <div class="login-note">Login via Firebase Authentication</div>
   </div>
 </div>
 
-<!-- ADMIN -->
 <div id="admin-screen">
   <nav>
     <div style="display:flex;align-items:center;gap:14px;">
@@ -652,124 +123,60 @@ function showToast(msg, type) {
       <div class="nav-badge">Admin</div>
     </div>
     <div class="nav-right">
-      <span class="nav-email" id="user-email"></span>
+      <div class="fb-status"><div class="fb-dot" id="fb-dot"></div><span id="fb-txt">Verbinde...</span></div>
       <a href="/" style="color:var(--grey);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;" target="_blank">↗ Live-Seite</a>
-      <button class="logout-btn" onclick="window.doLogout()">Logout</button>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
     </div>
   </nav>
 
   <div class="main">
-    <!-- SETUP HINWEIS (kann entfernt werden wenn alles konfiguriert ist) -->
-    <div class="setup-banner">
-      <strong>⚙ Einmalige Einrichtung erforderlich</strong>
-      1. Firebase Config oben im Script ersetzen (Firebase Console → Project Settings)<br>
-      2. Firebase Auth aktivieren (Email/Password) und Admin-Account anlegen<br>
-      3. Firestore Database anlegen (Testmode oder Rules setzen)<br>
-      4. Cloudflare Worker für R2-Upload deployen → URL oben als <code>R2_UPLOAD_WORKER</code> eintragen<br>
-      <span style="color:var(--grey2);font-size:11px;margin-top:4px;display:block;">→ Dieses Banner nach der Einrichtung aus dem HTML entfernen</span>
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat-card"><div class="stat-card-num" id="s-total">—</div><div class="stat-card-label">Beats Total</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="s-genre">—</div><div class="stat-card-label">Top Genre</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="s-yt">—</div><div class="stat-card-label">Mit YouTube</div></div>
+      <div class="stat-card"><div class="stat-card-num" id="s-std">—</div><div class="stat-card-label">Standard (29€)</div></div>
     </div>
 
-    <div class="stats-bar" id="stats-bar"></div>
+    <!-- BEATS -->
     <div class="toolbar">
       <div class="toolbar-title">BEATS VERWALTEN</div>
       <div class="toolbar-actions">
-        <button class="btn-export" onclick="window.openExport()">⬇ Code exportieren</button>
-        <button class="btn-add" onclick="window.openAddModal()">+ Neuen Beat hinzufügen</button>
+        <button class="btn-add" onclick="openAddModal()">+ Neuen Beat hinzufügen</button>
       </div>
     </div>
     <div style="overflow-x:auto;">
       <table class="beat-table">
-        <thead>
-          <tr><th>#</th><th>Titel</th><th>Genre</th><th>BPM</th><th>Key</th><th>Preis</th><th>YouTube</th><th>Datei</th><th>Aktionen</th></tr>
-        </thead>
-        <tbody id="beat-tbody"></tbody>
+        <thead><tr><th>#</th><th>Titel</th><th>Genre</th><th>BPM</th><th>Key</th><th>Basispreis</th><th>→ WAV</th><th>→ Trackout</th><th>YouTube</th><th>Datei (R2)</th><th>Aktionen</th></tr></thead>
+        <tbody id="beat-tbody"><tr class="loading-row"><td colspan="11">Lade Beats aus Firestore...</td></tr></tbody>
       </table>
     </div>
 
     <!-- LIZENZEN -->
-    <div style="margin-top:48px;">
+    <div class="section-divider">
       <div class="toolbar">
         <div class="toolbar-title">LIZENZEN VERWALTEN</div>
       </div>
+      <div class="mult-info">
+        <strong>Dynamische Preisberechnung (Option A)</strong><br>
+        Der <strong>Basispreis</strong> eines Beats entspricht dem MP3-Preis.<br>
+        WAV = Basis × 2.0 &nbsp;|&nbsp; Trackout = Basis × 3.4 &nbsp;|&nbsp; Exclusive = Basis × 17.2<br>
+        Ändere den Basispreis eines Beats → alle Lizenzpreise passen sich automatisch an.
+      </div>
       <div style="overflow-x:auto;">
         <table class="beat-table">
-          <thead>
-            <tr><th>Name</th><th>Typ</th><th>Preis</th><th>Popular</th><th>Aktion</th></tr>
-          </thead>
-          <tbody id="license-tbody"></tbody>
+          <thead><tr><th>Lizenz</th><th>Typ</th><th>Multiplikator</th><th>Features</th><th>Popular</th><th>Aktion</th></tr></thead>
+          <tbody id="lic-tbody"><tr class="loading-row"><td colspan="6">Lade Lizenzen...</td></tr></tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- LICENSE MODAL -->
-<div class="modal-overlay" id="license-modal" onclick="if(event.target===this)window.closeLicenseModal()">
+<!-- ADD BEAT MODAL -->
+<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)closeAddModal()">
   <div class="modal">
-    <button class="modal-close" onclick="window.closeLicenseModal()">✕</button>
-    <div class="modal-title">LIZENZ BEARBEITEN</div>
-    <input type="hidden" id="lic-id">
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Name</label>
-        <input class="form-input" id="lic-name" placeholder="MP3 LEASE">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Typ</label>
-        <input class="form-input" id="lic-type" placeholder="Basic">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Preis</label>
-        <input class="form-input" id="lic-price" placeholder="29">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Einheit (€ oder €+)</label>
-        <input class="form-input" id="lic-priceunit" placeholder="€">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
-        <input type="checkbox" id="lic-featured" style="width:16px;height:16px;accent-color:var(--red);">
-        <label class="form-label" style="margin:0;">Popular (hervorgehoben)</label>
-      </div>
-      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
-        <input type="checkbox" id="lic-inquire" style="width:16px;height:16px;accent-color:var(--red);">
-        <label class="form-label" style="margin:0;">Anfrage statt Kaufen</label>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Features (eine pro Zeile)</label>
-      <textarea class="form-input" id="lic-features" rows="5" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="MP3 High Quality&#10;Up to 100,000 Streams"></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Deaktivierte Features (eine pro Zeile, durchgestrichen)</label>
-      <textarea class="form-input" id="lic-disabled" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="WAV File&#10;Exclusive Rights"></textarea>
-    </div>
-    <button class="btn-submit" onclick="window.saveLicense()">Lizenz speichern →</button>
-  </div>
-</div>
-
-<!-- ADD MODAL -->
-<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)window.closeAddModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="window.closeAddModal()">✕</button>
+    <button class="modal-close" onclick="closeAddModal()">✕</button>
     <div class="modal-title">NEUEN BEAT</div>
-
-    <!-- AUDIO UPLOAD -->
-    <div class="form-group">
-      <label class="form-label">Audio-Datei (MP3 / WAV) *</label>
-      <div class="upload-zone">
-        <input type="file" id="audio-file-input" accept=".mp3,.wav,audio/mpeg,audio/wav" onchange="window.handleFileSelect(this)">
-        <div class="upload-icon">🎵</div>
-        <div class="upload-hint">Datei hierher ziehen oder <strong>klicken</strong></div>
-        <div class="upload-hint" style="font-size:11px;margin-top:4px;">MP3 oder WAV · wird direkt zu Cloudflare R2 hochgeladen</div>
-      </div>
-      <div class="upload-filename" id="upload-filename">Keine Datei ausgewählt</div>
-      <div class="upload-status" id="upload-status"></div>
-    </div>
-
     <div class="form-group">
       <label class="form-label">Titel *</label>
       <input class="form-input" id="new-name" placeholder="z.B. Future x 21 Savage – Codein Rain">
@@ -778,15 +185,11 @@ function showToast(msg, type) {
       <div class="form-group">
         <label class="form-label">Genre</label>
         <select class="form-select" id="new-genre">
-          <option value="Trap">Trap</option>
-          <option value="Dark">Dark</option>
-          <option value="Melodic">Melodic</option>
-          <option value="Drill">Drill</option>
-          <option value="Boom Bap">Boom Bap</option>
+          <option>Trap</option><option>Dark</option><option>Melodic</option><option>Drill</option><option>Boom Bap</option>
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label">Preis (€)</label>
+        <label class="form-label">Basispreis / MP3 (€)</label>
         <input class="form-input" id="new-price" type="number" value="29" min="1">
       </div>
     </div>
@@ -801,29 +204,53 @@ function showToast(msg, type) {
       </div>
     </div>
     <div class="form-group">
+      <label class="form-label">Dateiname in R2 (URL-encoded) *</label>
+      <input class="form-input" id="new-file" placeholder="Mein%20Beat%20135%20Bpm%20Cm.mp3">
+      <div class="form-note">Exakter Dateiname aus deinem Cloudflare R2 Bucket (URL-encoded)</div>
+    </div>
+    <div class="form-group">
       <label class="form-label">YouTube URL (optional)</label>
       <input class="form-input" id="new-yt" placeholder="https://www.youtube.com/watch?v=...">
     </div>
-    <button class="btn-submit" onclick="window.addBeat()">Beat hinzufügen →</button>
+    <button class="btn-submit" onclick="addBeat()">Beat hinzufügen →</button>
   </div>
 </div>
 
-<!-- EXPORT MODAL -->
-<div class="modal-overlay" id="export-modal" onclick="if(event.target===this)window.closeExport()">
+<!-- EDIT LICENSE MODAL -->
+<div class="modal-overlay" id="lic-modal" onclick="if(event.target===this)closeLicModal()">
   <div class="modal">
-    <button class="modal-close" onclick="window.closeExport()">✕</button>
-    <div class="modal-title">CODE EXPORTIEREN</div>
-    <div class="export-note">
-      Kopiere diesen Code und ersetze den <code style="color:var(--red)">const beats = [...]</code> Block in deiner <strong>index.html</strong> auf GitHub.
+    <button class="modal-close" onclick="closeLicModal()">✕</button>
+    <div class="modal-title">LIZENZ BEARBEITEN</div>
+    <input type="hidden" id="lic-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" id="lic-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Typ</label>
+        <input class="form-input" id="lic-type" placeholder="Basic">
+      </div>
     </div>
-    <ul class="export-steps">
-      <li data-step="1">Code unten kopieren (Button klicken)</li>
-      <li data-step="2">GitHub → index.html öffnen → Bleistift-Icon (Edit)</li>
-      <li data-step="3">Den alten <code style="color:var(--red)">const beats = [...]</code> Block suchen und ersetzen</li>
-      <li data-step="4">Commit → Vercel/Cloudflare deployed automatisch</li>
-    </ul>
-    <div class="export-code" id="export-code"></div>
-    <button class="btn-copy-code" id="copy-code-btn" onclick="window.copyExportCode()">Code kopieren</button>
+    <div class="form-row">
+      <div class="form-group form-check" style="justify-content:flex-start;margin-top:8px;">
+        <input type="checkbox" id="lic-featured">
+        <label class="form-label" style="margin:0;">Popular (hervorgehoben)</label>
+      </div>
+      <div class="form-group form-check" style="justify-content:flex-start;margin-top:8px;">
+        <input type="checkbox" id="lic-inquire">
+        <label class="form-label" style="margin:0;">Anfrage statt Kaufen</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Features (eine pro Zeile)</label>
+      <textarea class="form-input" id="lic-features" rows="6" style="resize:vertical;line-height:1.6;"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Deaktivierte Features (eine pro Zeile, durchgestrichen)</label>
+      <textarea class="form-input" id="lic-disabled" rows="3" style="resize:vertical;line-height:1.6;"></textarea>
+    </div>
+    <button class="btn-submit" onclick="saveLicense()">Lizenz speichern →</button>
   </div>
 </div>
 
@@ -831,15 +258,306 @@ function showToast(msg, type) {
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-box">
     <div class="confirm-title">Beat löschen?</div>
-    <div class="confirm-text" id="confirm-text">Dieser Beat wird gelöscht.</div>
+    <div class="confirm-text" id="confirm-text">Dieser Beat wird permanent gelöscht.</div>
     <div class="confirm-actions">
-      <button class="btn-confirm-cancel" onclick="window.closeConfirm()">Abbrechen</button>
-      <button class="btn-confirm-del" onclick="window.confirmDelete()">Löschen</button>
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">Abbrechen</button>
+      <button class="btn-confirm-del" onclick="confirmDelete()">Löschen</button>
     </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, query, orderBy }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey:"AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
+  authDomain:"deadshot-beats.firebaseapp.com",
+  projectId:"deadshot-beats",
+  storageBucket:"deadshot-beats.firebasestorage.app",
+  messagingSenderId:"252096563375",
+  appId:"1:252096563375:web:58193b52e325147f592c5a"
+};
+
+const ADMIN_PW = 'Deadshottheking1992';
+const MULT = { mp3:1.0, wav:2.0, trackout:3.4, exclusive:17.2 };
+const GENRES = ['Trap','Dark','Melodic','Drill','Boom Bap'];
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+let beats=[], licenses=[], editingId=null, deleteTargetId=null;
+
+const DEFAULT_BEATS=[
+  {id:1, name:'21 Savage X Future – Sacrifice',           genre:'Trap',    bpm:135,key:'Ebm',  price:29,yt:'',file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3'},
+  {id:2, name:'21 Savage – Nolenso',                      genre:'Trap',    bpm:132,key:'Cm',   price:29,yt:'',file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3'},
+  {id:3, name:'21 Savage Type Beat 85',                   genre:'Trap',    bpm:85, key:'Bbm',  price:29,yt:'',file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3'},
+  {id:4, name:'Drake – Midnight',                         genre:'Melodic', bpm:123,key:'Cm',   price:29,yt:'',file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3'},
+  {id:5, name:'Drake x 21 Savage – NoFeelings',           genre:'Dark',    bpm:146,key:'Ebmaj',price:29,yt:'',file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3'},
+  {id:6, name:'Future – Legacy',                          genre:'Trap',    bpm:137,key:'Em',   price:29,yt:'',file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3'},
+  {id:7, name:'Future x Playboy Carti x Drake – Big Dog', genre:'Dark',    bpm:143,key:'Em',   price:29,yt:'',file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3'},
+  {id:8, name:'Future x 21 Savage – Codein Rain',         genre:'Melodic', bpm:136,key:'Cm',   price:29,yt:'',file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3'},
+  {id:9, name:'Future x Southside – Ski Driver',          genre:'Trap',    bpm:135,key:'Ebmaj',price:29,yt:'',file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3'},
+  {id:10,name:'Ghosted',                                  genre:'Melodic', bpm:0,  key:'',     price:29,yt:'',file:'Ghosted.mp3'},
+  {id:11,name:'Mixdown 2',                                genre:'Trap',    bpm:0,  key:'',     price:29,yt:'',file:'Mixdown(2).mp3'},
+  {id:12,name:'Mixdown',                                  genre:'Trap',    bpm:0,  key:'',     price:29,yt:'',file:'Mixdown.mp3'},
+  {id:13,name:'A$AP Rocky – Dumb Shit',                   genre:'Trap',    bpm:130,key:'Cm',   price:29,yt:'',file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3'},
+  {id:14,name:'Florida Type Beat – Big Stepper',          genre:'Drill',   bpm:156,key:'D#min',price:29,yt:'',file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3'},
+  {id:15,name:'Larb – 21 Savage Type Beat',               genre:'Trap',    bpm:165,key:'G#',   price:29,yt:'',file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3'},
+  {id:16,name:'Put In My Cup – Future',                   genre:'Trap',    bpm:130,key:'Ebm',  price:29,yt:'',file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3'},
+  {id:17,name:'Roulete – 21 Savage',                      genre:'Dark',    bpm:77, key:'C#m',  price:29,yt:'',file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3'},
+  {id:18,name:'Travis Scott x Ye – Titel',                genre:'Dark',    bpm:130,key:'Dm',   price:29,yt:'',file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3'},
+  {id:19,name:'DGAF – Future ft. Quavo',                  genre:'Trap',    bpm:135,key:'Bmin', price:29,yt:'',file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3'},
+  {id:20,name:'Darkness In My Visions',                   genre:'Dark',    bpm:0,  key:'',     price:29,yt:'',file:'Darkness%20in%20my%20Visions(3).mp3'},
+  {id:21,name:'Decision – 21 Savage',                     genre:'Trap',    bpm:134,key:'D#m',  price:29,yt:'',file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3'},
+  {id:22,name:'Draft Day – Future',                       genre:'Trap',    bpm:140,key:'Abm',  price:29,yt:'',file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3'},
+];
+
+const DEFAULT_LICENSES=[
+  {id:'mp3',      order:1,type:'Basic',    name:'MP3 LEASE', featured:false,inquire:false,
+   features:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],
+   disabled:['WAV File','Trackout Stems','Exclusive Rights']},
+  {id:'wav',      order:2,type:'Standard', name:'WAV LEASE', featured:true, inquire:false,
+   features:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],
+   disabled:['Trackout Stems','Exclusive Rights']},
+  {id:'trackout', order:3,type:'Premium',  name:'TRACKOUT',  featured:false,inquire:false,
+   features:['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],
+   disabled:['Exclusive Rights']},
+  {id:'exclusive',order:4,type:'One-Time', name:'EXCLUSIVE', featured:false,inquire:true,
+   features:['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price negotiable'],
+   disabled:[]},
+];
+
+// ── LOGIN ────────────────────────────────────────────────
+window.doLogin=function(){
+  const pw=document.getElementById('pw-input').value;
+  if(pw===ADMIN_PW){
+    sessionStorage.setItem('ds_admin','1');
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('admin-screen').classList.add('visible');
+    loadAll();
+  }else{
+    document.getElementById('login-error').textContent='Falsches Passwort.';
+    document.getElementById('pw-input').value='';
+  }
+};
+window.doLogout=function(){
+  sessionStorage.removeItem('ds_admin');
+  document.getElementById('login-screen').classList.remove('hidden');
+  document.getElementById('admin-screen').classList.remove('visible');
+  document.getElementById('pw-input').value='';
+};
+
+if(sessionStorage.getItem('ds_admin')==='1'){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('admin-screen').classList.add('visible');
+  loadAll();
+}
+document.getElementById('pw-input').focus();
+
+// ── LOAD ─────────────────────────────────────────────────
+async function loadAll(){
+  setFbStatus(false);
+  // Beats
+  try{
+    const snap=await getDocs(query(collection(db,'beats'),orderBy('id')));
+    if(snap.empty){
+      const batch=writeBatch(db);
+      DEFAULT_BEATS.forEach(b=>batch.set(doc(db,'beats',String(b.id)),b));
+      await batch.commit();
+      beats=[...DEFAULT_BEATS];
+      showToast('✓ 22 Beats aus Backup importiert!','success');
+    }else{
+      beats=snap.docs.map(d=>d.data());
+    }
+    setFbStatus(true);
+  }catch(e){showToast('Beats Fehler: '+e.message,'');}
+
+  // Licenses
+  try{
+    const snap=await getDocs(collection(db,'licenses'));
+    if(snap.empty){
+      const batch=writeBatch(db);
+      DEFAULT_LICENSES.forEach(l=>batch.set(doc(db,'licenses',l.id),l));
+      await batch.commit();
+      licenses=[...DEFAULT_LICENSES];
+    }else{
+      licenses=snap.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
+    }
+  }catch(e){showToast('Lizenzen Fehler: '+e.message,'');}
+
+  renderAll();
+}
+
+function setFbStatus(ok){
+  const dot=document.getElementById('fb-dot');
+  const txt=document.getElementById('fb-txt');
+  dot.className='fb-dot'+(ok?' ok':'');
+  txt.textContent=ok?'Firestore verbunden':'Verbinde...';
+}
+
+// ── RENDER ────────────────────────────────────────────────
+function renderAll(){renderStats();renderBeats();renderLicenses();}
+
+function renderStats(){
+  const genres={};
+  beats.forEach(b=>{genres[b.genre]=(genres[b.genre]||0)+1;});
+  const top=Object.entries(genres).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('s-total').textContent=beats.length;
+  document.getElementById('s-genre').textContent=top?top[0]:'—';
+  document.getElementById('s-yt').textContent=beats.filter(b=>b.yt).length;
+  document.getElementById('s-std').textContent=beats.filter(b=>b.price===29).length;
+}
+
+function calcPrices(base){
+  return{mp3:Math.round(base*MULT.mp3),wav:Math.round(base*MULT.wav),trackout:Math.round(base*MULT.trackout),exclusive:Math.round(base*MULT.exclusive)};
+}
+
+function renderBeats(){
+  if(!beats.length){document.getElementById('beat-tbody').innerHTML='<tr class="loading-row"><td colspan="11">Keine Beats in Firestore.</td></tr>';return;}
+  document.getElementById('beat-tbody').innerHTML=[...beats].sort((a,b)=>(a.id||0)-(b.id||0)).map((b,i)=>{
+    const isE=editingId===b.id;
+    const p=calcPrices(b.price||29);
+    return`<tr class="${isE?'editing':''}">
+      <td class="td-num">${i+1}</td>
+      <td style="min-width:180px;">${isE?`<input class="edit-input" id="e-name" value="${esc(b.name)}">`:`<div class="display-text">${esc(b.name)}</div>`}</td>
+      <td>${isE?`<select class="edit-select" id="e-genre">${GENRES.map(g=>`<option value="${g}"${b.genre===g?' selected':''}>${g}</option>`).join('')}</select>`:`<span class="display-meta">${b.genre}</span>`}</td>
+      <td>${isE?`<input class="edit-input edit-input-sm" id="e-bpm" type="number" value="${b.bpm||0}">`:`<span class="display-meta">${b.bpm>0?b.bpm:'—'}</span>`}</td>
+      <td>${isE?`<input class="edit-input edit-input-sm" id="e-key" value="${esc(b.key||'')}">`:`<span class="display-meta">${b.key||'—'}</span>`}</td>
+      <td>${isE?`<input class="edit-input edit-input-xs" id="e-price" type="number" value="${b.price||29}">€`:`<span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${b.price||29}€</span>`}</td>
+      <td><span class="display-meta" style="color:var(--grey2);">${p.wav}€</span></td>
+      <td><span class="display-meta" style="color:var(--grey2);">${p.trackout}€</span></td>
+      <td style="text-align:center;">${isE?`<input class="edit-input" id="e-yt" value="${esc(b.yt||'')}" placeholder="YouTube URL" style="min-width:160px;">`:`<span class="yt-dot ${b.yt?'active':''}" title="${b.yt||'Kein Link'}"></span>`}</td>
+      <td class="td-file" title="${esc(b.file)}">${esc(b.file)}</td>
+      <td><div class="action-cell">
+        ${isE?`<button class="btn-save" onclick="saveEdit(${b.id})">✓</button><button class="btn-cancel" onclick="cancelEdit()">✕</button>`
+            :`<button class="btn-edit" onclick="startEdit(${b.id})">Bearbeiten</button><button class="btn-delete" onclick="openConfirm(${b.id})" title="Löschen">🗑</button>`}
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderLicenses(){
+  document.getElementById('lic-tbody').innerHTML=licenses.map(l=>{
+    const multStr={mp3:'× 1.0',wav:'× 2.0',trackout:'× 3.4',exclusive:'× 17.2'}[l.id]||'—';
+    const feats=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)).length;
+    return`<tr>
+      <td><div class="display-text">${l.name}</div></td>
+      <td><span class="display-meta">${l.type}</span></td>
+      <td><span style="font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--red);">${multStr}</span></td>
+      <td><span class="display-meta">${feats} Features</span></td>
+      <td style="text-align:center;"><span class="yt-dot ${l.featured?'active':''}"></span></td>
+      <td><div class="action-cell"><button class="btn-edit" onclick="openLicModal('${l.id}')">Bearbeiten</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── BEAT EDIT ────────────────────────────────────────────
+window.startEdit=id=>{editingId=id;renderBeats();setTimeout(()=>document.getElementById('e-name')?.focus(),50);};
+window.cancelEdit=()=>{editingId=null;renderBeats();};
+window.saveEdit=async function(id){
+  const b=beats.find(x=>x.id===id);if(!b)return;
+  b.name =document.getElementById('e-name').value.trim()||b.name;
+  b.genre=document.getElementById('e-genre').value;
+  b.bpm  =parseInt(document.getElementById('e-bpm').value)||0;
+  b.key  =document.getElementById('e-key').value.trim();
+  b.price=parseInt(document.getElementById('e-price').value)||29;
+  b.yt   =document.getElementById('e-yt').value.trim();
+  editingId=null;
+  try{await setDoc(doc(db,'beats',String(id)),b);renderAll();showToast('✓ Beat gespeichert & live!','success');}
+  catch(e){showToast('Fehler: '+e.message,'');}
+};
+
+// ── BEAT DELETE ──────────────────────────────────────────
+window.openConfirm=function(id){
+  deleteTargetId=id;
+  const b=beats.find(x=>x.id===id);
+  document.getElementById('confirm-text').textContent=`"${b?.name}" wird permanent gelöscht.`;
+  document.getElementById('confirm-overlay').classList.add('open');
+};
+window.closeConfirm=()=>{document.getElementById('confirm-overlay').classList.remove('open');deleteTargetId=null;};
+window.confirmDelete=async function(){
+  if(!deleteTargetId)return;
+  try{
+    await deleteDoc(doc(db,'beats',String(deleteTargetId)));
+    beats=beats.filter(b=>b.id!==deleteTargetId);
+    closeConfirm();editingId=null;renderAll();showToast('Beat gelöscht','');
+  }catch(e){showToast('Fehler: '+e.message,'');}
+};
+
+// ── ADD BEAT ─────────────────────────────────────────────
+window.openAddModal=()=>{document.getElementById('add-modal').classList.add('open');setTimeout(()=>document.getElementById('new-name').focus(),100);};
+window.closeAddModal=()=>{
+  document.getElementById('add-modal').classList.remove('open');
+  ['new-name','new-bpm','new-key','new-yt','new-file'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('new-price').value='29';
+};
+window.addBeat=async function(){
+  const name=document.getElementById('new-name').value.trim();
+  const file=document.getElementById('new-file').value.trim();
+  if(!name||!file){showToast('Titel und Dateiname sind Pflichtfelder','');return;}
+  const maxId=beats.length?Math.max(...beats.map(b=>b.id)):0;
+  const nb={
+    id:maxId+1,name,
+    genre:document.getElementById('new-genre').value,
+    bpm:parseInt(document.getElementById('new-bpm').value)||0,
+    key:document.getElementById('new-key').value.trim(),
+    price:parseInt(document.getElementById('new-price').value)||29,
+    yt:document.getElementById('new-yt').value.trim(),
+    file
+  };
+  try{
+    await setDoc(doc(db,'beats',String(nb.id)),nb);
+    beats.push(nb);closeAddModal();renderAll();
+    showToast('✓ Beat hinzugefügt & sofort live!','success');
+  }catch(e){showToast('Fehler: '+e.message,'');}
+};
+
+// ── LICENSE EDIT ─────────────────────────────────────────
+window.openLicModal=function(id){
+  const l=licenses.find(x=>x.id===id);if(!l)return;
+  document.getElementById('lic-id').value=l.id;
+  document.getElementById('lic-name').value=l.name;
+  document.getElementById('lic-type').value=l.type;
+  document.getElementById('lic-featured').checked=l.featured;
+  document.getElementById('lic-inquire').checked=l.inquire;
+  document.getElementById('lic-features').value=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)).join('\n');
+  document.getElementById('lic-disabled').value=(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)).join('\n');
+  document.getElementById('lic-modal').classList.add('open');
+};
+window.closeLicModal=()=>document.getElementById('lic-modal').classList.remove('open');
+window.saveLicense=async function(){
+  const id=document.getElementById('lic-id').value;
+  const updated={
+    id,
+    name:    document.getElementById('lic-name').value.trim(),
+    type:    document.getElementById('lic-type').value.trim(),
+    featured:document.getElementById('lic-featured').checked,
+    inquire: document.getElementById('lic-inquire').checked,
+    features:document.getElementById('lic-features').value.trim().split('\n').filter(x=>x),
+    disabled:document.getElementById('lic-disabled').value.trim().split('\n').filter(x=>x),
+    order:(licenses.find(x=>x.id===id)?.order||0),
+  };
+  try{
+    await setDoc(doc(db,'licenses',id),updated);
+    const idx=licenses.findIndex(x=>x.id===id);
+    if(idx>=0)licenses[idx]=updated;else licenses.push(updated);
+    closeLicModal();renderLicenses();showToast('✓ Lizenz gespeichert & live!','success');
+  }catch(e){showToast('Fehler: '+e.message,'');}
+};
+
+// ── UTILS ────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+let _tt;
+function showToast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
+  clearTimeout(_tt);_tt=setTimeout(()=>{t.className='toast';},3000);
+}
+window.showToast=showToast;
+</script>
 </body>
 </html>
