@@ -9,60 +9,78 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { name, email, subject, message } = req.body;
+
   if (!name || !email || !subject || !message) {
-    return res.status(400).json({ error: 'Missing fields' });
+    return res.status(400).json({ error: 'All fields required' });
   }
 
   try {
+    // 1. Notification to Deadshot
     await resend.emails.send({
-      from: 'Deadshot Beats <beats@deadshotbeats.com>',
-      to:   'beats@deadshotbeats.com',
-      replyTo: email,
-      subject: `[Contact] ${subject} — from ${name}`,
+      from: 'Deadshot Beats <noreply@deadshotbeats.com>',
+      to: 'Deadshotbeatz@outlook.com',
+      subject: `[Contact] ${subject} — ${name}`,
       html: `
-        <div style="background:#080808;padding:40px;font-family:Arial,sans-serif;">
-          <div style="max-width:500px;margin:0 auto;background:#111;border:1px solid #222;padding:32px;">
-            <h2 style="color:#e01a1a;font-size:24px;margin:0 0 24px;letter-spacing:2px;">NEW MESSAGE</h2>
-            <table style="width:100%;font-size:14px;color:#888;">
-              <tr><td style="padding:6px 0;color:#555;width:80px;">Name</td><td style="color:#f0f0f0;">${name}</td></tr>
-              <tr><td style="padding:6px 0;color:#555;">Email</td><td><a href="mailto:${email}" style="color:#e01a1a;">${email}</a></td></tr>
-              <tr><td style="padding:6px 0;color:#555;">Subject</td><td style="color:#f0f0f0;">${subject}</td></tr>
-            </table>
-            <div style="margin-top:24px;padding-top:24px;border-top:1px solid #222;">
-              <p style="color:#555;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:0 0 8px;">Message</p>
-              <p style="color:#f0f0f0;font-size:14px;line-height:1.7;margin:0;">${message.replace(/\n/g,'<br>')}</p>
-            </div>
-            <div style="margin-top:24px;">
-              <a href="mailto:${email}?subject=Re: ${subject}" style="display:inline-block;background:#e01a1a;color:#fff;text-decoration:none;padding:10px 24px;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">Reply to ${name}</a>
-            </div>
+        <div style="font-family:sans-serif;background:#080808;color:#f0f0f0;padding:32px;">
+          <h2 style="color:#e01a1a;font-size:20px;letter-spacing:2px;margin-bottom:24px;">NEW MESSAGE</h2>
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="padding:8px 0;color:#888;font-size:12px;letter-spacing:2px;text-transform:uppercase;width:100px;">From</td><td style="padding:8px 0;font-size:15px;">${name}</td></tr>
+            <tr><td style="padding:8px 0;color:#888;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Email</td><td style="padding:8px 0;font-size:15px;"><a href="mailto:${email}" style="color:#e01a1a;">${email}</a></td></tr>
+            <tr><td style="padding:8px 0;color:#888;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Subject</td><td style="padding:8px 0;font-size:15px;">${subject}</td></tr>
+          </table>
+          <div style="margin-top:24px;padding:20px;background:#111;border-left:3px solid #e01a1a;">
+            <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">Message</p>
+            <p style="font-size:14px;line-height:1.8;white-space:pre-wrap;">${message}</p>
           </div>
+          <p style="margin-top:24px;font-size:12px;color:#555;">Reply directly to <a href="mailto:${email}" style="color:#e01a1a;">${email}</a></p>
         </div>
       `,
+      replyTo: email,
     });
 
-    // Auto-reply to sender
+    // 2. Confirmation to sender
     await resend.emails.send({
-      from: 'Deadshot Beats <beats@deadshotbeats.com>',
-      to:   email,
-      subject: `Got your message — Deadshot Beats`,
+      from: 'Deadshot Beats <noreply@deadshotbeats.com>',
+      to: email,
+      subject: `Got your message — Deadshot Beats 🔥`,
       html: `
-        <div style="background:#080808;padding:40px;font-family:Arial,sans-serif;">
-          <div style="max-width:500px;margin:0 auto;background:#111;border:1px solid #222;padding:32px;">
-            <h2 style="color:#f0f0f0;font-size:22px;margin:0 0 4px;letter-spacing:3px;"><span style="color:#e01a1a;">DEAD</span>SHOT BEATS</h2>
-            <p style="color:#555;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 28px;">Message received</p>
-            <p style="color:#f0f0f0;font-size:15px;line-height:1.7;margin:0 0 16px;">Hey ${name},</p>
-            <p style="color:#888;font-size:14px;line-height:1.7;margin:0 0 24px;">Thanks for reaching out! I got your message about <strong style="color:#f0f0f0;">${subject}</strong> and will get back to you within 24 hours.</p>
-            <p style="color:#555;font-size:13px;margin:0;">— Deadshot</p>
-            <div style="margin-top:28px;padding-top:20px;border-top:1px solid #222;">
-              <p style="color:#333;font-size:11px;margin:0;">© 2026 DeadshotBeats · deadshotbeats.com</p>
-            </div>
-          </div>
+        <div style="font-family:'Helvetica Neue',Arial,sans-serif;background:#080808;color:#f0f0f0;padding:0;margin:0;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px;">
+            <tr><td align="center">
+              <table width="560" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid #222;max-width:560px;width:100%;">
+                <tr>
+                  <td style="background:#080808;padding:24px 40px;border-bottom:2px solid #e01a1a;">
+                    <span style="font-family:Georgia,serif;font-size:24px;font-weight:900;letter-spacing:6px;color:#f0f0f0;">DEAD</span><span style="font-family:Georgia,serif;font-size:24px;font-weight:900;letter-spacing:6px;color:#e01a1a;">SHOT</span><span style="font-family:Georgia,serif;font-size:24px;font-weight:900;letter-spacing:6px;color:#f0f0f0;"> BEATS</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:40px;">
+                    <p style="color:#888;font-size:12px;letter-spacing:3px;text-transform:uppercase;margin:0 0 8px;">Message Received</p>
+                    <h1 style="color:#f0f0f0;font-size:24px;margin:0 0 20px;line-height:1.2;">We got your message, ${name}!</h1>
+                    <p style="color:#888;font-size:14px;line-height:1.7;margin:0 0 24px;">Thanks for reaching out. We'll get back to you within <strong style="color:#f0f0f0;">24 hours</strong>.</p>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-left:3px solid #e01a1a;margin-bottom:28px;">
+                      <tr><td style="padding:16px 20px;">
+                        <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;">Your message</p>
+                        <p style="color:#888;font-size:12px;font-style:italic;line-height:1.6;margin:0;">${subject}</p>
+                      </td></tr>
+                    </table>
+                    <p style="color:#555;font-size:13px;line-height:1.7;margin:0;">In the meantime, check out the store at <a href="https://deadshotbeats.com" style="color:#e01a1a;">deadshotbeats.com</a> or follow on Instagram <a href="https://instagram.com/deadshotbeats" style="color:#e01a1a;">@deadshotbeats</a></p>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="background:#080808;padding:20px 40px;border-top:1px solid #222;">
+                    <p style="color:#333;font-size:11px;margin:0;text-align:center;">© 2026 DeadshotBeats · deadshotbeats.com</p>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
         </div>
       `,
     });
 
     res.status(200).json({ ok: true });
-  } catch (err) {
+  } catch(err) {
     console.error('Contact email error:', err);
     res.status(500).json({ error: err.message });
   }
