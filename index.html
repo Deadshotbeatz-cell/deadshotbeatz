@@ -179,36 +179,12 @@
     .about { grid-template-columns: 1fr; gap: 40px; }
     .contact-grid { grid-template-columns: 1fr; gap: 40px; }
     footer { flex-direction: column; gap: 20px; text-align: center; }
+    .beat-row { grid-template-columns: 40px 44px 1fr auto auto; gap: 8px; }
+    .beat-price { display: none; }
+    .buy-btn { display: inline-block; padding: 6px 10px; font-size: 10px; }
     .sticky-player { padding: 0 20px; gap: 16px; } .player-volume { display: none; }
     .hero::after { font-size: 240px; right: -30px; }
     .form-row { grid-template-columns: 1fr; }
-
-    /* MOBILE BEAT ROW — card layout with buy button visible */
-    .beat-row {
-      display: grid;
-      grid-template-columns: 44px 1fr auto;
-      grid-template-rows: auto auto;
-      gap: 6px 10px;
-      padding: 12px 14px;
-      align-items: start;
-    }
-    .beat-num { display: none; }
-    .beat-cover { width: 44px; height: 44px; grid-column: 1; grid-row: 1 / 3; align-self: center; }
-    .beat-info { grid-column: 2; grid-row: 1; }
-    .beat-duration { display: none; }
-    .beat-price {
-      display: block !important;
-      grid-column: 3; grid-row: 1;
-      font-size: 18px; align-self: center; text-align: right;
-    }
-    .buy-btn {
-      display: block !important;
-      grid-column: 2 / 4; grid-row: 2;
-      width: 100%; text-align: center; padding: 7px 0; font-size: 11px;
-    }
-  }
-  @media (max-width: 480px) {
-    .license-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -303,8 +279,8 @@
         <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
           <div class="contact-link-icon">IG</div>@deadshotbeats
         </a>
-        <a href="/cdn-cgi/l/email-protection#d397b6b2b7a0bbbca7b1b6b2a7a993bca6a7bfbcbcb8fdb0bcbe" class="contact-link">
-          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="9cd8f9fdf8eff4f3e8fef9fde8e6dcf3e9e8f0f3f3f7b2fff3f1">[email&#160;protected]</span>
+        <a href="mailto:Deadshotbeatz@outlook.com" class="contact-link">
+          <div class="contact-link-icon">✉</div>Deadshotbeatz@outlook.com
         </a>
       </div>
     </div>
@@ -390,10 +366,9 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<!-- Firebase compat (no ES modules needed, works everywhere) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
@@ -404,8 +379,8 @@ const firebaseConfig = {
   appId: "1:252096563375:web:58193b52e325147f592c5a"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
 const BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
 
 let beats = [];
@@ -589,31 +564,30 @@ function renderLicenses(list) {
         ${disabled.map(f=>`<li class="disabled">${f}</li>`).join('')}
       </ul>
       ${l.inquire
-        ? `<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('conjoin('');
+        ? `<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire</button>`
+        : `<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById('beats').scrollIntoView({behavior:'smooth'})">Buy Now</button>`}
+    </div>`;
+  }).join('');
 }
 
 // ── LOAD FROM FIRESTORE ───────────────────────────────────
 async function loadBeats() {
   try {
-    // compat API — no orderBy needed, sort client-side
-    const snap = await db.collection('beats').get();
+    const snap = await getDocs(query(collection(db, 'beats'), orderBy('id')));
     if (!snap.empty) {
       beats = snap.docs.map(d => d.data());
-      beats.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
-    } else {
-      beats = STATIC_BEATS;
     }
   } catch(e) {
     console.error('Firestore beats error:', e);
-    beats = STATIC_BEATS;
   }
+  // Update hero count dynamically
   document.getElementById('hero-beat-count').textContent = beats.length || '—';
   renderBeats('all');
 }
 
 async function loadLicenses() {
   try {
-    const snap = await db.collection('licenses').get();
+    const snap = await getDocs(collection(db, 'licenses'));
     if (!snap.empty) {
       const list = snap.docs.map(d => d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
       renderLicenses(list);
