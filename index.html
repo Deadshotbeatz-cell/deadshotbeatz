@@ -279,8 +279,17 @@
         <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
           <div class="contact-link-icon">IG</div>@deadshotbeats
         </a>
-        <a href="/cdn-cgi/l/email-protection#cd89a8aca9bea5a2b9afa8acb9b78da2b8b9a1a2a2a6e3aea2a0" class="contact-link">
-          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="591d3c383d2a31362d3b3c382d2319362c2d35363632773a3634">[email&#160;protected]</span>
+        <a href="https://x.com/deadshotbeatz" class="contact-link" target="_blank">
+          <div class="contact-link-icon">𝕏</div>@deadshotbeatz
+        </a>
+        <a href="https://www.tiktok.com/@deadshotbeaz" class="contact-link" target="_blank">
+          <div class="contact-link-icon">TT</div>@deadshotbeaz
+        </a>
+        <a href="https://www.youtube.com/@prod.deadshotbeats" class="contact-link" target="_blank">
+          <div class="contact-link-icon">YT</div>@prod.deadshotbeats
+        </a>
+        <a href="mailto:Deadshotbeatz@outlook.com" class="contact-link">
+          <div class="contact-link-icon">✉</div>Deadshotbeatz@outlook.com
         </a>
       </div>
     </div>
@@ -303,7 +312,12 @@
   <div class="footer-logo">DEAD<span>SHOT</span> BEATS</div>
   <div class="footer-copy">© 2026 DeadshotBeats. All rights reserved.</div>
   <div class="footer-links">
-    <a href="#">Imprint</a><a href="#">Privacy</a><a href="#">Terms</a>
+    <a href="https://instagram.com/deadshotbeats" target="_blank">Instagram</a>
+    <a href="https://x.com/deadshotbeatz" target="_blank">X</a>
+    <a href="https://www.tiktok.com/@deadshotbeaz" target="_blank">TikTok</a>
+    <a href="https://www.youtube.com/@prod.deadshotbeats" target="_blank">YouTube</a>
+    <a href="#">Imprint</a>
+  </div>
   </div>
 </footer>
 
@@ -517,12 +531,11 @@ window._openBuyModal = function(e, id) {
   document.querySelectorAll('.license-option').forEach(function(o) { o.classList.remove('selected'); });
   document.querySelector('.license-option[data-license="mp3"]').classList.add('selected');
   selectedLicense = 'mp3';
-  // Dynamic prices
-  var base = currentBeatForModal.price || 29;
-  document.getElementById('price-mp3').textContent       = base + '€';
-  document.getElementById('price-wav').textContent       = Math.round(base*2) + '€';
-  document.getElementById('price-trackout').textContent  = Math.round(base*3.5) + '€';
-  document.getElementById('price-exclusive').textContent = Math.round(base*17) + '€+';
+  // Fixed license prices (not multiplier-based)
+  document.getElementById('price-mp3').textContent      = '29€';
+  document.getElementById('price-wav').textContent      = '59€';
+  document.getElementById('price-trackout').textContent = '99€';
+  document.getElementById('price-exclusive').textContent= '499€+';
 };
 
 window.selectLicense = function(el) {
@@ -540,9 +553,8 @@ window.proceedCheckout = async function() {
   var btn = document.getElementById('checkout-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="checkout-spinner"></span>Loading...';
-  var base = currentBeatForModal.price || 29;
-  var mult = { mp3:1, wav:2, trackout:3.5, exclusive:17 };
-  var finalPrice = Math.round(base * (mult[selectedLicense] || 1));
+  var prices = { mp3: 29, wav: 59, trackout: 99, exclusive: 499 };
+  var finalPrice = prices[selectedLicense] || 29;
   try {
     var res = await fetch('/api/create-checkout', {
       method: 'POST',
@@ -582,11 +594,13 @@ window.submitContact = async function() {
       document.getElementById('cf-message').value = '';
       document.getElementById('cf-subject').value = '';
       btn.textContent = 'Sent ✓';
-    } else { throw new Error(data.error); }
+    } else { throw new Error(data.error || 'API error'); }
   } catch(err) {
-    document.getElementById('contact-error').style.display = 'block';
-    document.getElementById('contact-success').style.display = 'none';
-    btn.disabled = false; btn.textContent = 'Send';
+    // Fallback: open mailto directly
+    var mailBody = 'Name: ' + name + '\nEmail: ' + email + '\nSubject: ' + subject + '\n\n' + message;
+    window.location.href = 'mailto:Deadshotbeatz@outlook.com?subject=' + encodeURIComponent(subject + ' - ' + name) + '&body=' + encodeURIComponent(mailBody);
+    btn.disabled = false;
+    btn.textContent = 'Send';
   }
 };
 
