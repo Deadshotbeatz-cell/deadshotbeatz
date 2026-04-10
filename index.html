@@ -179,12 +179,36 @@
     .about { grid-template-columns: 1fr; gap: 40px; }
     .contact-grid { grid-template-columns: 1fr; gap: 40px; }
     footer { flex-direction: column; gap: 20px; text-align: center; }
-    .beat-row { grid-template-columns: 40px 44px 1fr auto auto; gap: 8px; }
-    .beat-price { display: none; }
-    .buy-btn { display: inline-block; padding: 6px 10px; font-size: 10px; }
     .sticky-player { padding: 0 20px; gap: 16px; } .player-volume { display: none; }
     .hero::after { font-size: 240px; right: -30px; }
     .form-row { grid-template-columns: 1fr; }
+
+    /* MOBILE BEAT ROW — card layout with buy button visible */
+    .beat-row {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      grid-template-rows: auto auto;
+      gap: 6px 10px;
+      padding: 12px 14px;
+      align-items: start;
+    }
+    .beat-num { display: none; }
+    .beat-cover { width: 44px; height: 44px; grid-column: 1; grid-row: 1 / 3; align-self: center; }
+    .beat-info { grid-column: 2; grid-row: 1; }
+    .beat-duration { display: none; }
+    .beat-price {
+      display: block !important;
+      grid-column: 3; grid-row: 1;
+      font-size: 18px; align-self: center; text-align: right;
+    }
+    .buy-btn {
+      display: block !important;
+      grid-column: 2 / 4; grid-row: 2;
+      width: 100%; text-align: center; padding: 7px 0; font-size: 11px;
+    }
+  }
+  @media (max-width: 480px) {
+    .license-grid { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -279,37 +303,22 @@
         <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
           <div class="contact-link-icon">IG</div>@deadshotbeats
         </a>
-        <a href="https://x.com/deadshotbeatz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">𝕏</div>@deadshotbeatz
-        </a>
-        <a href="https://www.tiktok.com/@deadshotbeaz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">TT</div>@deadshotbeaz
-        </a>
-        <a href="https://www.youtube.com/@deadshotbeatz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">YT</div>@deadshotbeatz
-        </a>
-        <a href="mailto:Deadshotbeatz@outlook.com" class="contact-link">
-          <div class="contact-link-icon">✉</div>Deadshotbeatz@outlook.com
+        <a href="/cdn-cgi/l/email-protection#d397b6b2b7a0bbbca7b1b6b2a7a993bca6a7bfbcbcb8fdb0bcbe" class="contact-link">
+          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="9cd8f9fdf8eff4f3e8fef9fde8e6dcf3e9e8f0f3f3f7b2fff3f1">[email&#160;protected]</span>
         </a>
       </div>
     </div>
     <div class="contact-form">
-      <div id="contact-success" style="display:none;background:rgba(26,122,26,0.1);border:1px solid #1a7a1a;padding:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;color:#22a022;font-size:13px;">
-        ✓ Message sent! We'll get back to you within 24h.
-      </div>
-      <div id="contact-error" style="display:none;background:rgba(224,26,26,0.1);border:1px solid var(--red);padding:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;color:var(--red);font-size:13px;">
-        ✕ Something went wrong. Please email us directly.
-      </div>
       <div class="form-row">
-        <div class="form-group"><label>Name</label><input type="text" id="cf-name" placeholder="Your Name"></div>
-        <div class="form-group"><label>Email</label><input type="email" id="cf-email" placeholder="your@email.com"></div>
+        <div class="form-group"><label>Name</label><input type="text" placeholder="Your Name"></div>
+        <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com"></div>
       </div>
       <div class="form-group">
         <label>Subject</label>
-        <select id="cf-subject"><option value="">Please select...</option><option>Custom Beat</option><option>Exclusive Deal</option><option>Feature / Collab</option><option>Mixing & Mastering</option><option>Other</option></select>
+        <select><option value="">Please select...</option><option>Custom Beat</option><option>Exclusive Deal</option><option>Feature / Collab</option><option>Mixing & Mastering</option><option>Other</option></select>
       </div>
-      <div class="form-group"><label>Message</label><textarea id="cf-message" placeholder="Describe your project..."></textarea></div>
-      <button class="btn-primary" id="cf-submit" style="align-self:flex-start;padding:14px 40px;" onclick="submitContact()">Send</button>
+      <div class="form-group"><label>Message</label><textarea placeholder="Describe your project..."></textarea></div>
+      <button class="btn-primary" style="align-self:flex-start;padding:14px 40px;">Send</button>
     </div>
   </div>
 </section>
@@ -318,10 +327,7 @@
   <div class="footer-logo">DEAD<span>SHOT</span> BEATS</div>
   <div class="footer-copy">© 2026 DeadshotBeats. All rights reserved.</div>
   <div class="footer-links">
-    <a href="https://x.com/deadshotbeatz" target="_blank">X</a>
-    <a href="https://www.tiktok.com/@deadshotbeaz" target="_blank">TikTok</a>
-    <a href="https://www.youtube.com/@deadshotbeatz" target="_blank">YouTube</a>
-    <a href="#">Imprint</a>
+    <a href="#">Imprint</a><a href="#">Privacy</a><a href="#">Terms</a>
   </div>
 </footer>
 
@@ -384,9 +390,10 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+<!-- Firebase compat (no ES modules needed, works everywhere) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
 
 const firebaseConfig = {
   apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
@@ -397,8 +404,8 @@ const firebaseConfig = {
   appId: "1:252096563375:web:58193b52e325147f592c5a"
 };
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 const BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
 
 let beats = [];
@@ -511,16 +518,6 @@ window._openBuyModal = function(e, id) {
   document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
   document.querySelector('.license-option[data-license="mp3"]').classList.add('selected');
   selectedLicense = 'mp3';
-
-  // Dynamic prices: base price × multiplier
-  const base = currentBeatForModal.price || 29;
-  const mult = { mp3:1, wav:2, trackout:3.5, exclusive:17 };
-  ['mp3','wav','trackout','exclusive'].forEach(k => {
-    const el = document.getElementById('price-'+k);
-    if (el) el.textContent = (k==='exclusive'
-      ? Math.round(base*mult[k])+'€+'
-      : Math.round(base*mult[k])+'€');
-  });
 };
 
 window.selectLicense = function(el) {
@@ -538,14 +535,11 @@ window.proceedCheckout = async function() {
   const btn = document.getElementById('checkout-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="checkout-spinner"></span>Loading...';
-  const base = currentBeatForModal.price || 29;
-  const mult = { mp3:1, wav:2, trackout:3.5, exclusive:17 };
-  const finalPrice = Math.round(base * (mult[selectedLicense] || 1));
   try {
     const res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ beatName: currentBeatForModal.name, beatId: currentBeatForModal.id, license: selectedLicense, price: finalPrice })
+      body: JSON.stringify({ beatName: currentBeatForModal.name, beatId: currentBeatForModal.id, license: selectedLicense })
     });
     const data = await res.json();
     if (data.url) { window.location.href = data.url; }
@@ -554,35 +548,6 @@ window.proceedCheckout = async function() {
     btn.disabled = false;
     btn.innerHTML = 'Proceed to Checkout →';
     alert('Error: ' + err.message);
-  }
-};
-
-// ── CONTACT FORM ──────────────────────────────────────────
-window.submitContact = async function() {
-  const name    = document.getElementById('cf-name')?.value.trim();
-  const email   = document.getElementById('cf-email')?.value.trim();
-  const subject = document.getElementById('cf-subject')?.value;
-  const message = document.getElementById('cf-message')?.value.trim();
-  const btn     = document.getElementById('cf-submit');
-  if (!name || !email || !subject || !message) { alert('Please fill in all fields.'); return; }
-  btn.disabled = true; btn.textContent = 'Sending...';
-  try {
-    const res = await fetch('/api/contact', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, subject, message })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      document.getElementById('contact-success').style.display = 'block';
-      document.getElementById('contact-error').style.display = 'none';
-      ['cf-name','cf-email','cf-message'].forEach(id => document.getElementById(id).value = '');
-      document.getElementById('cf-subject').value = '';
-      btn.textContent = 'Sent ✓';
-    } else { throw new Error(data.error); }
-  } catch(err) {
-    document.getElementById('contact-error').style.display = 'block';
-    document.getElementById('contact-success').style.display = 'none';
-    btn.disabled = false; btn.textContent = 'Send';
   }
 };
 
@@ -624,57 +589,31 @@ function renderLicenses(list) {
         ${disabled.map(f=>`<li class="disabled">${f}</li>`).join('')}
       </ul>
       ${l.inquire
-        ? `<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire</button>`
-        : `<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById('beats').scrollIntoView({behavior:'smooth'})">Buy Now</button>`}
-    </div>`;
-  }).join('');
+        ? `<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('conjoin('');
 }
 
 // ── LOAD FROM FIRESTORE ───────────────────────────────────
-const STATIC_BEATS = [
-  { id:1,  name:'21 Savage X Future – Sacrifice',            genre:'Trap',    bpm:135, key:'Ebm',   price:29, file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3' },
-  { id:2,  name:'21 Savage – Nolenso',                       genre:'Trap',    bpm:132, key:'Cm',    price:29, file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3' },
-  { id:3,  name:'21 Savage Type Beat 85',                    genre:'Trap',    bpm:85,  key:'Bbm',   price:29, file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3' },
-  { id:4,  name:'Drake – Midnight',                          genre:'Melodic', bpm:123, key:'Cm',    price:29, file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3' },
-  { id:5,  name:'Drake x 21 Savage – NoFeelings',            genre:'Dark',    bpm:146, key:'Ebmaj', price:29, file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3' },
-  { id:6,  name:'Future – Legacy',                           genre:'Trap',    bpm:137, key:'Em',    price:29, file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3' },
-  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog',  genre:'Dark',    bpm:143, key:'Em',    price:29, file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3' },
-  { id:8,  name:'Future x 21 Savage – Codein Rain',          genre:'Melodic', bpm:136, key:'Cm',    price:29, file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3' },
-  { id:9,  name:'Future x Southside – Ski Driver',           genre:'Trap',    bpm:135, key:'Ebmaj', price:29, file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3' },
-  { id:10, name:'Ghosted',                                   genre:'Melodic', bpm:0,   key:'',      price:29, file:'Ghosted.mp3' },
-  { id:11, name:'Mixdown 2',                                 genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown(2).mp3' },
-  { id:12, name:'Mixdown',                                   genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown.mp3' },
-  { id:13, name:'A$AP Rocky – Dumb Shit',                    genre:'Trap',    bpm:130, key:'Cm',    price:29, file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3' },
-  { id:14, name:'Florida Type Beat – Big Stepper',           genre:'Drill',   bpm:156, key:'D#min', price:29, file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3' },
-  { id:15, name:'Larb – 21 Savage Type Beat',                genre:'Trap',    bpm:165, key:'G#',    price:29, file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3' },
-  { id:16, name:'Put In My Cup – Future',                    genre:'Trap',    bpm:130, key:'Ebm',   price:29, file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3' },
-  { id:17, name:'Roulete – 21 Savage',                       genre:'Dark',    bpm:77,  key:'C#m',   price:29, file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3' },
-  { id:18, name:'Travis Scott x Ye – Titel',                 genre:'Dark',    bpm:130, key:'Dm',    price:29, file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3' },
-  { id:19, name:'DGAF – Future ft. Quavo',                   genre:'Trap',    bpm:135, key:'Bmin',  price:29, file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3' },
-  { id:20, name:'Darkness In My Visions',                    genre:'Dark',    bpm:0,   key:'',      price:29, file:'Darkness%20in%20my%20Visions(3).mp3' },
-  { id:21, name:'Decision – 21 Savage',                      genre:'Trap',    bpm:134, key:'D#m',   price:29, file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3' },
-  { id:22, name:'Draft Day – Future',                        genre:'Trap',    bpm:140, key:'Abm',   price:29, file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3' },
-];
 async function loadBeats() {
   try {
-    const snap = await getDocs(query(collection(db, 'beats'), orderBy('id')));
+    // compat API — no orderBy needed, sort client-side
+    const snap = await db.collection('beats').get();
     if (!snap.empty) {
       beats = snap.docs.map(d => d.data());
+      beats.sort((a, b) => (Number(a.id) || 0) - (Number(b.id) || 0));
     } else {
-      // Firestore empty – use static fallback
       beats = STATIC_BEATS;
     }
   } catch(e) {
-    // Firestore error – use static fallback
+    console.error('Firestore beats error:', e);
     beats = STATIC_BEATS;
   }
-  document.getElementById('hero-beat-count').textContent = beats.length;
+  document.getElementById('hero-beat-count').textContent = beats.length || '—';
   renderBeats('all');
 }
 
 async function loadLicenses() {
   try {
-    const snap = await getDocs(collection(db, 'licenses'));
+    const snap = await db.collection('licenses').get();
     if (!snap.empty) {
       const list = snap.docs.map(d => d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
       renderLicenses(list);
@@ -683,4 +622,12 @@ async function loadLicenses() {
   } catch(e) {
     console.error('Firestore licenses error:', e);
   }
-  ren
+  renderLicenses(DEFAULT_LICENSES);
+}
+
+// ── INIT ──────────────────────────────────────────────────
+loadBeats();
+loadLicenses();
+</script>
+</body>
+</html>
