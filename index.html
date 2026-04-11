@@ -452,20 +452,29 @@ document.querySelectorAll('.filter-btn').forEach(btn=>{
 window._openBuyModal=function(e,id){
   e.stopPropagation();
   currentBeatForModal=beats.find(b=>b.id===id);if(!currentBeatForModal)return;
-  const p=calcPrices(currentBeatForModal.price||29);
-  document.getElementById('modal-beat-name').textContent=currentBeatForModal.name;
+  const b=currentBeatForModal;
+  const p=calcPrices(b.price||29);
+  document.getElementById('modal-beat-name').textContent=b.name;
   selectedLicense='mp3';
+
+  const hasWav=!!b.wavFile;
+  const hasTrackout=!!b.trackoutFile;
+  const hasAll=hasWav&&hasTrackout;
+
   const defs=[
-    {key:'mp3',     name:'MP3 LEASE', desc:'MP3 320kbps · up to 100k Streams'},
-    {key:'wav',     name:'WAV LEASE', desc:'WAV + MP3 · up to 500k Streams'},
-    {key:'trackout',name:'TRACKOUT',  desc:'All Stems · Unlimited Streams'},
-    {key:'exclusive',name:'EXCLUSIVE',desc:'100% Exclusive Rights · Beat removed'},
+    {key:'mp3',      name:'MP3 LEASE', desc:'MP3 320kbps · up to 100k Streams',    available:true},
+    {key:'wav',      name:'WAV LEASE', desc:'WAV + MP3 · up to 500k Streams',       available:hasWav},
+    {key:'trackout', name:'TRACKOUT',  desc:'All Stems · Unlimited Streams',         available:hasTrackout},
+    {key:'exclusive',name:'EXCLUSIVE', desc:'100% Exclusive Rights · Beat removed', available:hasAll},
   ];
-  document.getElementById('modal-options').innerHTML=defs.map(l=>`
-    <div class="license-option ${l.key==='mp3'?'selected':''}" data-license="${l.key}" onclick="window._selectLicense(this)">
-      <div><div class="license-option-name">${l.name}</div><div class="license-option-desc">${l.desc}</div></div>
-      <div class="license-option-price">${p[l.key]}€${l.key==='exclusive'?'+':''}</div>
-    </div>`).join('');
+
+  document.getElementById('modal-options').innerHTML=defs.map(l=>{
+    if(l.available){
+      return '<div class="license-option '+(l.key==="mp3"?"selected":"")+'" data-license="'+l.key+'" onclick="window._selectLicense(this)"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+'</div></div><div class="license-option-price">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
+    }else{
+      return '<div class="license-option" style="opacity:0.35;cursor:not-allowed;" title="Coming soon for this beat"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+' · Coming soon</div></div><div class="license-option-price" style="color:var(--grey);">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
+    }
+  }).join('');
   document.getElementById('modal').classList.add('open');
 };
 window._selectLicense=function(el){
