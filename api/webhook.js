@@ -1,16 +1,17 @@
-// MUSS exportiert werden – deaktiviert den Body-Parser
-module.exports.config = {
-  api: {
-    bodyParser: false,
-  },
-};
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const BASE_URL = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
 
-// Beat files mapping - filename in R2
+const LICENSE_NAMES = {
+  mp3:       'MP3 Lease',
+  wav:       'WAV Lease',
+  trackout:  'Trackout Lease',
+  exclusive: 'Exclusive Rights',
+};
+
+// Static fallback – for all existing beats
 const BEAT_FILES = {
   '21 Savage X Future – Sacrifice':           '%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3',
   '21 Savage – Nolenso':                      '21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3',
@@ -36,19 +37,50 @@ const BEAT_FILES = {
   'Draft Day – Future':                       'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3',
 };
 
-const LICENSE_NAMES = {
-  mp3:       'MP3 Lease',
-  wav:       'WAV Lease',
-  trackout:  'Trackout Lease',
-  exclusive: 'Exclusive Rights',
-};
-
 async function buffer(readable) {
   const chunks = [];
   for await (const chunk of readable) {
     chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
   }
   return Buffer.concat(chunks);
+}
+
+// Get download URL – tries Firebase first, then static map
+async function getDownloadUrl(beatName, beatId) {
+  // 1. Try Firebase Admin (for new beats added via admin panel)
+  try {
+    const admin = require('firebase-admin');
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId:   process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey:  process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        })
+      });
+    }
+    const db = admin.firestore();
+
+    // Try by ID first
+    if (beatId) {
+      const doc = await db.collection('beats').doc(String(beatId)).get();
+      if (doc.exists && doc.data().file) {
+        return BASE_URL + doc.data().file;
+      }
+    }
+
+    // Try by name
+    const snap = await db.collection('beats').where('name', '==', beatName).limit(1).get();
+    if (!snap.empty && snap.docs[0].data().file) {
+      return BASE_URL + snap.docs[0].data().file;
+    }
+  } catch(e) {
+    console.log('Firebase lookup failed:', e.message);
+  }
+
+  // 2. Fallback to static map
+  const fileKey = BEAT_FILES[beatName];
+  return fileKey ? BASE_URL + fileKey : null;
 }
 
 module.exports = async (req, res) => {
@@ -70,114 +102,89 @@ module.exports = async (req, res) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    const { beatName, license } = session.metadata;
+    const { beatName, beatId, license } = session.metadata;
     const customerEmail = session.customer_details.email;
-    const customerName = session.customer_details.name || 'Artist';
+    const customerName  = session.customer_details.name || 'Artist';
+    const amountPaid    = (session.amount_total / 100).toFixed(2);
+    const licenseName   = LICENSE_NAMES[license] || license;
 
-    // Get download URL
-    const fileKey = BEAT_FILES[beatName];
-    const downloadUrl = fileKey ? BASE_URL + fileKey : null;
-    const licenseName = LICENSE_NAMES[license] || license;
+    console.log(`Order: ${beatName} | ${licenseName} | ${customerEmail} | ${amountPaid}€`);
 
-    console.log(`Order: ${beatName} | ${licenseName} | ${customerEmail}`);
-
-    if (!downloadUrl) {
-      console.error('Beat file not found:', beatName);
-    }
+    const downloadUrl = await getDownloadUrl(beatName, beatId);
+    if (!downloadUrl) console.error('Beat file not found for:', beatName);
 
     try {
       await resend.emails.send({
-        from: 'Deadshot Beats <beats@deadshotbeats.com>',
-
-        to: customerEmail,
+        from:    'Deadshot Beats <noreply@deadshotbeats.com>',
+        to:      customerEmail,
         subject: `Your Beat is Ready — ${beatName} 🔥`,
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head><meta charset="UTF-8"></head>
-          <body style="margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;">
-            <table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px;">
-              <tr><td align="center">
-                <table width="560" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid #222222;max-width:560px;width:100%;">
-                  
-                  <!-- Header -->
-                  <tr>
-                    <td style="background:#080808;padding:28px 40px;border-bottom:2px solid #e01a1a;">
-                      <span style="font-family:Georgia,serif;font-size:26px;font-weight:900;letter-spacing:6px;color:#f0f0f0;">DEAD</span><span style="font-family:Georgia,serif;font-size:26px;font-weight:900;letter-spacing:6px;color:#e01a1a;">SHOT</span><span style="font-family:Georgia,serif;font-size:26px;font-weight:900;letter-spacing:6px;color:#f0f0f0;"> BEATS</span>
-                    </td>
-                  </tr>
+        html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="margin:0;padding:0;background:#080808;font-family:'Helvetica Neue',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#080808;padding:40px 20px;">
+<tr><td align="center">
+<table width="560" cellpadding="0" cellspacing="0" style="background:#111111;border:1px solid #222222;max-width:560px;width:100%;">
+  <tr>
+    <td style="background:#080808;padding:28px 40px;border-bottom:2px solid #e01a1a;">
+      <span style="font-family:Georgia,serif;font-size:26px;font-weight:900;letter-spacing:6px;color:#f0f0f0;">DEAD</span>
+      <span style="font-family:Georgia,serif;font-size:26px;font-weight:900;letter-spacing:6px;color:#e01a1a;">SHOT</span>
+      <span style="font-family:Georgia,serif;font-size:26px;font-weight:900;letter-spacing:6px;color:#f0f0f0;"> BEATS</span>
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:40px;">
+      <p style="color:#888;font-size:12px;letter-spacing:3px;text-transform:uppercase;margin:0 0 8px;">Order Confirmed</p>
+      <h1 style="color:#f0f0f0;font-size:28px;margin:0 0 24px;line-height:1.2;">Your beat is ready, ${customerName}! 🔥</h1>
 
-                  <!-- Body -->
-                  <tr>
-                    <td style="padding:40px;">
-                      <p style="color:#888;font-size:12px;letter-spacing:3px;text-transform:uppercase;margin:0 0 8px;">Order Confirmed</p>
-                      <h1 style="color:#f0f0f0;font-size:28px;margin:0 0 24px;line-height:1.2;">Your beat is ready, ${customerName}! 🔥</h1>
-                      
-                      <!-- Beat Info Box -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-left:3px solid #e01a1a;margin-bottom:32px;">
-                        <tr>
-                          <td style="padding:20px 24px;">
-                            <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 6px;">Beat</p>
-                            <p style="color:#f0f0f0;font-size:18px;font-weight:700;margin:0 0 16px;">${beatName}</p>
-                            <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 6px;">License</p>
-                            <p style="color:#e01a1a;font-size:15px;font-weight:600;margin:0;">${licenseName}</p>
-                          </td>
-                        </tr>
-                      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-left:3px solid #e01a1a;margin-bottom:32px;">
+        <tr><td style="padding:20px 24px;">
+          <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;">Beat</p>
+          <p style="color:#f0f0f0;font-size:18px;font-weight:700;margin:0 0 14px;">${beatName}</p>
+          <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;">License</p>
+          <p style="color:#e01a1a;font-size:15px;font-weight:600;margin:0 0 14px;">${licenseName}</p>
+          <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 4px;">Amount Paid</p>
+          <p style="color:#f0f0f0;font-size:15px;font-weight:600;margin:0;">${amountPaid}€</p>
+        </td></tr>
+      </table>
 
-                      <!-- Download Button -->
-                      ${downloadUrl ? `
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
-                        <tr>
-                          <td align="center">
-                            <a href="${downloadUrl}" style="display:inline-block;background:#e01a1a;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:16px 40px;">
-                              ↓ DOWNLOAD BEAT
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                      <p style="color:#555;font-size:12px;text-align:center;margin:0 0 32px;">
-                        Or copy this link: <a href="${downloadUrl}" style="color:#e01a1a;">${downloadUrl}</a>
-                      </p>
-                      ` : `
-                      <p style="color:#888;font-size:14px;margin:0 0 32px;">Your download link will be sent shortly. If you don't receive it within 24h, please contact us.</p>
-                      `}
+      ${downloadUrl ? `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        <tr><td align="center">
+          <a href="${downloadUrl}" style="display:inline-block;background:#e01a1a;color:#fff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:16px 40px;">↓ DOWNLOAD BEAT</a>
+        </td></tr>
+      </table>
+      <p style="color:#555;font-size:12px;text-align:center;margin:0 0 32px;">
+        Direct link: <a href="${downloadUrl}" style="color:#e01a1a;word-break:break-all;">${downloadUrl}</a>
+      </p>
+      ` : `
+      <p style="color:#888;font-size:14px;margin:0 0 32px;padding:20px;background:#1a1a1a;border:1px solid #333;">
+        Your download link will be sent within 24h. Questions? Reply to this email.
+      </p>
+      `}
 
-                      <!-- License Info -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #222;padding-top:24px;margin-bottom:24px;">
-                        <tr><td style="padding-top:24px;">
-                          <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 12px;">License Terms</p>
-                          ${license === 'mp3' ? `
-                            <p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ MP3 High Quality (320kbps)<br>✓ Up to 100,000 Streams<br>✓ Music videos allowed<br>✓ Non-profit performances</p>
-                          ` : license === 'wav' ? `
-                            <p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ WAV + MP3 Studio Quality<br>✓ Up to 500,000 Streams<br>✓ Music videos allowed<br>✓ Commercial performances<br>✓ Radio broadcasts</p>
-                          ` : license === 'trackout' ? `
-                            <p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ All Stems / Individual Tracks<br>✓ WAV + MP3 included<br>✓ Unlimited Streams<br>✓ Full commercial use<br>✓ TV & Film Sync</p>
-                          ` : `
-                            <p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ 100% Exclusive Rights<br>✓ Beat removed from store<br>✓ All stems & file formats<br>✓ Full commercial use<br>✓ Label deals possible</p>
-                          `}
-                        </td></tr>
-                      </table>
+      <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #222;margin-bottom:24px;">
+        <tr><td style="padding-top:24px;">
+          <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 10px;">License Terms</p>
+          ${license === 'mp3' ? `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ MP3 High Quality (320kbps)<br>✓ Up to 100,000 Streams<br>✓ Music videos allowed<br>✓ Non-profit performances</p>`
+          : license === 'wav' ? `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ WAV + MP3 Studio Quality<br>✓ Up to 500,000 Streams<br>✓ Music videos allowed<br>✓ Commercial performances<br>✓ Radio broadcasts</p>`
+          : license === 'trackout' ? `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ All Stems / Individual Tracks<br>✓ WAV + MP3 included<br>✓ Unlimited Streams<br>✓ Full commercial use<br>✓ TV & Film Sync</p>`
+          : `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ 100% Exclusive Rights<br>✓ Beat removed from store<br>✓ All stems & file formats<br>✓ Full commercial use<br>✓ Label deals possible</p>`}
+        </td></tr>
+      </table>
 
-                      <p style="color:#555;font-size:13px;line-height:1.7;margin:0;">
-                        Questions? Reply to this email or reach out on Instagram <a href="https://instagram.com/deadshotbeats" style="color:#e01a1a;">@deadshotbeats</a>
-                      </p>
-                    </td>
-                  </tr>
-
-                  <!-- Footer -->
-                  <tr>
-                    <td style="background:#080808;padding:20px 40px;border-top:1px solid #222;">
-                      <p style="color:#333;font-size:11px;margin:0;text-align:center;">© 2026 DeadshotBeats · deadshotbeats.com</p>
-                    </td>
-                  </tr>
-
-                </table>
-              </td></tr>
-            </table>
-          </body>
-          </html>
-        `,
+      <p style="color:#555;font-size:13px;line-height:1.7;margin:0;">
+        Questions? Reply to this email or DM on Instagram <a href="https://instagram.com/deadshotbeats" style="color:#e01a1a;">@deadshotbeats</a>
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td style="background:#080808;padding:20px 40px;border-top:1px solid #222;">
+      <p style="color:#333;font-size:11px;margin:0;text-align:center;">© 2026 DeadshotBeats · deadshotbeats.com</p>
+    </td>
+  </tr>
+</table>
+</td></tr>
+</table>
+</body></html>`,
       });
       console.log('Email sent to:', customerEmail);
     } catch (mailError) {
