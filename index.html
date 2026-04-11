@@ -288,8 +288,8 @@
         <a href="https://www.youtube.com/@deadshotbeatz" class="contact-link" target="_blank">
           <div class="contact-link-icon">YT</div>@deadshotbeatz
         </a>
-        <a href="mailto:Deadshotbeatz@outlook.com" class="contact-link">
-          <div class="contact-link-icon">✉</div>Deadshotbeatz@outlook.com
+        <a href="/cdn-cgi/l/email-protection#5713323633243f3823353236232d173822233b38383c7934383a" class="contact-link">
+          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="fcb8999d988f9493889e999d8886bc93898890939397d29f9391">[email&#160;protected]</span>
         </a>
       </div>
     </div>
@@ -384,7 +384,7 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script type="module" data-cfasync="false">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
@@ -674,13 +674,4 @@ async function loadBeats() {
 
 async function loadLicenses() {
   try {
-    const snap = await getDocs(collection(db, 'licenses'));
-    if (!snap.empty) {
-      const list = snap.docs.map(d => d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
-      renderLicenses(list);
-      return;
-    }
-  } catch(e) {
-    console.error('Firestore licenses error:', e);
-  }
-  ren
+    const snap = await getDocs(collecti
