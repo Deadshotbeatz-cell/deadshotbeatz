@@ -11,7 +11,7 @@ const LICENSE_NAMES = {
   exclusive: 'Exclusive Rights',
 };
 
-// Static fallback – for all existing beats
+// Static fallback for existing beats (MP3 only)
 const BEAT_FILES = {
   '21 Savage X Future – Sacrifice':           '%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3',
   '21 Savage – Nolenso':                      '21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3',
@@ -45,9 +45,8 @@ async function buffer(readable) {
   return Buffer.concat(chunks);
 }
 
-// Get download URL – tries Firebase first, then static map
-async function getDownloadUrl(beatName, beatId) {
-  // 1. Try Firebase Admin (for new beats added via admin panel)
+// Get beat data from Firestore
+async function getBeatData(beatName, beatId) {
   try {
     const admin = require('firebase-admin');
     if (!admin.apps.length) {
@@ -63,24 +62,59 @@ async function getDownloadUrl(beatName, beatId) {
 
     // Try by ID first
     if (beatId) {
-      const doc = await db.collection('beats').doc(String(beatId)).get();
-      if (doc.exists && doc.data().file) {
-        return BASE_URL + doc.data().file;
-      }
+      const docSnap = await db.collection('beats').doc(String(beatId)).get();
+      if (docSnap.exists) return docSnap.data();
     }
 
     // Try by name
     const snap = await db.collection('beats').where('name', '==', beatName).limit(1).get();
-    if (!snap.empty && snap.docs[0].data().file) {
-      return BASE_URL + snap.docs[0].data().file;
-    }
+    if (!snap.empty) return snap.docs[0].data();
   } catch(e) {
     console.log('Firebase lookup failed:', e.message);
   }
+  return null;
+}
 
-  // 2. Fallback to static map
-  const fileKey = BEAT_FILES[beatName];
-  return fileKey ? BASE_URL + fileKey : null;
+// Build download links based on license and available files
+function buildDownloadLinks(beatData, license, beatName) {
+  const links = [];
+
+  if (beatData) {
+    // MP3 – always available
+    if (beatData.file) {
+      links.push({ label: 'MP3 (320kbps)', url: BASE_URL + beatData.file });
+    }
+
+    // WAV – only if wavFile exists in Firestore
+    if ((license === 'wav' || license === 'exclusive') && beatData.wavFile) {
+      links.push({ label: 'WAV (Studio Quality)', url: BASE_URL + beatData.wavFile });
+    }
+
+    // Trackout/Stems – only if trackoutFile exists
+    if ((license === 'trackout' || license === 'exclusive') && beatData.trackoutFile) {
+      links.push({ label: 'Trackout Stems (ZIP)', url: BASE_URL + beatData.trackoutFile });
+    }
+
+  } else {
+    // Fallback: static map (MP3 only)
+    const fileKey = BEAT_FILES[beatName];
+    if (fileKey) {
+      links.push({ label: 'MP3 (320kbps)', url: BASE_URL + fileKey });
+    }
+  }
+
+  return links;
+}
+
+// Build license terms HTML
+function buildLicenseTerms(license) {
+  const terms = {
+    mp3: '✓ MP3 High Quality (320kbps)<br>✓ Up to 100,000 Streams<br>✓ Music videos allowed<br>✓ Non-profit performances',
+    wav: '✓ WAV + MP3 Studio Quality<br>✓ Up to 500,000 Streams<br>✓ Music videos allowed<br>✓ Commercial performances<br>✓ Radio broadcasts',
+    trackout: '✓ All Stems / Individual Tracks<br>✓ WAV + MP3 included<br>✓ Unlimited Streams<br>✓ Full commercial use<br>✓ TV & Film Sync',
+    exclusive: '✓ 100% Exclusive Rights<br>✓ Beat removed from store<br>✓ All stems & file formats<br>✓ Full commercial use<br>✓ Label deals possible',
+  };
+  return terms[license] || '';
 }
 
 module.exports = async (req, res) => {
@@ -110,12 +144,36 @@ module.exports = async (req, res) => {
 
     console.log(`Order: ${beatName} | ${licenseName} | ${customerEmail} | ${amountPaid}€`);
 
-    const downloadUrl = await getDownloadUrl(beatName, beatId);
-    if (!downloadUrl) console.error('Beat file not found for:', beatName);
+    // Get beat data from Firestore
+    const beatData = await getBeatData(beatName, beatId);
+    const downloadLinks = buildDownloadLinks(beatData, license, beatName);
+
+    if (!downloadLinks.length) {
+      console.error('No download files found for:', beatName);
+    }
+
+    // Build download buttons HTML
+    const downloadHtml = downloadLinks.length > 0 ? `
+      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+        ${downloadLinks.map(link => `
+        <tr><td align="center" style="padding:6px 0;">
+          <a href="${link.url}" style="display:inline-block;background:#e01a1a;color:#fff;text-decoration:none;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:14px 36px;min-width:260px;text-align:center;">
+            ↓ DOWNLOAD ${link.label.toUpperCase()}
+          </a>
+        </td></tr>
+        <tr><td align="center" style="padding:0 0 12px;">
+          <a href="${link.url}" style="color:#e01a1a;font-size:11px;word-break:break-all;">${link.url}</a>
+        </td></tr>`).join('')}
+      </table>
+    ` : `
+      <p style="color:#888;font-size:14px;margin:0 0 32px;padding:20px;background:#1a1a1a;border:1px solid #333;">
+        Your download link will be sent within 24h. Questions? Reply to this email.
+      </p>
+    `;
 
     try {
       await resend.emails.send({
-        from:    'Deadshot Beats <noreply@deadshotbeats.com>',
+        from:    'Deadshot Beats <beats@deadshotbeats.com>',
         to:      customerEmail,
         subject: `Your Beat is Ready — ${beatName} 🔥`,
         html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
@@ -146,28 +204,12 @@ module.exports = async (req, res) => {
         </td></tr>
       </table>
 
-      ${downloadUrl ? `
-      <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
-        <tr><td align="center">
-          <a href="${downloadUrl}" style="display:inline-block;background:#e01a1a;color:#fff;text-decoration:none;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:16px 40px;">↓ DOWNLOAD BEAT</a>
-        </td></tr>
-      </table>
-      <p style="color:#555;font-size:12px;text-align:center;margin:0 0 32px;">
-        Direct link: <a href="${downloadUrl}" style="color:#e01a1a;word-break:break-all;">${downloadUrl}</a>
-      </p>
-      ` : `
-      <p style="color:#888;font-size:14px;margin:0 0 32px;padding:20px;background:#1a1a1a;border:1px solid #333;">
-        Your download link will be sent within 24h. Questions? Reply to this email.
-      </p>
-      `}
+      ${downloadHtml}
 
       <table width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid #222;margin-bottom:24px;">
         <tr><td style="padding-top:24px;">
           <p style="color:#888;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin:0 0 10px;">License Terms</p>
-          ${license === 'mp3' ? `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ MP3 High Quality (320kbps)<br>✓ Up to 100,000 Streams<br>✓ Music videos allowed<br>✓ Non-profit performances</p>`
-          : license === 'wav' ? `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ WAV + MP3 Studio Quality<br>✓ Up to 500,000 Streams<br>✓ Music videos allowed<br>✓ Commercial performances<br>✓ Radio broadcasts</p>`
-          : license === 'trackout' ? `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ All Stems / Individual Tracks<br>✓ WAV + MP3 included<br>✓ Unlimited Streams<br>✓ Full commercial use<br>✓ TV & Film Sync</p>`
-          : `<p style="color:#555;font-size:13px;line-height:1.8;margin:0;">✓ 100% Exclusive Rights<br>✓ Beat removed from store<br>✓ All stems & file formats<br>✓ Full commercial use<br>✓ Label deals possible</p>`}
+          <p style="color:#555;font-size:13px;line-height:1.8;margin:0;">${buildLicenseTerms(license)}</p>
         </td></tr>
       </table>
 
