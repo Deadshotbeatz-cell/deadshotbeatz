@@ -279,37 +279,22 @@
         <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
           <div class="contact-link-icon">IG</div>@deadshotbeats
         </a>
-        <a href="https://x.com/deadshotbeatz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">𝕏</div>@deadshotbeatz
-        </a>
-        <a href="https://www.tiktok.com/@deadshotbeaz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">TT</div>@deadshotbeaz
-        </a>
-        <a href="https://www.youtube.com/@deadshotbeatz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">YT</div>@deadshotbeatz
-        </a>
-        <a href="/cdn-cgi/l/email-protection#5713323633243f3823353236232d173822233b38383c7934383a" class="contact-link">
-          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="fcb8999d988f9493889e999d8886bc93898890939397d29f9391">[email&#160;protected]</span>
+        <a href="/cdn-cgi/l/email-protection#cd89a8aca9bea5a2b9afa8acb9b78da2b8b9a1a2a2a6e3aea2a0" class="contact-link">
+          <div class="contact-link-icon">✉</div><span class="__cf_email__" data-cfemail="591d3c383d2a31362d3b3c382d2319362c2d35363632773a3634">[email&#160;protected]</span>
         </a>
       </div>
     </div>
     <div class="contact-form">
-      <div id="contact-success" style="display:none;background:rgba(26,122,26,0.1);border:1px solid #1a7a1a;padding:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;color:#22a022;font-size:13px;">
-        ✓ Message sent! We'll get back to you within 24h.
-      </div>
-      <div id="contact-error" style="display:none;background:rgba(224,26,26,0.1);border:1px solid var(--red);padding:16px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;color:var(--red);font-size:13px;">
-        ✕ Something went wrong. Please email us directly.
-      </div>
       <div class="form-row">
-        <div class="form-group"><label>Name</label><input type="text" id="cf-name" placeholder="Your Name"></div>
-        <div class="form-group"><label>Email</label><input type="email" id="cf-email" placeholder="your@email.com"></div>
+        <div class="form-group"><label>Name</label><input type="text" placeholder="Your Name"></div>
+        <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com"></div>
       </div>
       <div class="form-group">
         <label>Subject</label>
-        <select id="cf-subject"><option value="">Please select...</option><option>Custom Beat</option><option>Exclusive Deal</option><option>Feature / Collab</option><option>Mixing & Mastering</option><option>Other</option></select>
+        <select><option value="">Please select...</option><option>Custom Beat</option><option>Exclusive Deal</option><option>Feature / Collab</option><option>Mixing & Mastering</option><option>Other</option></select>
       </div>
-      <div class="form-group"><label>Message</label><textarea id="cf-message" placeholder="Describe your project..."></textarea></div>
-      <button class="btn-primary" id="cf-submit" style="align-self:flex-start;padding:14px 40px;" onclick="submitContact()">Send</button>
+      <div class="form-group"><label>Message</label><textarea placeholder="Describe your project..."></textarea></div>
+      <button class="btn-primary" style="align-self:flex-start;padding:14px 40px;">Send</button>
     </div>
   </div>
 </section>
@@ -318,10 +303,7 @@
   <div class="footer-logo">DEAD<span>SHOT</span> BEATS</div>
   <div class="footer-copy">© 2026 DeadshotBeats. All rights reserved.</div>
   <div class="footer-links">
-    <a href="https://x.com/deadshotbeatz" target="_blank">X</a>
-    <a href="https://www.tiktok.com/@deadshotbeaz" target="_blank">TikTok</a>
-    <a href="https://www.youtube.com/@deadshotbeatz" target="_blank">YouTube</a>
-    <a href="#">Imprint</a>
+    <a href="#">Imprint</a><a href="#">Privacy</a><a href="#">Terms</a>
   </div>
 </footer>
 
@@ -384,22 +366,47 @@
 
 <audio id="audio-player" preload="none"></audio>
 
-<script type="module" data-cfasync="false">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-const firebaseConfig = {
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// ── FIREBASE ──────────────────────────────────────────────
+firebase.initializeApp({
   apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
   authDomain: "deadshot-beats.firebaseapp.com",
   projectId: "deadshot-beats",
   storageBucket: "deadshot-beats.firebasestorage.app",
   messagingSenderId: "252096563375",
   appId: "1:252096563375:web:58193b52e325147f592c5a"
-};
+});
+const db = firebase.firestore();
 
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
 const BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
+
+// ── STATIC FALLBACK (always works, no Firebase needed) ────
+const STATIC_BEATS = [
+  { id:1,  name:'21 Savage X Future – Sacrifice',           genre:'Trap',    bpm:135, key:'Ebm',   price:29, file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3' },
+  { id:2,  name:'21 Savage – Nolenso',                      genre:'Trap',    bpm:132, key:'Cm',    price:29, file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3' },
+  { id:3,  name:'21 Savage Type Beat 85',                   genre:'Trap',    bpm:85,  key:'Bbm',   price:29, file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3' },
+  { id:4,  name:'Drake – Midnight',                         genre:'Melodic', bpm:123, key:'Cm',    price:29, file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3' },
+  { id:5,  name:'Drake x 21 Savage – NoFeelings',           genre:'Dark',    bpm:146, key:'Ebmaj', price:29, file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3' },
+  { id:6,  name:'Future – Legacy',                          genre:'Trap',    bpm:137, key:'Em',    price:29, file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3' },
+  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog', genre:'Dark',    bpm:143, key:'Em',    price:29, file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3' },
+  { id:8,  name:'Future x 21 Savage – Codein Rain',         genre:'Melodic', bpm:136, key:'Cm',    price:29, file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3' },
+  { id:9,  name:'Future x Southside – Ski Driver',          genre:'Trap',    bpm:135, key:'Ebmaj', price:29, file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3' },
+  { id:10, name:'Ghosted',                                  genre:'Melodic', bpm:0,   key:'',      price:29, file:'Ghosted.mp3' },
+  { id:11, name:'Mixdown 2',                                genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown(2).mp3' },
+  { id:12, name:'Mixdown',                                  genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown.mp3' },
+  { id:13, name:'A$AP Rocky – Dumb Shit',                   genre:'Trap',    bpm:130, key:'Cm',    price:29, file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3' },
+  { id:14, name:'Florida Type Beat – Big Stepper',          genre:'Drill',   bpm:156, key:'D#min', price:29, file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3' },
+  { id:15, name:'Larb – 21 Savage Type Beat',               genre:'Trap',    bpm:165, key:'G#',    price:29, file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3' },
+  { id:16, name:'Put In My Cup – Future',                   genre:'Trap',    bpm:130, key:'Ebm',   price:29, file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3' },
+  { id:17, name:'Roulete – 21 Savage',                      genre:'Dark',    bpm:77,  key:'C#m',   price:29, file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3' },
+  { id:18, name:'Travis Scott x Ye – Titel',                genre:'Dark',    bpm:130, key:'Dm',    price:29, file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3' },
+  { id:19, name:'DGAF – Future ft. Quavo',                  genre:'Trap',    bpm:135, key:'Bmin',  price:29, file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3' },
+  { id:20, name:'Darkness In My Visions',                   genre:'Dark',    bpm:0,   key:'',      price:29, file:'Darkness%20in%20my%20Visions(3).mp3' },
+  { id:21, name:'Decision – 21 Savage',                     genre:'Trap',    bpm:134, key:'D#m',   price:29, file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3' },
+  { id:22, name:'Draft Day – Future',                       genre:'Trap',    bpm:140, key:'Abm',   price:29, file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3' },
+];
 
 let beats = [];
 let currentBeat = null;
@@ -432,18 +439,18 @@ function renderBeats(filter) {
   document.getElementById('beat-list').innerHTML = filtered.length === 0
     ? '<div style="padding:40px;text-align:center;color:var(--grey);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:2px;">NO BEATS IN THIS GENRE YET</div>'
     : filtered.map((b, i) => `
-    <div class="beat-row ${currentBeat?.id===b.id?'playing':''}" onclick="window._playBeat(${b.id})">
-      <div class="beat-num">${currentBeat?.id===b.id ? '<div class="eq-bars"><div class="eq-bar" style="height:8px"></div><div class="eq-bar" style="height:12px"></div><div class="eq-bar" style="height:6px"></div></div>' : (i+1)}</div>
+    <div class="beat-row ${currentBeat && currentBeat.id===b.id?'playing':''}" onclick="window._playBeat(${b.id})">
+      <div class="beat-num">${currentBeat && currentBeat.id===b.id ? '<div class="eq-bars"><div class="eq-bar" style="height:8px"></div><div class="eq-bar" style="height:12px"></div><div class="eq-bar" style="height:6px"></div></div>' : (i+1)}</div>
       <div class="beat-cover">
         <div class="beat-cover-placeholder">DS</div>
-        <div class="play-overlay">${currentBeat?.id===b.id&&isPlaying ? '<div class="pause-icon"><div class="pause-bar"></div><div class="pause-bar"></div></div>' : '<div class="play-icon"></div>'}</div>
+        <div class="play-overlay">${currentBeat && currentBeat.id===b.id && isPlaying ? '<div class="pause-icon"><div class="pause-bar"></div><div class="pause-bar"></div></div>' : '<div class="play-icon"></div>'}</div>
       </div>
       <div class="beat-info">
         <div class="beat-name">${b.name}</div>
         <div class="beat-meta">
           <span class="beat-tag">${b.genre||''}</span>
-          ${b.bpm>0?`<span>${b.bpm} BPM</span>`:''}
-          ${b.key?`<span>${b.key}</span>`:''}
+          ${b.bpm>0?'<span>'+b.bpm+' BPM</span>':''}
+          ${b.key?'<span>'+b.key+'</span>':''}
         </div>
       </div>
       <div class="beat-duration">—</div>
@@ -456,11 +463,10 @@ function renderBeats(filter) {
 window._playBeat = function(id) {
   const b = beats.find(x => x.id===id);
   if (!b) return;
-  if (currentBeat?.id===id) { window._togglePlay(); return; }
+  if (currentBeat && currentBeat.id===id) { window._togglePlay(); return; }
   currentBeat = b;
-  // file is already URL-encoded in Firestore
   audio.src = BASE + b.file;
-  audio.volume = document.getElementById('vol').value;
+  audio.volume = parseFloat(document.getElementById('vol').value);
   audio.play();
   document.getElementById('player-name').textContent = b.name;
   document.getElementById('player-tag').textContent = (b.genre||'') + (b.bpm>0?' · '+b.bpm+' BPM':'') + (b.key?' · '+b.key:'');
@@ -468,11 +474,7 @@ window._playBeat = function(id) {
   renderBeats(currentFilter);
 };
 
-window._togglePlay = function() {
-  if (!currentBeat) return;
-  audio.paused ? audio.play() : audio.pause();
-};
-
+window._togglePlay = function() { if (!currentBeat) return; audio.paused ? audio.play() : audio.pause(); };
 window.togglePlay  = window._togglePlay;
 window.prevBeat    = function() {
   if (!currentBeat) { window._playBeat(beats[0].id); return; }
@@ -480,12 +482,15 @@ window.prevBeat    = function() {
   window._playBeat(beats[(i-1+beats.length)%beats.length].id);
 };
 window.nextBeat    = function() {
-  if (!currentBeat) { window._playBeat(beats[0]?.id); return; }
+  if (!currentBeat) { if(beats[0]) window._playBeat(beats[0].id); return; }
   const i = beats.findIndex(b => b.id===currentBeat.id);
   window._playBeat(beats[(i+1)%beats.length].id);
 };
-window.seekAudio   = function(e) { if (!audio.duration) return; audio.currentTime = (e.offsetX / document.getElementById('progress-bar').offsetWidth) * audio.duration; };
-window.setVolume   = function(v) { audio.volume = v; };
+window.seekAudio = function(e) {
+  if (!audio.duration) return;
+  audio.currentTime = (e.offsetX / document.getElementById('progress-bar').offsetWidth) * audio.duration;
+};
+window.setVolume = function(v) { audio.volume = v; };
 
 function updatePlayBtn(p) {
   document.getElementById('play-svg').style.display  = p ? 'none'  : 'block';
@@ -493,9 +498,9 @@ function updatePlayBtn(p) {
 }
 
 // ── FILTERS ───────────────────────────────────────────────
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
     btn.classList.add('active');
     currentFilter = btn.dataset.filter;
     renderBeats(currentFilter);
@@ -505,26 +510,23 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 // ── BUY MODAL ─────────────────────────────────────────────
 window._openBuyModal = function(e, id) {
   e.stopPropagation();
-  currentBeatForModal = beats.find(b => b.id===id);
+  currentBeatForModal = beats.find(function(b) { return b.id===id; });
+  if (!currentBeatForModal) return;
   document.getElementById('modal-beat-name').textContent = currentBeatForModal.name;
   document.getElementById('modal').classList.add('open');
-  document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.license-option').forEach(function(o) { o.classList.remove('selected'); });
   document.querySelector('.license-option[data-license="mp3"]').classList.add('selected');
   selectedLicense = 'mp3';
-
-  // Dynamic prices: base price × multiplier
-  const base = currentBeatForModal.price || 29;
-  const mult = { mp3:1, wav:2, trackout:3.5, exclusive:17 };
-  ['mp3','wav','trackout','exclusive'].forEach(k => {
-    const el = document.getElementById('price-'+k);
-    if (el) el.textContent = (k==='exclusive'
-      ? Math.round(base*mult[k])+'€+'
-      : Math.round(base*mult[k])+'€');
-  });
+  // Dynamic prices
+  var base = currentBeatForModal.price || 29;
+  document.getElementById('price-mp3').textContent       = base + '€';
+  document.getElementById('price-wav').textContent       = Math.round(base*2) + '€';
+  document.getElementById('price-trackout').textContent  = Math.round(base*3.5) + '€';
+  document.getElementById('price-exclusive').textContent = Math.round(base*17) + '€+';
 };
 
 window.selectLicense = function(el) {
-  document.querySelectorAll('.license-option').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.license-option').forEach(function(o) { o.classList.remove('selected'); });
   el.classList.add('selected');
   selectedLicense = el.dataset.license;
 };
@@ -535,22 +537,22 @@ window.closeModal = function(e) {
 
 window.proceedCheckout = async function() {
   if (!currentBeatForModal) return;
-  const btn = document.getElementById('checkout-btn');
+  var btn = document.getElementById('checkout-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="checkout-spinner"></span>Loading...';
-  const base = currentBeatForModal.price || 29;
-  const mult = { mp3:1, wav:2, trackout:3.5, exclusive:17 };
-  const finalPrice = Math.round(base * (mult[selectedLicense] || 1));
+  var base = currentBeatForModal.price || 29;
+  var mult = { mp3:1, wav:2, trackout:3.5, exclusive:17 };
+  var finalPrice = Math.round(base * (mult[selectedLicense] || 1));
   try {
-    const res = await fetch('/api/create-checkout', {
+    var res = await fetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ beatName: currentBeatForModal.name, beatId: currentBeatForModal.id, license: selectedLicense, price: finalPrice })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (data.url) { window.location.href = data.url; }
     else { throw new Error(data.error || 'Unknown error'); }
-  } catch (err) {
+  } catch(err) {
     btn.disabled = false;
     btn.innerHTML = 'Proceed to Checkout →';
     alert('Error: ' + err.message);
@@ -559,23 +561,25 @@ window.proceedCheckout = async function() {
 
 // ── CONTACT FORM ──────────────────────────────────────────
 window.submitContact = async function() {
-  const name    = document.getElementById('cf-name')?.value.trim();
-  const email   = document.getElementById('cf-email')?.value.trim();
-  const subject = document.getElementById('cf-subject')?.value;
-  const message = document.getElementById('cf-message')?.value.trim();
-  const btn     = document.getElementById('cf-submit');
+  var name    = document.getElementById('cf-name').value.trim();
+  var email   = document.getElementById('cf-email').value.trim();
+  var subject = document.getElementById('cf-subject').value;
+  var message = document.getElementById('cf-message').value.trim();
+  var btn     = document.getElementById('cf-submit');
   if (!name || !email || !subject || !message) { alert('Please fill in all fields.'); return; }
   btn.disabled = true; btn.textContent = 'Sending...';
   try {
-    const res = await fetch('/api/contact', {
+    var res = await fetch('/api/contact', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, subject, message })
+      body: JSON.stringify({ name: name, email: email, subject: subject, message: message })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (data.ok) {
       document.getElementById('contact-success').style.display = 'block';
       document.getElementById('contact-error').style.display = 'none';
-      ['cf-name','cf-email','cf-message'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('cf-name').value = '';
+      document.getElementById('cf-email').value = '';
+      document.getElementById('cf-message').value = '';
       document.getElementById('cf-subject').value = '';
       btn.textContent = 'Sent ✓';
     } else { throw new Error(data.error); }
@@ -586,8 +590,8 @@ window.submitContact = async function() {
   }
 };
 
-// ── RENDER LICENSES ───────────────────────────────────────
-const DEFAULT_LICENSES = [
+// ── LICENSES ──────────────────────────────────────────────
+var DEFAULT_LICENSES = [
   { id:'mp3',      order:1, type:'Basic',    name:'MP3 LEASE', price:'29',  priceUnit:'€',  featured:false, inquire:false,
     features:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],
     disabled:['WAV File','Trackout Stems','Exclusive Rights'] },
@@ -603,75 +607,72 @@ const DEFAULT_LICENSES = [
 ];
 
 function renderLicenses(list) {
-  // Update modal prices from license data
-  list.forEach(l => {
-    const el = document.getElementById('price-' + l.id);
+  list.forEach(function(l) {
+    var el = document.getElementById('price-' + l.id);
     if (el) el.textContent = l.price + l.priceUnit;
   });
-
-  document.getElementById('license-grid').innerHTML = list.map(l => {
-    const features = Array.isArray(l.features) ? l.features : (l.features||'').split('\n').filter(x=>x);
-    const disabled = Array.isArray(l.disabled)  ? l.disabled  : (l.disabled||'').split('\n').filter(x=>x);
-    return `
-    <div class="license-card ${l.featured?'featured':''}">
-      ${l.featured ? '<div class="license-badge">Popular</div>' : ''}
-      <div class="license-type">${l.type}</div>
-      <div class="license-name">${l.name}</div>
-      <div class="license-price">${l.price}<span>${l.priceUnit}</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        ${features.map(f=>`<li>${f}</li>`).join('')}
-        ${disabled.map(f=>`<li class="disabled">${f}</li>`).join('')}
-      </ul>
-      ${l.inquire
-        ? `<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire</button>`
-        : `<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById('beats').scrollIntoView({behavior:'smooth'})">Buy Now</button>`}
-    </div>`;
+  document.getElementById('license-grid').innerHTML = list.map(function(l) {
+    var features = Array.isArray(l.features) ? l.features : (l.features||'').split('\n').filter(function(x){return x;});
+    var disabled = Array.isArray(l.disabled)  ? l.disabled  : (l.disabled||'').split('\n').filter(function(x){return x;});
+    return '<div class="license-card ' + (l.featured?'featured':'') + '">' +
+      (l.featured ? '<div class="license-badge">Popular</div>' : '') +
+      '<div class="license-type">' + l.type + '</div>' +
+      '<div class="license-name">' + l.name + '</div>' +
+      '<div class="license-price">' + l.price + '<span>' + l.priceUnit + '</span></div>' +
+      '<div class="license-divider"></div>' +
+      '<ul class="license-features">' +
+        features.map(function(f){ return '<li>' + f + '</li>'; }).join('') +
+        disabled.map(function(f){ return '<li class="disabled">' + f + '</li>'; }).join('') +
+      '</ul>' +
+      (l.inquire
+        ? '<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById(\'contact\').scrollIntoView({behavior:\'smooth\'})">Inquire</button>'
+        : '<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById(\'beats\').scrollIntoView({behavior:\'smooth\'})">Buy Now</button>') +
+    '</div>';
   }).join('');
 }
 
-// ── LOAD FROM FIRESTORE ───────────────────────────────────
-const STATIC_BEATS = [
-  { id:1,  name:'21 Savage X Future – Sacrifice',            genre:'Trap',    bpm:135, key:'Ebm',   price:29, file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3' },
-  { id:2,  name:'21 Savage – Nolenso',                       genre:'Trap',    bpm:132, key:'Cm',    price:29, file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3' },
-  { id:3,  name:'21 Savage Type Beat 85',                    genre:'Trap',    bpm:85,  key:'Bbm',   price:29, file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3' },
-  { id:4,  name:'Drake – Midnight',                          genre:'Melodic', bpm:123, key:'Cm',    price:29, file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3' },
-  { id:5,  name:'Drake x 21 Savage – NoFeelings',            genre:'Dark',    bpm:146, key:'Ebmaj', price:29, file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3' },
-  { id:6,  name:'Future – Legacy',                           genre:'Trap',    bpm:137, key:'Em',    price:29, file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3' },
-  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog',  genre:'Dark',    bpm:143, key:'Em',    price:29, file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3' },
-  { id:8,  name:'Future x 21 Savage – Codein Rain',          genre:'Melodic', bpm:136, key:'Cm',    price:29, file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3' },
-  { id:9,  name:'Future x Southside – Ski Driver',           genre:'Trap',    bpm:135, key:'Ebmaj', price:29, file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3' },
-  { id:10, name:'Ghosted',                                   genre:'Melodic', bpm:0,   key:'',      price:29, file:'Ghosted.mp3' },
-  { id:11, name:'Mixdown 2',                                 genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown(2).mp3' },
-  { id:12, name:'Mixdown',                                   genre:'Trap',    bpm:0,   key:'',      price:29, file:'Mixdown.mp3' },
-  { id:13, name:'A$AP Rocky – Dumb Shit',                    genre:'Trap',    bpm:130, key:'Cm',    price:29, file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3' },
-  { id:14, name:'Florida Type Beat – Big Stepper',           genre:'Drill',   bpm:156, key:'D#min', price:29, file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3' },
-  { id:15, name:'Larb – 21 Savage Type Beat',                genre:'Trap',    bpm:165, key:'G#',    price:29, file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3' },
-  { id:16, name:'Put In My Cup – Future',                    genre:'Trap',    bpm:130, key:'Ebm',   price:29, file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3' },
-  { id:17, name:'Roulete – 21 Savage',                       genre:'Dark',    bpm:77,  key:'C#m',   price:29, file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3' },
-  { id:18, name:'Travis Scott x Ye – Titel',                 genre:'Dark',    bpm:130, key:'Dm',    price:29, file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3' },
-  { id:19, name:'DGAF – Future ft. Quavo',                   genre:'Trap',    bpm:135, key:'Bmin',  price:29, file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3' },
-  { id:20, name:'Darkness In My Visions',                    genre:'Dark',    bpm:0,   key:'',      price:29, file:'Darkness%20in%20my%20Visions(3).mp3' },
-  { id:21, name:'Decision – 21 Savage',                      genre:'Trap',    bpm:134, key:'D#m',   price:29, file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3' },
-  { id:22, name:'Draft Day – Future',                        genre:'Trap',    bpm:140, key:'Abm',   price:29, file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3' },
-];
+// ── LOAD FROM FIRESTORE (with static fallback) ────────────
 async function loadBeats() {
-  try {
-    const snap = await getDocs(query(collection(db, 'beats'), orderBy('id')));
-    if (!snap.empty) {
-      beats = snap.docs.map(d => d.data());
-    } else {
-      // Firestore empty – use static fallback
-      beats = STATIC_BEATS;
-    }
-  } catch(e) {
-    // Firestore error – use static fallback
-    beats = STATIC_BEATS;
-  }
+  // Show static beats immediately so page never shows "LOADING"
+  beats = STATIC_BEATS;
   document.getElementById('hero-beat-count').textContent = beats.length;
   renderBeats('all');
+
+  // Then try to get live data from Firestore (updated prices etc)
+  try {
+    var snap = await db.collection('beats').get();
+    if (!snap.empty) {
+      var live = snap.docs.map(function(d) { return d.data(); });
+      live.sort(function(a,b) { return (Number(a.id)||0) - (Number(b.id)||0); });
+      beats = live;
+      document.getElementById('hero-beat-count').textContent = beats.length;
+      renderBeats(currentFilter);
+    }
+  } catch(e) {
+    console.warn('Firestore unavailable, using static beats:', e.message);
+  }
 }
 
 async function loadLicenses() {
+  // Show default licenses immediately
+  renderLicenses(DEFAULT_LICENSES);
+
+  // Then try Firestore
   try {
-    const snap = await getDocs(collecti
+    var snap = await db.collection('licenses').get();
+    if (!snap.empty) {
+      var list = snap.docs.map(function(d) { return d.data(); });
+      list.sort(function(a,b) { return (a.order||0)-(b.order||0); });
+      renderLicenses(list);
+    }
+  } catch(e) {
+    console.warn('Firestore licenses unavailable:', e.message);
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────
+loadBeats();
+loadLicenses();
+</script>
+</body>
+</html>
