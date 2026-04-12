@@ -510,7 +510,7 @@ window.sendContactForm=async function(){
   }
   btn.disabled=true;btn.textContent='Sending...';fb.style.display='none';
   try{
-    const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},
+    const res=await fetch('https://lively-wood-2e7c.deadshotbeatz.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({name,email,subject,message})});
     if(res.ok){
       fb.textContent='✓ Message sent! I\'ll get back to you within 24h.';fb.className='form-feedback success';fb.style.display='block';
