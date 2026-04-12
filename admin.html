@@ -5,231 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DEADSHOT BEATS — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
-<script type="module">
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
-
-const firebaseConfig={apiKey:"AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",authDomain:"deadshot-beats.firebaseapp.com",projectId:"deadshot-beats",storageBucket:"deadshot-beats.firebasestorage.app",messagingSenderId:"252096563375",appId:"1:252096563375:web:58193b52e325147f592c5a"};
-const R2='https://broad-resonance-69c2.deadshotbeatz.workers.dev/upload';
-const GENRES=['Trap','Dark','Melodic','Drill','Boom Bap'];
-const DB=[
-  {id:1,name:'21 Savage X Future - Sacrifice',genre:'Trap',bpm:135,key:'Ebm',price:29,yt:'',file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3'},
-  {id:2,name:'21 Savage - Nolenso',genre:'Trap',bpm:132,key:'Cm',price:29,yt:'',file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3'},
-  {id:3,name:'21 Savage Type Beat 85',genre:'Trap',bpm:85,key:'Bbm',price:29,yt:'',file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3'},
-  {id:4,name:'Drake - Midnight',genre:'Melodic',bpm:123,key:'Cm',price:29,yt:'',file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3'},
-  {id:5,name:'Drake x 21 Savage - NoFeelings',genre:'Dark',bpm:146,key:'Ebmaj',price:29,yt:'',file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3'},
-  {id:6,name:'Future - Legacy',genre:'Trap',bpm:137,key:'Em',price:29,yt:'',file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3'},
-  {id:7,name:'Future x Playboy Carti x Drake - Big Dog',genre:'Dark',bpm:143,key:'Em',price:29,yt:'',file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3'},
-  {id:8,name:'Future x 21 Savage - Codein Rain',genre:'Melodic',bpm:136,key:'Cm',price:29,yt:'',file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3'},
-  {id:9,name:'Future x Southside - Ski Driver',genre:'Trap',bpm:135,key:'Ebmaj',price:29,yt:'',file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3'},
-  {id:10,name:'Ghosted',genre:'Melodic',bpm:0,key:'',price:29,yt:'',file:'Ghosted.mp3'},
-  {id:11,name:'Mixdown 2',genre:'Trap',bpm:0,key:'',price:29,yt:'',file:'Mixdown(2).mp3'},
-  {id:12,name:'Mixdown',genre:'Trap',bpm:0,key:'',price:29,yt:'',file:'Mixdown.mp3'},
-  {id:13,name:"A$AP Rocky - Dumb Shit",genre:'Trap',bpm:130,key:'Cm',price:29,yt:'',file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3'},
-  {id:14,name:'Florida Type Beat - Big Stepper',genre:'Drill',bpm:156,key:'D#min',price:29,yt:'',file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3'},
-  {id:15,name:'Larb - 21 Savage Type Beat',genre:'Trap',bpm:165,key:'G#',price:29,yt:'',file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3'},
-  {id:16,name:'Put In My Cup - Future',genre:'Trap',bpm:130,key:'Ebm',price:29,yt:'',file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3'},
-  {id:17,name:'Roulete - 21 Savage',genre:'Dark',bpm:77,key:'C#m',price:29,yt:'',file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3'},
-  {id:18,name:'Travis Scott x Ye - Titel',genre:'Dark',bpm:130,key:'Dm',price:29,yt:'',file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3'},
-  {id:19,name:'DGAF - Future ft. Quavo',genre:'Trap',bpm:135,key:'Bmin',price:29,yt:'',file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3'},
-  {id:20,name:'Darkness In My Visions',genre:'Dark',bpm:0,key:'',price:29,yt:'',file:'Darkness%20in%20my%20Visions(3).mp3'},
-  {id:21,name:'Decision - 21 Savage',genre:'Trap',bpm:134,key:'D#m',price:29,yt:'',file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3'},
-  {id:22,name:'Draft Day - Future',genre:'Trap',bpm:140,key:'Abm',price:29,yt:'',file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3'},
-];
-const DL=[
-  {id:'mp3',order:1,type:'Basic',name:'MP3 LEASE',price:'29',priceUnit:'e',multiplier:1.0,featured:false,inquire:false,features:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],disabled:['WAV File','Trackout Stems','Exclusive Rights']},
-  {id:'wav',order:2,type:'Standard',name:'WAV LEASE',price:'59',priceUnit:'e',multiplier:2.0,featured:true,inquire:false,features:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],disabled:['Trackout Stems','Exclusive Rights']},
-  {id:'trackout',order:3,type:'Premium',name:'TRACKOUT',price:'99',priceUnit:'e',multiplier:3.4,featured:false,inquire:false,features:['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],disabled:['Exclusive Rights']},
-  {id:'exclusive',order:4,type:'One-Time',name:'EXCLUSIVE',price:'499',priceUnit:'e+',multiplier:17.2,featured:false,inquire:true,features:['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price on request'],disabled:[]},
-];
-
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
-let beats=[],lics=[],editId=null,delId=null,fmId=null;
-
-onAuthStateChanged(auth,async u=>{
-  if(u){
-    document.getElementById('ls').classList.add('hidden');
-    document.getElementById('as').classList.add('visible');
-    document.getElementById('ue').textContent=u.email;
-    await loadBeats();await loadLics();
-  }else{
-    document.getElementById('ls').classList.remove('hidden');
-    document.getElementById('as').classList.remove('visible');
-  }
-});
-window.doLogin=async function(){
-  const e=document.getElementById('ei').value.trim(),p=document.getElementById('pi').value,er=document.getElementById('le');
-  er.textContent='';if(!e||!p){er.textContent='E-Mail und Passwort eingeben.';return;}
-  try{await signInWithEmailAndPassword(auth,e,p);}
-  catch(x){er.textContent=x.code==='auth/invalid-credential'?'Falsche Zugangsdaten.':'Fehler: '+x.message;}
-};
-window.doLogout=async()=>await signOut(auth);
-document.getElementById('pi').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
-document.getElementById('ei').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('pi').focus();});
-
-async function loadBeats(){
-  showL(true);
-  try{
-    const s=await getDocs(query(collection(db,'beats'),orderBy('id')));
-    if(s.empty){const b=writeBatch(db);DB.forEach(x=>b.set(doc(db,'beats',String(x.id)),x));await b.commit();beats=[...DB];toast('22 Beats importiert!','s');}
-    else beats=s.docs.map(d=>d.data());
-  }catch(x){toast('Fehler: '+x.message,'e');}
-  showL(false);ra();
-}
-async function loadLics(){
-  try{
-    const s=await getDocs(collection(db,'licenses'));
-    if(s.empty){const b=writeBatch(db);DL.forEach(l=>b.set(doc(db,'licenses',l.id),l));await b.commit();lics=[...DL];}
-    else lics=s.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
-  }catch(x){toast('Fehler Liz: '+x.message,'e');}
-  renderLT();
-}
-const sb=async b=>await setDoc(doc(db,'beats',String(b.id)),b);
-const db2=async id=>await deleteDoc(doc(db,'beats',String(id)));
-
-function ra(){rStats();rTable();}
-function rStats(){
-  const g={};beats.forEach(b=>{g[b.genre]=(g[b.genre]||0)+1;});
-  const t=Object.entries(g).sort((a,b)=>b[1]-a[1])[0];
-  document.getElementById('sb').innerHTML=`
-    <div class="sc"><div class="sn">${beats.length}</div><div class="sl">Beats</div></div>
-    <div class="sc"><div class="sn">${t?t[0]:'-'}</div><div class="sl">Top Genre</div></div>
-    <div class="sc"><div class="sn">${beats.filter(b=>b.wavFile).length}</div><div class="sl">Mit WAV</div></div>
-    <div class="sc"><div class="sn">${beats.filter(b=>b.trackoutFile).length}</div><div class="sl">Mit Stems</div></div>`;
-}
-function ft(ok,l){return ok?`<span class="tag-ok">+${l}</span>`:`<span class="tag-no">-${l}</span>`;}
-function rTable(){
-  document.getElementById('bt').innerHTML=[...beats].sort((a,b)=>(a.id||0)-(b.id||0)).map((b,i)=>{
-    const e=editId===b.id;
-    return`<tr class="${e?'ed':''}">
-      <td class="tn">${i+1}</td>
-      <td style="min-width:170px;">${e?`<input class="ei2" id="en" value="${x(b.name)}">`:`<div class="dt">${x(b.name)}</div>`}</td>
-      <td>${e?`<select class="es" id="eg">${GENRES.map(g=>`<option value="${g}"${b.genre===g?' selected':''}>${g}</option>`).join('')}</select>`:`<span class="dm">${b.genre}</span>`}</td>
-      <td>${e?`<input class="ei2 sm" id="ebpm" type="number" value="${b.bpm||0}">`:`<span class="dm">${b.bpm>0?b.bpm:'--'}</span>`}</td>
-      <td>${e?`<input class="ei2 sm" id="ek" value="${x(b.key||'')}">`:`<span class="dm">${b.key||'--'}</span>`}</td>
-      <td>${e?`<input class="ei2 xs" id="ep" type="number" value="${b.price||29}">EUR`:`<span class="big">${b.price||29}E</span>`}</td>
-      <td>${ft(!!b.file,'MP3')}${ft(!!b.wavFile,'WAV')}${ft(!!b.trackoutFile,'STM')}</td>
-      <td style="text-align:center;">${e?`<input class="ei2" id="eyt" value="${x(b.yt||'')}" placeholder="YT URL" style="min-width:140px;">`:`<span class="dot ${b.yt?'on':''}" title="${b.yt||'--'}"></span>`}</td>
-      <td><div class="ac">
-        ${e?`<button class="bs" onclick="se(${b.id})">SAVE</button><button class="bc" onclick="ce()">X</button>`
-           :`<button class="be" onclick="startE(${b.id})">Edit</button><button class="be" onclick="openFM(${b.id})" style="border-color:rgba(34,160,34,0.5);color:#22a022;">Files</button><button class="bd" onclick="oC(${b.id})">Del</button>`}
-      </div></td>
-    </tr>`;
-  }).join('');
-}
-
-window.startE=id=>{editId=id;rTable();setTimeout(()=>document.getElementById('en')?.focus(),50);};
-window.ce=()=>{editId=null;rTable();};
-window.se=async function(id){
-  const b=beats.find(x=>x.id===id);if(!b)return;
-  b.name=document.getElementById('en').value.trim()||b.name;
-  b.genre=document.getElementById('eg').value;
-  b.bpm=parseInt(document.getElementById('ebpm').value)||0;
-  b.key=document.getElementById('ek').value.trim();
-  b.price=parseInt(document.getElementById('ep').value)||29;
-  b.yt=document.getElementById('eyt').value.trim();
-  editId=null;
-  try{await sb(b);ra();toast('Beat gespeichert!','s');}catch(e){toast('Fehler: '+e.message,'e');}
-};
-
-window.oC=function(id){delId=id;const b=beats.find(x=>x.id===id);document.getElementById('ct').textContent=`"${b?.name}" loeschen?`;document.getElementById('co').classList.add('open');};
-window.cC=()=>{document.getElementById('co').classList.remove('open');delId=null;};
-window.doDel=async function(){
-  if(!delId)return;
-  try{await db2(delId);beats=beats.filter(b=>b.id!==delId);window.cC();editId=null;ra();toast('Beat geloescht','');}
-  catch(e){toast('Fehler: '+e.message,'e');}
-};
-
-window.openAdd=()=>{document.getElementById('am').classList.add('open');setTimeout(()=>document.getElementById('nn').focus(),100);resetU(['mp3','wav','stems']);};
-window.closeAdd=()=>{
-  document.getElementById('am').classList.remove('open');
-  ['nn','nb','nk','ny'].forEach(id=>{document.getElementById(id).value='';});
-  document.getElementById('np').value='29';resetU(['mp3','wav','stems']);
-};
-window.addBeat=async function(){
-  const name=document.getElementById('nn').value.trim();
-  if(!name){toast('Titel ist Pflichtfeld','');return;}
-  if(!window._mp3){toast('MP3-Datei ist Pflicht!','');return;}
-  const maxId=beats.length?Math.max(...beats.map(b=>b.id)):0;
-  const nb={id:maxId+1,name,genre:document.getElementById('ng').value,bpm:parseInt(document.getElementById('nb').value)||0,key:document.getElementById('nk').value.trim(),price:parseInt(document.getElementById('np').value)||29,yt:document.getElementById('ny').value.trim(),file:encodeURIComponent(window._mp3)};
-  if(window._wav)   nb.wavFile=encodeURIComponent(window._wav);
-  if(window._stems) nb.trackoutFile=encodeURIComponent(window._stems);
-  try{await sb(nb);beats.push(nb);window.closeAdd();ra();toast('Beat hinzugefuegt!','s');}catch(e){toast('Fehler: '+e.message,'e');}
-};
-
-window.openFM=function(id){
-  fmId=id;const b=beats.find(x=>x.id===id);
-  document.getElementById('fmt').textContent=b.name;
-  document.getElementById('fmm').textContent=b.file?'MP3: '+decodeURIComponent(b.file):'Keine MP3';
-  document.getElementById('fmw').textContent=b.wavFile?'WAV: '+decodeURIComponent(b.wavFile):'Keine WAV';
-  document.getElementById('fms').textContent=b.trackoutFile?'Stems: '+decodeURIComponent(b.trackoutFile):'Keine Stems';
-  resetU(['wavx','stmx']);
-  document.getElementById('fm').classList.add('open');
-};
-window.closeFM=()=>{document.getElementById('fm').classList.remove('open');fmId=null;};
-window.saveFM=async function(){
-  const b=beats.find(x=>x.id===fmId);if(!b)return;
-  if(window._wavx)  b.wavFile=encodeURIComponent(window._wavx);
-  if(window._stmx)  b.trackoutFile=encodeURIComponent(window._stmx);
-  try{await sb(b);window.closeFM();ra();toast('Dateien gespeichert!','s');}catch(e){toast('Fehler: '+e.message,'e');}
-};
-
-function resetU(types){types.forEach(t=>{window['_'+t]=null;['us','uf','ui'].forEach(p=>{const el=document.getElementById(p+t);if(el){if(p==='us')el.innerHTML='';else if(p==='uf')el.textContent='Keine Datei';else el.value='';}}); });}
-
-window.handleUp=async function(input,type){
-  const file=input.files[0];if(!file)return;
-  const ext=file.name.split('.').pop().toLowerCase();
-  const ok={mp3:['mp3'],wav:['wav'],wavx:['wav'],stems:['zip','rar'],stmx:['zip','rar']};
-  if(!ok[type].includes(ext)){toast('Falscher Dateityp!','e');input.value='';return;}
-  const s=document.getElementById('us'+type),f=document.getElementById('uf'+type);
-  if(f)f.textContent=file.name;if(s)s.innerHTML='<span style="color:#888">Upload laeuft...</span>';
-  try{
-    const fd=new FormData();fd.append('file',file);fd.append('filename',file.name);
-    const res=await fetch(R2,{method:'POST',body:fd});
-    if(!res.ok)throw new Error(await res.text());
-    const data=await res.json();
-    window['_'+type]=data.filename||file.name;
-    if(s)s.innerHTML=`<span style="color:#22a022">OK: ${data.filename}</span>`;
-    toast('Hochgeladen!','s');
-  }catch(e){
-    if(s)s.innerHTML=`<span style="color:#e01a1a">Fehler: ${e.message}</span>`;
-    toast('Upload fehlgeschlagen','e');window['_'+type]=null;
-  }
-};
-
-function renderLT(){
-  document.getElementById('lt').innerHTML=lics.map(l=>`
-    <tr>
-      <td><div class="dt">${l.name}</div></td>
-      <td><span class="dm">${l.type}</span></td>
-      <td><span class="big">${l.price}${l.priceUnit}</span></td>
-      <td style="text-align:center;"><span class="dot ${l.featured?'on':''}"></span></td>
-      <td><button class="be" onclick="openLM('${l.id}')">Edit</button></td>
-    </tr>`).join('');
-}
-window.openLM=function(id){
-  const l=lics.find(x=>x.id===id);if(!l)return;
-  document.getElementById('lid').value=l.id;document.getElementById('ln').value=l.name;
-  document.getElementById('lty').value=l.type;document.getElementById('lp').value=l.price;
-  document.getElementById('lpu').value=l.priceUnit;document.getElementById('lm').value=l.multiplier||1;
-  document.getElementById('lf').checked=l.featured;document.getElementById('li').checked=l.inquire;
-  document.getElementById('lfe').value=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)).join('\n');
-  document.getElementById('ld').value=(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)).join('\n');
-  document.getElementById('lm2').classList.add('open');
-};
-window.closeLM=()=>document.getElementById('lm2').classList.remove('open');
-window.saveLic=async function(){
-  const id=document.getElementById('lid').value;
-  const u={id,name:document.getElementById('ln').value.trim(),type:document.getElementById('lty').value.trim(),price:document.getElementById('lp').value.trim(),priceUnit:document.getElementById('lpu').value.trim(),multiplier:parseFloat(document.getElementById('lm').value)||1,featured:document.getElementById('lf').checked,inquire:document.getElementById('li').checked,features:document.getElementById('lfe').value.trim().split('\n').filter(x=>x),disabled:document.getElementById('ld').value.trim().split('\n').filter(x=>x),order:(lics.find(x=>x.id===id)?.order||0)};
-  try{await setDoc(doc(db,'licenses',id),u);const i=lics.findIndex(x=>x.id===id);if(i>=0)lics[i]=u;else lics.push(u);window.closeLM();renderLT();toast('Lizenz gespeichert!','s');}catch(e){toast('Fehler: '+e.message,'e');}
-};
-
-function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function showL(on){document.getElementById('lo').style.display=on?'flex':'none';}
-let _tt2;
-function toast(msg,type){const t=document.getElementById('t');t.textContent=msg;t.className='toast show'+(type==='s'?' success':type==='e'?' error':'');clearTimeout(_tt2);_tt2=setTimeout(()=>{t.className='toast';},2800);}
-</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root{--r:#e01a1a;--rd:#a01010;--b:#080808;--b2:#111;--b3:#1a1a1a;--b4:#222;--w:#f0f0f0;--g:#888;--g2:#555;--gr:#1a7a1a;--gl:#22a022;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -248,8 +26,7 @@ body{background:var(--b);color:var(--w);font-family:'Barlow',sans-serif;min-heig
 .le{color:var(--r);font-size:12px;margin-top:10px;min-height:16px;}
 #as{display:none;}#as.visible{display:block;}
 nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(8,8,8,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(224,26,26,.2);}
-.nl{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;}
-.nl span{color:var(--r);}
+.nl{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;}.nl span{color:var(--r);}
 .nb{background:var(--r);color:white;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px;text-transform:uppercase;}
 .nr{display:flex;align-items:center;gap:16px;}
 .ue{font-size:12px;color:var(--g);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
@@ -264,6 +41,8 @@ nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-co
 .tt{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;}
 .ba{background:var(--r);border:none;color:white;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s;}
 .ba:hover{background:var(--rd);}
+.scan-btn{background:transparent;border:1px solid #22a022;color:#22a022;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.scan-btn:hover{background:rgba(34,160,34,.1);}
 table{width:100%;border-collapse:collapse;}
 th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--g);padding:10px 12px;text-align:left;border-bottom:1px solid var(--b4);background:var(--b2);white-space:nowrap;}
 td{padding:8px 12px;border-bottom:1px solid var(--b4);background:var(--b2);vertical-align:middle;}
@@ -273,11 +52,9 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
 .ei2{background:var(--b);border:1px solid var(--r);color:var(--w);padding:5px 8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;width:100%;}
 .sm{width:70px;}.xs{width:50px;}
 .es{background:var(--b);border:1px solid var(--r);color:var(--w);padding:5px 8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;appearance:none;cursor:pointer;}
-.dt{font-size:14px;font-weight:500;}
-.dm{font-size:12px;color:var(--g);}
+.dt{font-size:14px;font-weight:500;}.dm{font-size:12px;color:var(--g);}
 .big{font-family:'Bebas Neue',sans-serif;font-size:18px;}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--g2);display:inline-block;}
-.dot.on{background:#f00;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--g2);display:inline-block;}.dot.on{background:#f00;}
 .ac{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
 .be{background:transparent;border:1px solid var(--b4);color:var(--g);padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;}
 .be:hover{border-color:var(--w);color:var(--w);}
@@ -289,15 +66,13 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
 .tag-no{background:var(--b4);color:var(--g2);font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;padding:2px 6px;border:1px solid var(--b4);margin-right:2px;}
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px);}
 .mo.open{opacity:1;pointer-events:all;}
-.md{background:var(--b2);border:1px solid var(--b4);width:90%;max-width:580px;padding:40px;position:relative;transform:translateY(20px);transition:transform .3s;max-height:90vh;overflow-y:auto;}
+.md{background:var(--b2);border:1px solid var(--b4);width:90%;max-width:620px;padding:40px;position:relative;transform:translateY(20px);transition:transform .3s;max-height:90vh;overflow-y:auto;}
 .mo.open .md{transform:translateY(0);}
-.mc{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--g);font-size:20px;cursor:pointer;}
-.mc:hover{color:var(--r);}
+.mc{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--g);font-size:20px;cursor:pointer;}.mc:hover{color:var(--r);}
 .mt{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:28px;}
 .fg{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
 .fl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--g);}
-.fi{background:var(--b);border:1px solid var(--b4);color:var(--w);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%;}
-.fi:focus{border-color:var(--r);}
+.fi{background:var(--b);border:1px solid var(--b4);color:var(--w);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%;}.fi:focus{border-color:var(--r);}
 .fs{background:var(--b);border:1px solid var(--b4);color:var(--w);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;appearance:none;cursor:pointer;width:100%;}
 .fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .fn{font-size:11px;color:var(--g);margin-top:2px;}
@@ -312,8 +87,7 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
 .uz{border:2px dashed var(--b4);padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative;}
 .uz:hover{border-color:var(--r);}
 .uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.uzh{font-size:13px;color:var(--g);}
-.uzh strong{color:var(--r);}
+.uzh{font-size:13px;color:var(--g);}.uzh strong{color:var(--r);}
 .ufn{font-size:11px;color:var(--g);margin-top:5px;font-style:italic;}
 .ust{margin-top:4px;font-size:12px;min-height:14px;}
 .co{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
@@ -332,10 +106,21 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
 .toast.show{opacity:1;transform:translateY(0);}
 .toast.success{border-color:var(--gl);}
 .toast.error{border-color:var(--r);background:rgba(224,26,26,.1);}
+/* R2 SCAN */
+.r2-file-row{display:flex;align-items:center;padding:8px 12px;background:var(--b3);border:1px solid var(--b4);margin-bottom:4px;gap:8px;}
+.r2-fn{font-size:12px;color:var(--w);font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.r2-ext{font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;padding:2px 6px;flex-shrink:0;}
+.ext-mp3{background:rgba(224,26,26,.15);color:var(--r);border:1px solid var(--r);}
+.ext-wav{background:rgba(34,160,34,.15);color:#22a022;border:1px solid #22a022;}
+.ext-zip,.ext-rar{background:rgba(100,100,255,.15);color:#9999ff;border:1px solid #9999ff;}
+.ext-other{background:var(--b4);color:var(--g);border:1px solid var(--b4);}
+.asgn{background:transparent;border:1px solid var(--r);color:var(--r);padding:3px 10px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+.asgn:hover{background:var(--r);color:white;}
+.asgn.done{border-color:#22a022;color:#22a022;cursor:default;}
+.matched{background:rgba(34,160,34,.05);border-color:rgba(34,160,34,.3);}
 </style>
 </head>
 <body>
-
 <div id="lo"><div class="sp"></div><div class="stxt">Laedt...</div></div>
 
 <div id="ls">
@@ -365,7 +150,10 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
     <div id="sb"></div>
     <div class="tb">
       <div class="tt">BEATS VERWALTEN</div>
-      <button class="ba" onclick="window.openAdd()">+ Neuen Beat</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="scan-btn" onclick="window.openScan()">⟳ R2 Scannen &amp; Auto-Zuordnen</button>
+        <button class="ba" onclick="window.openAdd()">+ Neuen Beat</button>
+      </div>
     </div>
     <div style="overflow-x:auto;">
       <table>
@@ -385,36 +173,53 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
   </div>
 </div>
 
+<!-- R2 SCAN MODAL -->
+<div class="mo" id="r2modal" onclick="if(event.target===this)window.closeScan()">
+  <div class="md" style="max-width:780px;">
+    <button class="mc" onclick="window.closeScan()">X</button>
+    <div class="mt">R2 BUCKET SCANNEN</div>
+    <p style="font-size:13px;color:var(--g);margin-bottom:20px;line-height:1.7;">
+      Scannt <strong style="color:var(--w);">deadshotbeats-audio</strong> und ordnet MP3, WAV und ZIP automatisch den richtigen Beats zu — anhand des Dateinamens.<br>
+      Grün = bereits zugeordnet. Klick auf Pfeil = manuell zuordnen.
+    </p>
+    <div style="display:flex;gap:10px;margin-bottom:20px;">
+      <button class="bsu" style="margin-top:0;" onclick="window.doScan()">⟳ Jetzt scannen</button>
+      <button class="bsu" style="margin-top:0;background:var(--gr);" onclick="window.autoAll()">✓ Alle automatisch zuordnen</button>
+    </div>
+    <div id="r2list"><div style="text-align:center;color:var(--g);padding:40px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;">Klick "Jetzt scannen"</div></div>
+  </div>
+</div>
+
 <!-- ADD MODAL -->
 <div class="mo" id="am" onclick="if(event.target===this)window.closeAdd()">
   <div class="md">
     <button class="mc" onclick="window.closeAdd()">X</button>
     <div class="mt">NEUEN BEAT</div>
     <div class="ub">
-      <div class="ubh"><span class="utag tm">MP3</span>MP3-Datei * (Pflicht)</div>
-      <div class="uz"><input type="file" id="uimp3" accept=".mp3,audio/mpeg" onchange="window.handleUp(this,'mp3')"><div class="uzh">MP3 ablegen oder <strong>klicken</strong></div></div>
+      <div class="ubh"><span class="utag tm">MP3</span>MP3 * Pflicht</div>
+      <div class="uz"><input type="file" id="uimp3" accept=".mp3" onchange="window.handleUp(this,'mp3')"><div class="uzh">MP3 ablegen oder <strong>klicken</strong></div></div>
       <div class="ufn" id="ufmp3">Keine Datei</div><div class="ust" id="usmp3"></div>
     </div>
     <div class="ub">
-      <div class="ubh"><span class="utag tw">WAV</span>WAV-Datei (optional - aktiviert WAV Lease)</div>
-      <div class="uz"><input type="file" id="uiwav" accept=".wav,audio/wav" onchange="window.handleUp(this,'wav')"><div class="uzh">WAV ablegen oder <strong>klicken</strong></div></div>
+      <div class="ubh"><span class="utag tw">WAV</span>WAV (optional)</div>
+      <div class="uz"><input type="file" id="uiwav" accept=".wav" onchange="window.handleUp(this,'wav')"><div class="uzh">WAV ablegen oder <strong>klicken</strong></div></div>
       <div class="ufn" id="ufwav">Keine Datei</div><div class="ust" id="uswav"></div>
     </div>
     <div class="ub">
-      <div class="ubh"><span class="utag ts">STEMS</span>Stems ZIP (optional - aktiviert Trackout und Exclusive)</div>
+      <div class="ubh"><span class="utag ts">STEMS</span>ZIP (optional)</div>
       <div class="uz"><input type="file" id="uistems" accept=".zip,.rar" onchange="window.handleUp(this,'stems')"><div class="uzh">ZIP ablegen oder <strong>klicken</strong></div></div>
       <div class="ufn" id="ufstems">Keine Datei</div><div class="ust" id="usstems"></div>
     </div>
-    <div class="fg"><label class="fl">Titel *</label><input class="fi" id="nn" placeholder="z.B. Future x Southside - Night Invasion Am 145 Bpm"></div>
+    <div class="fg"><label class="fl">Titel *</label><input class="fi" id="nn" placeholder="Future x Southside - Night Invasion Am 145 Bpm"></div>
     <div class="fr">
       <div class="fg"><label class="fl">Genre</label><select class="fs" id="ng"><option>Trap</option><option>Dark</option><option>Melodic</option><option>Drill</option><option>Boom Bap</option></select></div>
-      <div class="fg"><label class="fl">Basispreis MP3 (EUR)</label><input class="fi" id="np" type="number" value="29" min="1"></div>
+      <div class="fg"><label class="fl">Preis MP3 (EUR)</label><input class="fi" id="np" type="number" value="29" min="1"></div>
     </div>
     <div class="fr">
       <div class="fg"><label class="fl">BPM</label><input class="fi" id="nb" type="number" placeholder="135"></div>
-      <div class="fg"><label class="fl">Key</label><input class="fi" id="nk" placeholder="z.B. Cm, Ebm"></div>
+      <div class="fg"><label class="fl">Key</label><input class="fi" id="nk" placeholder="Cm"></div>
     </div>
-    <div class="fg"><label class="fl">YouTube URL (optional)</label><input class="fi" id="ny" placeholder="https://www.youtube.com/watch?v=..."></div>
+    <div class="fg"><label class="fl">YouTube URL</label><input class="fi" id="ny" placeholder="https://youtube.com/watch?v=..."></div>
     <button class="bsu" onclick="window.addBeat()">Beat hinzufuegen</button>
   </div>
 </div>
@@ -423,25 +228,33 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
 <div class="mo" id="fm" onclick="if(event.target===this)window.closeFM()">
   <div class="md">
     <button class="mc" onclick="window.closeFM()">X</button>
-    <div class="mt">DATEIEN VERWALTEN</div>
-    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--r);letter-spacing:1px;margin-bottom:20px;" id="fmt"></div>
-    <div style="background:var(--b3);border:1px solid var(--b4);padding:16px;margin-bottom:20px;">
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--g);margin-bottom:10px;">Aktuelle Dateien</div>
-      <div style="font-size:12px;color:var(--g2);line-height:2;" id="fmm"></div>
-      <div style="font-size:12px;color:var(--g2);line-height:2;" id="fmw"></div>
-      <div style="font-size:12px;color:var(--g2);line-height:2;" id="fms"></div>
+    <div class="mt">DATEIEN</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--r);letter-spacing:1px;margin-bottom:16px;" id="fmt"></div>
+    <div style="background:var(--b3);border:1px solid var(--b4);padding:14px;margin-bottom:20px;font-size:12px;color:var(--g2);line-height:2;">
+      <div id="fmm"></div><div id="fmw"></div><div id="fms"></div>
     </div>
     <div class="ub">
-      <div class="ubh"><span class="utag tw">WAV</span>WAV hochladen / ersetzen</div>
-      <div class="uz"><input type="file" id="uiwavx" accept=".wav,audio/wav" onchange="window.handleUp(this,'wavx')"><div class="uzh">WAV ablegen oder <strong>klicken</strong></div></div>
+      <div class="ubh"><span class="utag tm">MP3</span>Dateiname (exakt wie in R2)</div>
+      <input class="fi" id="fm-mp3" placeholder="Beat Name 135 Bpm Cm.mp3" style="margin-bottom:8px;">
+      <div class="fn">Oder direkt hochladen:</div>
+      <div class="uz" style="margin-top:6px;"><input type="file" id="uimp3x" accept=".mp3" onchange="window.handleUp(this,'mp3x')"><div class="uzh">MP3 <strong>klicken</strong></div></div>
+      <div class="ufn" id="ufmp3x">Keine Datei</div><div class="ust" id="usmp3x"></div>
+    </div>
+    <div class="ub">
+      <div class="ubh"><span class="utag tw">WAV</span>Dateiname (exakt wie in R2)</div>
+      <input class="fi" id="fm-wav" placeholder="Beat Name 135 Bpm Cm.wav" style="margin-bottom:8px;">
+      <div class="fn">Oder direkt hochladen:</div>
+      <div class="uz" style="margin-top:6px;"><input type="file" id="uiwavx" accept=".wav" onchange="window.handleUp(this,'wavx')"><div class="uzh">WAV <strong>klicken</strong></div></div>
       <div class="ufn" id="ufwavx">Keine Datei</div><div class="ust" id="uswavx"></div>
     </div>
     <div class="ub">
-      <div class="ubh"><span class="utag ts">STEMS</span>Stems ZIP hochladen / ersetzen</div>
-      <div class="uz"><input type="file" id="uistmx" accept=".zip,.rar" onchange="window.handleUp(this,'stmx')"><div class="uzh">ZIP ablegen oder <strong>klicken</strong></div></div>
+      <div class="ubh"><span class="utag ts">STEMS</span>Dateiname (exakt wie in R2)</div>
+      <input class="fi" id="fm-stm" placeholder="Beat Name Stems.zip" style="margin-bottom:8px;">
+      <div class="fn">Oder direkt hochladen:</div>
+      <div class="uz" style="margin-top:6px;"><input type="file" id="uistmx" accept=".zip,.rar" onchange="window.handleUp(this,'stmx')"><div class="uzh">ZIP <strong>klicken</strong></div></div>
       <div class="ufn" id="ufstmx">Keine Datei</div><div class="ust" id="usstmx"></div>
     </div>
-    <button class="bsu" onclick="window.saveFM()">Speichern und Live</button>
+    <button class="bsu" onclick="window.saveFM()">Speichern</button>
   </div>
 </div>
 
@@ -456,17 +269,17 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
       <div class="fg"><label class="fl">Typ</label><input class="fi" id="lty"></div>
     </div>
     <div class="fr">
-      <div class="fg"><label class="fl">Startpreis</label><input class="fi" id="lp"><div class="fn">Wird als "ab X EUR" angezeigt</div></div>
-      <div class="fg"><label class="fl">Einheit (e oder e+)</label><input class="fi" id="lpu"></div>
+      <div class="fg"><label class="fl">Preis</label><input class="fi" id="lp"></div>
+      <div class="fg"><label class="fl">Einheit (e / e+)</label><input class="fi" id="lpu"></div>
     </div>
-    <div class="fg"><label class="fl">Multiplikator</label><input class="fi" id="lm" type="number" step="0.1"><div class="fn">MP3=1.0 / WAV=2.0 / Trackout=3.4 / Exclusive=17.2</div></div>
+    <div class="fg"><label class="fl">Multiplikator</label><input class="fi" id="lmult" type="number" step="0.1"><div class="fn">MP3=1 WAV=2 Trackout=3.4 Exclusive=17.2</div></div>
     <div class="fr">
       <div class="fg" style="flex-direction:row;align-items:center;gap:10px;margin-top:8px;"><input type="checkbox" id="lf" style="width:16px;height:16px;accent-color:var(--r);"><label class="fl" style="margin:0;">Popular</label></div>
       <div class="fg" style="flex-direction:row;align-items:center;gap:10px;margin-top:8px;"><input type="checkbox" id="li" style="width:16px;height:16px;accent-color:var(--r);"><label class="fl" style="margin:0;">Anfrage statt Kauf</label></div>
     </div>
-    <div class="fg"><label class="fl">Features (eine pro Zeile)</label><textarea class="fi" id="lfe" rows="6" style="resize:vertical;font-size:13px;line-height:1.6;"></textarea></div>
-    <div class="fg"><label class="fl">Deaktivierte Features</label><textarea class="fi" id="ld" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;"></textarea></div>
-    <button class="bsu" onclick="window.saveLic()">Lizenz speichern</button>
+    <div class="fg"><label class="fl">Features (eine pro Zeile)</label><textarea class="fi" id="lfe" rows="6" style="resize:vertical;font-size:13px;"></textarea></div>
+    <div class="fg"><label class="fl">Deaktivierte Features</label><textarea class="fi" id="ld" rows="3" style="resize:vertical;font-size:13px;"></textarea></div>
+    <button class="bsu" onclick="window.saveLic()">Speichern</button>
   </div>
 </div>
 
@@ -474,7 +287,7 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
 <div class="co" id="co">
   <div class="cb">
     <div class="ct2">Beat loeschen?</div>
-    <div class="ctxt" id="ct">Dieser Beat wird geloescht.</div>
+    <div class="ctxt" id="ct"></div>
     <div class="cac">
       <button class="bcc" onclick="window.cC()">Abbrechen</button>
       <button class="bcd" onclick="window.doDel()">Loeschen</button>
@@ -483,5 +296,377 @@ tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
 </div>
 
 <div class="toast" id="t"></div>
+
+<script>
+firebase.initializeApp({apiKey:"AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",authDomain:"deadshot-beats.firebaseapp.com",projectId:"deadshot-beats",storageBucket:"deadshot-beats.firebasestorage.app",messagingSenderId:"252096563375",appId:"1:252096563375:web:58193b52e325147f592c5a"});
+const auth=firebase.auth(), db=firebase.firestore();
+const R2_UP='https://broad-resonance-69c2.deadshotbeatz.workers.dev/upload';
+const R2_LS='https://broad-resonance-69c2.deadshotbeatz.workers.dev/list';
+const GENRES=['Trap','Dark','Melodic','Drill','Boom Bap'];
+const DB0=[
+  {id:1,name:'21 Savage X Future - Sacrifice',genre:'Trap',bpm:135,key:'Ebm',price:29,yt:'',file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3'},
+  {id:2,name:'21 Savage - Nolenso',genre:'Trap',bpm:132,key:'Cm',price:29,yt:'',file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3'},
+  {id:3,name:'21 Savage Type Beat 85',genre:'Trap',bpm:85,key:'Bbm',price:29,yt:'',file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3'},
+  {id:4,name:'Drake - Midnight',genre:'Melodic',bpm:123,key:'Cm',price:29,yt:'',file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3'},
+  {id:5,name:'Drake x 21 Savage - NoFeelings',genre:'Dark',bpm:146,key:'Ebmaj',price:29,yt:'',file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3'},
+  {id:6,name:'Future - Legacy',genre:'Trap',bpm:137,key:'Em',price:29,yt:'',file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3'},
+  {id:7,name:'Future x Playboy Carti x Drake - Big Dog',genre:'Dark',bpm:143,key:'Em',price:29,yt:'',file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3'},
+  {id:8,name:'Future x 21 Savage - Codein Rain',genre:'Melodic',bpm:136,key:'Cm',price:29,yt:'',file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3'},
+  {id:9,name:'Future x Southside - Ski Driver',genre:'Trap',bpm:135,key:'Ebmaj',price:29,yt:'',file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3'},
+  {id:10,name:'Ghosted',genre:'Melodic',bpm:0,key:'',price:29,yt:'',file:'Ghosted.mp3'},
+  {id:11,name:'Mixdown 2',genre:'Trap',bpm:0,key:'',price:29,yt:'',file:'Mixdown(2).mp3'},
+  {id:12,name:'Mixdown',genre:'Trap',bpm:0,key:'',price:29,yt:'',file:'Mixdown.mp3'},
+  {id:13,name:"A$AP Rocky - Dumb Shit",genre:'Trap',bpm:130,key:'Cm',price:29,yt:'',file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3'},
+  {id:14,name:'Florida Type Beat - Big Stepper',genre:'Drill',bpm:156,key:'D#min',price:29,yt:'',file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3'},
+  {id:15,name:'Larb - 21 Savage Type Beat',genre:'Trap',bpm:165,key:'G#',price:29,yt:'',file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3'},
+  {id:16,name:'Put In My Cup - Future',genre:'Trap',bpm:130,key:'Ebm',price:29,yt:'',file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3'},
+  {id:17,name:'Roulete - 21 Savage',genre:'Dark',bpm:77,key:'C#m',price:29,yt:'',file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3'},
+  {id:18,name:'Travis Scott x Ye - Titel',genre:'Dark',bpm:130,key:'Dm',price:29,yt:'',file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3'},
+  {id:19,name:'DGAF - Future ft. Quavo',genre:'Trap',bpm:135,key:'Bmin',price:29,yt:'',file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3'},
+  {id:20,name:'Darkness In My Visions',genre:'Dark',bpm:0,key:'',price:29,yt:'',file:'Darkness%20in%20my%20Visions(3).mp3'},
+  {id:21,name:'Decision - 21 Savage',genre:'Trap',bpm:134,key:'D#m',price:29,yt:'',file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3'},
+  {id:22,name:'Draft Day - Future',genre:'Trap',bpm:140,key:'Abm',price:29,yt:'',file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3'}
+];
+const DL=[
+  {id:'mp3',order:1,type:'Basic',name:'MP3 LEASE',price:'29',priceUnit:'e',multiplier:1,featured:false,inquire:false,features:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],disabled:['WAV File','Trackout Stems','Exclusive Rights']},
+  {id:'wav',order:2,type:'Standard',name:'WAV LEASE',price:'59',priceUnit:'e',multiplier:2,featured:true,inquire:false,features:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],disabled:['Trackout Stems','Exclusive Rights']},
+  {id:'trackout',order:3,type:'Premium',name:'TRACKOUT',price:'99',priceUnit:'e',multiplier:3.4,featured:false,inquire:false,features:['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],disabled:['Exclusive Rights']},
+  {id:'exclusive',order:4,type:'One-Time',name:'EXCLUSIVE',price:'499',priceUnit:'e+',multiplier:17.2,featured:false,inquire:true,features:['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price on request'],disabled:[]}
+];
+
+let beats=[],lics=[],editId=null,delId=null,fmId=null,r2files=[];
+
+auth.onAuthStateChanged(async function(u){
+  if(u){
+    document.getElementById('ls').classList.add('hidden');
+    document.getElementById('as').classList.add('visible');
+    document.getElementById('ue').textContent=u.email;
+    await loadBeats(); await loadLics();
+  } else {
+    document.getElementById('ls').classList.remove('hidden');
+    document.getElementById('as').classList.remove('visible');
+  }
+});
+
+window.doLogin=async function(){
+  var e=document.getElementById('ei').value.trim(),p=document.getElementById('pi').value,er=document.getElementById('le');
+  er.textContent=''; if(!e||!p){er.textContent='E-Mail und Passwort eingeben.';return;}
+  try{await auth.signInWithEmailAndPassword(e,p);}
+  catch(x){er.textContent=x.code==='auth/invalid-credential'?'Falsche Zugangsdaten.':'Fehler: '+x.message;}
+};
+window.doLogout=async function(){await auth.signOut();};
+document.getElementById('pi').addEventListener('keydown',function(e){if(e.key==='Enter')window.doLogin();});
+document.getElementById('ei').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('pi').focus();});
+
+async function loadBeats(){
+  showL(true);
+  try{
+    var s=await db.collection('beats').get();
+    if(s.empty){
+      var batch=db.batch();
+      DB0.forEach(function(x){batch.set(db.collection('beats').doc(String(x.id)),x);});
+      await batch.commit(); beats=DB0.slice(); toast('Beats importiert!','s');
+    } else {
+      beats=s.docs.map(function(d){return d.data();});
+      beats.sort(function(a,b){return (Number(a.id)||0)-(Number(b.id)||0);});
+    }
+  }catch(x){toast('Fehler: '+x.message,'e');}
+  showL(false); ra();
+}
+async function loadLics(){
+  try{
+    var s=await db.collection('licenses').get();
+    if(s.empty){
+      var batch=db.batch();
+      DL.forEach(function(l){batch.set(db.collection('licenses').doc(l.id),l);});
+      await batch.commit(); lics=DL.slice();
+    } else {
+      lics=s.docs.map(function(d){return d.data();});
+      lics.sort(function(a,b){return (a.order||0)-(b.order||0);});
+    }
+  }catch(x){toast('Fehler Liz: '+x.message,'e');}
+  renderLT();
+}
+async function saveB(b){await db.collection('beats').doc(String(b.id)).set(b);}
+async function delB(id){await db.collection('beats').doc(String(id)).delete();}
+
+// ── R2 SCAN ──────────────────────────────────────────────
+window.openScan=function(){document.getElementById('r2modal').classList.add('open');if(!r2files.length)window.doScan();};
+window.closeScan=function(){document.getElementById('r2modal').classList.remove('open');};
+
+window.doScan=async function(){
+  var el=document.getElementById('r2list');
+  el.innerHTML='<div style="text-align:center;color:var(--g);padding:40px;font-family:\'Barlow Condensed\',sans-serif;letter-spacing:2px;">Scannt R2 Bucket...</div>';
+  try{
+    var res=await fetch(R2_LS);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    var data=await res.json();
+    r2files=data.files||[];
+    renderScan();
+  }catch(e){
+    el.innerHTML='<div style="background:rgba(224,26,26,.1);border:1px solid var(--r);padding:16px;font-size:13px;color:var(--g);line-height:1.8;">'
+      +'<strong style="color:var(--r);">Worker /list Endpoint fehlt.</strong><br><br>'
+      +'Fuege deinem Cloudflare Worker diese Route hinzu:<br>'
+      +'<code style="font-size:11px;color:var(--w);background:var(--b3);padding:8px;display:block;margin-top:8px;">'
+      +'if (url.pathname === \'/list\') {<br>'
+      +'&nbsp;&nbsp;const list = await env.R2_BUCKET.list();<br>'
+      +'&nbsp;&nbsp;return Response.json({ files: list.objects.map(o=>({name:o.key,size:o.size})) });<br>'
+      +'}'
+      +'</code><br>'
+      +'Bis dahin: nutze "Files" beim Beat und trage Dateinamen manuell ein.</div>';
+  }
+};
+
+function autoMatch(name){
+  var nl=name.toLowerCase().replace(/\.[^.]+$/,'').replace(/[_\-]/g,' ');
+  var best=null,bestScore=0;
+  beats.forEach(function(b){
+    var bl=b.name.toLowerCase().replace(/[_\-]/g,' ');
+    var words=bl.split(/\s+/).filter(function(w){return w.length>3;});
+    var hits=words.filter(function(w){return nl.includes(w);}).length;
+    var score=hits/Math.max(words.length,1);
+    if(score>bestScore&&score>0.4){bestScore=score;best=b;}
+  });
+  return best;
+}
+
+function renderScan(){
+  var el=document.getElementById('r2list');
+  if(!r2files.length){el.innerHTML='<div style="color:var(--g);padding:20px;text-align:center;">Keine Dateien</div>';return;}
+  var claimed={};
+  beats.forEach(function(b){
+    if(b.file)          claimed[decodeURIComponent(b.file)]={b:b,t:'MP3'};
+    if(b.wavFile)       claimed[decodeURIComponent(b.wavFile)]={b:b,t:'WAV'};
+    if(b.trackoutFile)  claimed[decodeURIComponent(b.trackoutFile)]={b:b,t:'STM'};
+  });
+  var html='<div style="font-size:11px;color:var(--g);margin-bottom:10px;">'+r2files.length+' Dateien im Bucket</div>';
+  r2files.forEach(function(f){
+    var name=f.name||f;
+    var ext=name.split('.').pop().toLowerCase();
+    var ec=ext==='mp3'?'ext-mp3':ext==='wav'?'ext-wav':(ext==='zip'||ext==='rar')?'ext-zip':'ext-other';
+    var claim=claimed[name];
+    var match=autoMatch(name);
+    var rc=claim?'matched':'';
+    html+='<div class="r2-file-row '+rc+'">';
+    html+='<span class="r2-ext '+ec+'">'+ext.toUpperCase()+'</span>';
+    html+='<span class="r2-fn" title="'+esc(name)+'">'+esc(name)+'</span>';
+    if(claim){
+      html+='<span class="asgn done">✓ '+esc(claim.b.name.substring(0,18))+'</span>';
+    } else if(match){
+      html+='<button class="asgn" onclick="window.assign(\''+encodeURIComponent(name)+'\',\''+ext+'\','+match.id+')">→ Beat '+match.id+': '+esc(match.name.substring(0,16))+'</button>';
+    } else {
+      html+='<button class="asgn" onclick="window.manualAssign(\''+encodeURIComponent(name)+'\',\''+ext+'\')">Zuordnen</button>';
+    }
+    html+='</div>';
+  });
+  el.innerHTML=html;
+}
+
+window.assign=async function(enc,ext,beatId){
+  var b=beats.find(function(x){return x.id===beatId;});if(!b)return;
+  if(ext==='mp3') b.file=enc;
+  else if(ext==='wav') b.wavFile=enc;
+  else if(ext==='zip'||ext==='rar') b.trackoutFile=enc;
+  try{await saveB(b);toast('Zugeordnet!','s');ra();renderScan();}
+  catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+window.manualAssign=function(enc,ext){
+  var list=beats.map(function(b){return b.id+': '+b.name;}).join('\n');
+  var id=prompt('Beat ID eingeben:\n\n'+list);
+  if(!id)return;
+  window.assign(enc,ext,parseInt(id));
+};
+
+window.autoAll=async function(){
+  if(!r2files.length){toast('Erst scannen!','');return;}
+  var count=0;
+  for(var i=0;i<r2files.length;i++){
+    var f=r2files[i];
+    var name=f.name||f;
+    var ext=name.split('.').pop().toLowerCase();
+    var match=autoMatch(name);
+    if(!match)continue;
+    var already=(ext==='mp3'&&match.file)||(ext==='wav'&&match.wavFile)||((ext==='zip'||ext==='rar')&&match.trackoutFile);
+    if(already)continue;
+    if(ext==='mp3') match.file=encodeURIComponent(name);
+    else if(ext==='wav') match.wavFile=encodeURIComponent(name);
+    else if(ext==='zip'||ext==='rar') match.trackoutFile=encodeURIComponent(name);
+    try{await saveB(match);count++;}catch(e){}
+  }
+  ra(); renderScan();
+  toast(count+' Dateien zugeordnet!','s');
+};
+
+// ── RENDER ───────────────────────────────────────────────
+function ra(){rStats();rTable();}
+function rStats(){
+  var g={};beats.forEach(function(b){g[b.genre]=(g[b.genre]||0)+1;});
+  var t=Object.entries(g).sort(function(a,b){return b[1]-a[1];})[0];
+  document.getElementById('sb').innerHTML=
+    '<div class="sc"><div class="sn">'+beats.length+'</div><div class="sl">Beats Total</div></div>'+
+    '<div class="sc"><div class="sn">'+(t?t[0]:'-')+'</div><div class="sl">Top Genre</div></div>'+
+    '<div class="sc"><div class="sn">'+beats.filter(function(b){return !!b.wavFile;}).length+'</div><div class="sl">Mit WAV</div></div>'+
+    '<div class="sc"><div class="sn">'+beats.filter(function(b){return !!b.trackoutFile;}).length+'</div><div class="sl">Mit Stems</div></div>';
+}
+function ft(ok,l){return ok?'<span class="tag-ok">+'+l+'</span>':'<span class="tag-no">-'+l+'</span>';}
+function rTable(){
+  document.getElementById('bt').innerHTML=beats.map(function(b,i){
+    var e=editId===b.id;
+    return '<tr class="'+(e?'ed':'')+'">'+
+      '<td class="tn">'+(i+1)+'</td>'+
+      '<td style="min-width:170px;">'+(e?'<input class="ei2" id="en" value="'+esc(b.name)+'">':'<div class="dt">'+esc(b.name)+'</div>')+'</td>'+
+      '<td>'+(e?'<select class="es" id="eg">'+GENRES.map(function(g){return '<option value="'+g+'"'+(b.genre===g?' selected':'')+'>'+g+'</option>';}).join('')+'</select>':'<span class="dm">'+b.genre+'</span>')+'</td>'+
+      '<td>'+(e?'<input class="ei2 sm" id="ebpm" type="number" value="'+(b.bpm||0)+'">':'<span class="dm">'+(b.bpm>0?b.bpm:'--')+'</span>')+'</td>'+
+      '<td>'+(e?'<input class="ei2 sm" id="ek" value="'+esc(b.key||'')+'">':'<span class="dm">'+(b.key||'--')+'</span>')+'</td>'+
+      '<td>'+(e?'<input class="ei2 xs" id="ep" type="number" value="'+(b.price||29)+'">EUR':'<span class="big">'+(b.price||29)+'E</span>')+'</td>'+
+      '<td>'+ft(!!b.file,'MP3')+ft(!!b.wavFile,'WAV')+ft(!!b.trackoutFile,'STM')+'</td>'+
+      '<td style="text-align:center;">'+(e?'<input class="ei2" id="eyt" value="'+esc(b.yt||'')+'" placeholder="YT URL" style="min-width:120px;">':'<span class="dot '+(b.yt?'on':'')+'" title="'+(b.yt||'')+'"></span>')+'</td>'+
+      '<td><div class="ac">'+
+        (e?'<button class="bs" onclick="window.se('+b.id+')">SAVE</button><button class="bc" onclick="window.ce()">X</button>':
+           '<button class="be" onclick="window.startE('+b.id+')">Edit</button><button class="be" onclick="window.openFM('+b.id+')" style="border-color:rgba(34,160,34,.5);color:#22a022;">Files</button><button class="bd" onclick="window.oC('+b.id+')">Del</button>')+
+      '</div></td></tr>';
+  }).join('');
+}
+
+window.startE=function(id){editId=id;rTable();setTimeout(function(){var e=document.getElementById('en');if(e)e.focus();},50);};
+window.ce=function(){editId=null;rTable();};
+window.se=async function(id){
+  var b=beats.find(function(x){return x.id===id;});if(!b)return;
+  b.name=document.getElementById('en').value.trim()||b.name;
+  b.genre=document.getElementById('eg').value;
+  b.bpm=parseInt(document.getElementById('ebpm').value)||0;
+  b.key=document.getElementById('ek').value.trim();
+  b.price=parseInt(document.getElementById('ep').value)||29;
+  b.yt=document.getElementById('eyt').value.trim();
+  editId=null;
+  try{await saveB(b);ra();toast('Gespeichert!','s');}
+  catch(e){toast('Fehler: '+e.message,'e');}
+};
+window.oC=function(id){delId=id;var b=beats.find(function(x){return x.id===id;});document.getElementById('ct').textContent='"'+(b?b.name:'')+'" wirklich loeschen?';document.getElementById('co').classList.add('open');};
+window.cC=function(){document.getElementById('co').classList.remove('open');delId=null;};
+window.doDel=async function(){
+  if(!delId)return;
+  try{await delB(delId);beats=beats.filter(function(b){return b.id!==delId;});window.cC();editId=null;ra();toast('Geloescht','');}
+  catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+window.openAdd=function(){document.getElementById('am').classList.add('open');setTimeout(function(){document.getElementById('nn').focus();},100);resetU(['mp3','wav','stems']);};
+window.closeAdd=function(){
+  document.getElementById('am').classList.remove('open');
+  ['nn','nb','nk','ny'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('np').value='29';resetU(['mp3','wav','stems']);
+};
+window.addBeat=async function(){
+  var name=document.getElementById('nn').value.trim();
+  if(!name){toast('Titel Pflichtfeld','');return;}
+  if(!window._mp3){toast('MP3 ist Pflicht!','');return;}
+  var maxId=beats.length?Math.max.apply(null,beats.map(function(b){return b.id;})):0;
+  var nb={id:maxId+1,name:name,genre:document.getElementById('ng').value,bpm:parseInt(document.getElementById('nb').value)||0,key:document.getElementById('nk').value.trim(),price:parseInt(document.getElementById('np').value)||29,yt:document.getElementById('ny').value.trim(),file:encodeURIComponent(window._mp3)};
+  if(window._wav)   nb.wavFile=encodeURIComponent(window._wav);
+  if(window._stems) nb.trackoutFile=encodeURIComponent(window._stems);
+  try{await saveB(nb);beats.push(nb);window.closeAdd();ra();toast('Beat hinzugefuegt!','s');}
+  catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+window.openFM=function(id){
+  fmId=id;var b=beats.find(function(x){return x.id===id;});
+  document.getElementById('fmt').textContent=b.name;
+  document.getElementById('fmm').textContent=b.file?'MP3: '+decodeURIComponent(b.file):'Keine MP3';
+  document.getElementById('fmw').textContent=b.wavFile?'WAV: '+decodeURIComponent(b.wavFile):'Keine WAV';
+  document.getElementById('fms').textContent=b.trackoutFile?'Stems: '+decodeURIComponent(b.trackoutFile):'Keine Stems';
+  document.getElementById('fm-mp3').value=b.file?decodeURIComponent(b.file):'';
+  document.getElementById('fm-wav').value=b.wavFile?decodeURIComponent(b.wavFile):'';
+  document.getElementById('fm-stm').value=b.trackoutFile?decodeURIComponent(b.trackoutFile):'';
+  resetU(['mp3x','wavx','stmx']);
+  document.getElementById('fm').classList.add('open');
+};
+window.closeFM=function(){document.getElementById('fm').classList.remove('open');fmId=null;};
+window.saveFM=async function(){
+  var b=beats.find(function(x){return x.id===fmId;});if(!b)return;
+  var m=document.getElementById('fm-mp3').value.trim();
+  var w=document.getElementById('fm-wav').value.trim();
+  var s=document.getElementById('fm-stm').value.trim();
+  if(m) b.file=encodeURIComponent(m);
+  else if(window._mp3x) b.file=encodeURIComponent(window._mp3x);
+  if(w) b.wavFile=encodeURIComponent(w);
+  else if(window._wavx) b.wavFile=encodeURIComponent(window._wavx);
+  if(s) b.trackoutFile=encodeURIComponent(s);
+  else if(window._stmx) b.trackoutFile=encodeURIComponent(window._stmx);
+  try{await saveB(b);window.closeFM();ra();toast('Gespeichert!','s');}
+  catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+function resetU(types){
+  types.forEach(function(t){
+    window['_'+t]=null;
+    var s=document.getElementById('us'+t),f=document.getElementById('uf'+t),u=document.getElementById('ui'+t);
+    if(s)s.innerHTML='';if(f)f.textContent='Keine Datei';if(u)u.value='';
+  });
+}
+window.handleUp=async function(input,type){
+  var file=input.files[0];if(!file)return;
+  var ext=file.name.split('.').pop().toLowerCase();
+  var ok={mp3:['mp3'],mp3x:['mp3'],wav:['wav'],wavx:['wav'],stems:['zip','rar'],stmx:['zip','rar']};
+  if(!(ok[type]||[]).includes(ext)){toast('Falscher Typ!','e');input.value='';return;}
+  var s=document.getElementById('us'+type),f=document.getElementById('uf'+type);
+  if(f)f.textContent=file.name;
+  if(s)s.innerHTML='<span style="color:#888">Upload laeuft...</span>';
+  try{
+    var fd=new FormData();fd.append('file',file);fd.append('filename',file.name);
+    var res=await fetch(R2_UP,{method:'POST',body:fd});
+    if(!res.ok)throw new Error(await res.text());
+    var data=await res.json();
+    window['_'+type]=data.filename||file.name;
+    if(s)s.innerHTML='<span style="color:#22a022">OK: '+(data.filename||file.name)+'</span>';
+    toast('Hochgeladen!','s');
+  }catch(e){
+    if(s)s.innerHTML='<span style="color:var(--r)">Fehler: '+e.message+'</span>';
+    toast('Upload fehlgeschlagen','e');window['_'+type]=null;
+  }
+};
+
+function renderLT(){
+  document.getElementById('lt').innerHTML=lics.map(function(l){
+    return '<tr>'+
+      '<td><div class="dt">'+l.name+'</div></td>'+
+      '<td><span class="dm">'+l.type+'</span></td>'+
+      '<td><span class="big">'+l.price+l.priceUnit+'</span></td>'+
+      '<td style="text-align:center;"><span class="dot '+(l.featured?'on':'')+'"></span></td>'+
+      '<td><button class="be" onclick="window.openLM(\''+l.id+'\')">Edit</button></td>'+
+    '</tr>';
+  }).join('');
+}
+window.openLM=function(id){
+  var l=lics.find(function(x){return x.id===id;});if(!l)return;
+  document.getElementById('lid').value=l.id;
+  document.getElementById('ln').value=l.name;
+  document.getElementById('lty').value=l.type;
+  document.getElementById('lp').value=l.price;
+  document.getElementById('lpu').value=l.priceUnit;
+  document.getElementById('lmult').value=l.multiplier||1;
+  document.getElementById('lf').checked=l.featured;
+  document.getElementById('li').checked=l.inquire;
+  document.getElementById('lfe').value=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(function(x){return x;})).join('\n');
+  document.getElementById('ld').value=(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(function(x){return x;})).join('\n');
+  document.getElementById('lm2').classList.add('open');
+};
+window.closeLM=function(){document.getElementById('lm2').classList.remove('open');};
+window.saveLic=async function(){
+  var id=document.getElementById('lid').value;
+  var u={id:id,name:document.getElementById('ln').value.trim(),type:document.getElementById('lty').value.trim(),price:document.getElementById('lp').value.trim(),priceUnit:document.getElementById('lpu').value.trim(),multiplier:parseFloat(document.getElementById('lmult').value)||1,featured:document.getElementById('lf').checked,inquire:document.getElementById('li').checked,features:document.getElementById('lfe').value.trim().split('\n').filter(function(x){return x;}),disabled:document.getElementById('ld').value.trim().split('\n').filter(function(x){return x;}),order:(lics.find(function(x){return x.id===id;})||{order:0}).order};
+  try{
+    await db.collection('licenses').doc(id).set(u);
+    var i=lics.findIndex(function(x){return x.id===id;});
+    if(i>=0)lics[i]=u;else lics.push(u);
+    window.closeLM();renderLT();toast('Lizenz gespeichert!','s');
+  }catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showL(on){document.getElementById('lo').style.display=on?'flex':'none';}
+var _tt;
+function toast(msg,type){var t=document.getElementById('t');t.textContent=msg;t.className='toast show'+(type==='s'?' success':type==='e'?' error':'');clearTimeout(_tt);_tt=setTimeout(function(){t.className='toast';},2800);}
+</script>
 </body>
 </html>
