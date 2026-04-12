@@ -1,28 +1,12 @@
-/**
- * DEADSHOT BEATS – Cloudflare Worker: R2 Upload
- *
- * Deploy-Anleitung:
- * 1. Cloudflare Dashboard → Workers & Pages → Create Worker
- * 2. Diesen Code einfügen
- * 3. Settings → Variables → R2 Bucket binden:
- *    Variable Name: BEATS_BUCKET  →  dein R2 Bucket
- * 4. Unter "Routes" die Domain/Route eintragen z.B. upload.deinedomain.workers.dev
- *
- * In admin.html dann:
- *   const R2_UPLOAD_WORKER = 'https://upload.deinedomain.workers.dev/upload';
- */
-
 export default {
   async fetch(request, env) {
 
-    // CORS für deine Admin-Domain erlauben
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',   // Ersetze * mit deiner echten Domain: 'https://admin.deadshot-beats.com'
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Origin': 'https://admin.deadshotbeats.com',
+      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
 
-    // OPTIONS Preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
     }
@@ -34,68 +18,46 @@ export default {
       try {
         const formData = await request.formData();
         const file = formData.get('file');
-
         if (!file) {
-          return new Response(JSON.stringify({ error: 'Keine Datei gefunden' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          return new Response(JSON.stringify({ error: 'Keine Datei' }), {
+            status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders }
           });
         }
-
-        // Dateiname bereinigen (Sonderzeichen entfernen)
-        const originalName = formData.get('filename') || file.name;
-        const cleanName = originalName; // Originalname behalten für R2
-
-        // Dateityp prüfen
-        const ext = cleanName.split('.').pop().toLowerCase();
-        if (!['mp3', 'wav'].includes(ext)) {
-          return new Response(JSON.stringify({ error: 'Nur MP3 und WAV erlaubt' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        const filename = formData.get('filename') || file.name;
+        const ext = filename.split('.').pop().toLowerCase();
+        if (!['mp3', 'wav', 'zip', 'rar'].includes(ext)) {
+          return new Response(JSON.stringify({ error: 'Nur MP3, WAV, ZIP erlaubt' }), {
+            status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders }
           });
         }
-
-        // Content-Type setzen
-        const contentType = ext === 'mp3' ? 'audio/mpeg' : 'audio/wav';
-
-        // Zu R2 hochladen
+        const contentTypes = { mp3: 'audio/mpeg', wav: 'audio/wav', zip: 'application/zip', rar: 'application/x-rar-compressed' };
         const arrayBuffer = await file.arrayBuffer();
-        await env.BEATS_BUCKET.put(cleanName, arrayBuffer, {
-          httpMetadata: {
-            contentType,
-            // Erlaubt direkte Downloads
-            contentDisposition: `attachment; filename="${cleanName}"`,
-          }
+        await env.BEATS_BUCKET.put(filename, arrayBuffer, {
+          httpMetadata: { contentType: contentTypes[ext] || 'application/octet-stream' }
         });
-
-        return new Response(JSON.stringify({
-          success: true,
-          filename: cleanName,
-          url: `https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/${encodeURIComponent(cleanName)}`
-        }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        return new Response(JSON.stringify({ success: true, filename }), {
+          status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
-
       } catch (err) {
         return new Response(JSON.stringify({ error: err.message }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders }
+          status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders }
         });
       }
     }
 
-    // ─── GET /list (optional: alle Dateien im Bucket auflisten) ───────────────
+    // ─── GET /list ─────────────────────────────────────────────────────────────
     if (request.method === 'GET' && url.pathname === '/list') {
-      const listed = await env.BEATS_BUCKET.list();
-      const files = listed.objects.map(o => ({
-        name: o.key,
-        size: o.size,
-        uploaded: o.uploaded
-      }));
-      return new Response(JSON.stringify(files), {
-        headers: { 'Content-Type': 'application/json', ...corsHeaders }
-      });
+      try {
+        const listed = await env.BEATS_BUCKET.list();
+        const files = listed.objects.map(o => ({ name: o.key, size: o.size }));
+        return new Response(JSON.stringify({ files }), {
+          status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders }
+        });
+      }
     }
 
     return new Response('Not found', { status: 404 });
