@@ -5,848 +5,483 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DEADSHOT BEATS — Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet">
-
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, query, orderBy }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc, writeBatch, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-// ─── FIREBASE CONFIG (keine sensiblen Keys – nur public config) ───────────────
-// ERSETZE DIESE WERTE MIT DEINEN EIGENEN AUS DEM FIREBASE CONSOLE
-const firebaseConfig = {
-  apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
-  authDomain: "deadshot-beats.firebaseapp.com",
-  projectId: "deadshot-beats",
-  storageBucket: "deadshot-beats.firebasestorage.app",
-  messagingSenderId: "252096563375",
-  appId: "1:252096563375:web:58193b52e325147f592c5a"
-};
-
-// ─── CLOUDFLARE R2 WORKER URL ─────────────────────────────────────────────────
-// Erstelle einen Cloudflare Worker der den Upload handelt (kein Secret im HTML!)
-// Beispiel Worker URL: https://upload.DEIN_SUBDOMAIN.workers.dev
-const R2_UPLOAD_WORKER = 'https://broad-resonance-69c2.deadshotbeatz.workers.dev/upload';
-const R2_BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
-
-// ─── DEFAULT BEATS (nur für erste Migration zu Firestore) ────────────────────
-const DEFAULT_BEATS = [
-  { id:1,  name:'21 Savage X Future – Sacrifice',            genre:'Trap',    bpm:135, key:'Ebm',   price:29, yt:'', file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3' },
-  { id:2,  name:'21 Savage – Nolenso',                       genre:'Trap',    bpm:132, key:'Cm',    price:29, yt:'', file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3' },
-  { id:3,  name:'21 Savage Type Beat 85',                    genre:'Trap',    bpm:85,  key:'Bbm',   price:29, yt:'', file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3' },
-  { id:4,  name:'Drake – Midnight',                          genre:'Melodic', bpm:123, key:'Cm',    price:29, yt:'', file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3' },
-  { id:5,  name:'Drake x 21 Savage – NoFeelings',            genre:'Dark',    bpm:146, key:'Ebmaj', price:29, yt:'', file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3' },
-  { id:6,  name:'Future – Legacy',                           genre:'Trap',    bpm:137, key:'Em',    price:29, yt:'', file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3' },
-  { id:7,  name:'Future x Playboy Carti x Drake – Big Dog',  genre:'Dark',    bpm:143, key:'Em',    price:29, yt:'', file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3' },
-  { id:8,  name:'Future x 21 Savage – Codein Rain',          genre:'Melodic', bpm:136, key:'Cm',    price:29, yt:'', file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3' },
-  { id:9,  name:'Future x Southside – Ski Driver',           genre:'Trap',    bpm:135, key:'Ebmaj', price:29, yt:'', file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3' },
-  { id:10, name:'Ghosted',                                   genre:'Melodic', bpm:0,   key:'',      price:29, yt:'', file:'Ghosted.mp3' },
-  { id:11, name:'Mixdown 2',                                 genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown(2).mp3' },
-  { id:12, name:'Mixdown',                                   genre:'Trap',    bpm:0,   key:'',      price:29, yt:'', file:'Mixdown.mp3' },
-  { id:13, name:'A$AP Rocky – Dumb Shit',                    genre:'Trap',    bpm:130, key:'Cm',    price:29, yt:'', file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3' },
-  { id:14, name:'Florida Type Beat – Big Stepper',           genre:'Drill',   bpm:156, key:'D#min', price:29, yt:'', file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3' },
-  { id:15, name:'Larb – 21 Savage Type Beat',                genre:'Trap',    bpm:165, key:'G#',    price:29, yt:'', file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3' },
-  { id:16, name:'Put In My Cup – Future',                    genre:'Trap',    bpm:130, key:'Ebm',   price:29, yt:'', file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3' },
-  { id:17, name:'Roulete – 21 Savage',                       genre:'Dark',    bpm:77,  key:'C#m',   price:29, yt:'', file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3' },
-  { id:18, name:'Travis Scott x Ye – Titel',                 genre:'Dark',    bpm:130, key:'Dm',    price:29, yt:'', file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3' },
-  { id:19, name:'DGAF – Future ft. Quavo',                   genre:'Trap',    bpm:135, key:'Bmin',  price:29, yt:'', file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3' },
-  { id:20, name:'Darkness In My Visions',                    genre:'Dark',    bpm:0,   key:'',      price:29, yt:'', file:'Darkness%20in%20my%20Visions(3).mp3' },
-  { id:21, name:'Decision – 21 Savage',                      genre:'Trap',    bpm:134, key:'D#m',   price:29, yt:'', file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3' },
-  { id:22, name:'Draft Day – Future',                        genre:'Trap',    bpm:140, key:'Abm',   price:29, yt:'', file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3' },
+const firebaseConfig={apiKey:"AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",authDomain:"deadshot-beats.firebaseapp.com",projectId:"deadshot-beats",storageBucket:"deadshot-beats.firebasestorage.app",messagingSenderId:"252096563375",appId:"1:252096563375:web:58193b52e325147f592c5a"};
+const R2='https://broad-resonance-69c2.deadshotbeatz.workers.dev/upload';
+const GENRES=['Trap','Dark','Melodic','Drill','Boom Bap'];
+const DB=[
+  {id:1,name:'21 Savage X Future - Sacrifice',genre:'Trap',bpm:135,key:'Ebm',price:29,yt:'',file:'%2021%20Savage%20X%20Future%20Type%20Beat%20%20-%20Sacrifice%20135%20Bpm%20Ebm.mp3'},
+  {id:2,name:'21 Savage - Nolenso',genre:'Trap',bpm:132,key:'Cm',price:29,yt:'',file:'21%20Savage%20Type%20Beat%20-%20Nolenso%20Cm%20132%20Bpm.mp3'},
+  {id:3,name:'21 Savage Type Beat 85',genre:'Trap',bpm:85,key:'Bbm',price:29,yt:'',file:'21%20Savage%20Type%20Beat%2085%20Bpm%20Bbm.mp3'},
+  {id:4,name:'Drake - Midnight',genre:'Melodic',bpm:123,key:'Cm',price:29,yt:'',file:'Drake%20Type%20Beat%20-%20Midnight%20-%20Rnb%20Type%20Beat%20-%20Cm%20123%20Bpm%20.mp3'},
+  {id:5,name:'Drake x 21 Savage - NoFeelings',genre:'Dark',bpm:146,key:'Ebmaj',price:29,yt:'',file:'Drake%20x%2021%20Savage%20_%20Freestyle%20Type%20Beat%20_%20NoFeelings%20Ebmaj%20%20146%20Bpm(3).mp3'},
+  {id:6,name:'Future - Legacy',genre:'Trap',bpm:137,key:'Em',price:29,yt:'',file:'Future%20Type%20Beat%20-%20Legacy%20-%20Em%20137%20Bpm.mp3'},
+  {id:7,name:'Future x Playboy Carti x Drake - Big Dog',genre:'Dark',bpm:143,key:'Em',price:29,yt:'',file:'Future%20X%20Playboy%20Carti%20x%20Drake%20Type%20Beat%20-%20Big%20Dog%20Em%20143%20Bpm(4).mp3'},
+  {id:8,name:'Future x 21 Savage - Codein Rain',genre:'Melodic',bpm:136,key:'Cm',price:29,yt:'',file:'Future%20x%2021%20Savage%20Type%20Beat%20-%20Codein%20Rain%20Cm%20136%20Bpm.mp3'},
+  {id:9,name:'Future x Southside - Ski Driver',genre:'Trap',bpm:135,key:'Ebmaj',price:29,yt:'',file:'Future%20x%20Southsiddde%20Type%20Beat%20-%20Ski%20Driver%20Ebmaj%20135%20Bpm.mp3'},
+  {id:10,name:'Ghosted',genre:'Melodic',bpm:0,key:'',price:29,yt:'',file:'Ghosted.mp3'},
+  {id:11,name:'Mixdown 2',genre:'Trap',bpm:0,key:'',price:29,yt:'',file:'Mixdown(2).mp3'},
+  {id:12,name:'Mixdown',genre:'Trap',bpm:0,key:'',price:29,yt:'',file:'Mixdown.mp3'},
+  {id:13,name:"A$AP Rocky - Dumb Shit",genre:'Trap',bpm:130,key:'Cm',price:29,yt:'',file:'A%24ap%20Rocky%20Type%20Beat%20-%20Dumb%20Shit%20Cm%20130%20Bpm.mp3'},
+  {id:14,name:'Florida Type Beat - Big Stepper',genre:'Drill',bpm:156,key:'D#min',price:29,yt:'',file:'Florida%20Type%20Beat%20Big%20Stepper%20Bossman%20Dlow%20Type%20Beat%20D%23Min%20156%20BPM%20V1.mp3'},
+  {id:15,name:'Larb - 21 Savage Type Beat',genre:'Trap',bpm:165,key:'G#',price:29,yt:'',file:'Larb%20-%2021%20Savage%20Type%20Beat%20-%20G%23%20165%20Bpm.mp3'},
+  {id:16,name:'Put In My Cup - Future',genre:'Trap',bpm:130,key:'Ebm',price:29,yt:'',file:'Put%20in%20my%20cup%20-%20Future%20Type%20Beat%20-%20Ebm%20130%20Bpm%20.mp3'},
+  {id:17,name:'Roulete - 21 Savage',genre:'Dark',bpm:77,key:'C#m',price:29,yt:'',file:'Roulete%20%20-%2021%20Savage%20Type%20Beat%2077%20Bpm%20C%23m(2).mp3'},
+  {id:18,name:'Travis Scott x Ye - Titel',genre:'Dark',bpm:130,key:'Dm',price:29,yt:'',file:'Travis%20Scott%20x%20Ye%20Type%20Beat%20-%20Titel%20-%20Dm%20130%20Bpm.mp3'},
+  {id:19,name:'DGAF - Future ft. Quavo',genre:'Trap',bpm:135,key:'Bmin',price:29,yt:'',file:'DGAF%20-%20Future%20Ft.%20Quavo%20Type%20Beat%20Bmin%20135%20Bpm%20.mp3'},
+  {id:20,name:'Darkness In My Visions',genre:'Dark',bpm:0,key:'',price:29,yt:'',file:'Darkness%20in%20my%20Visions(3).mp3'},
+  {id:21,name:'Decision - 21 Savage',genre:'Trap',bpm:134,key:'D#m',price:29,yt:'',file:'Decision%20-%2021%20Savage%20Type%20Beat%20D%23m%20134%20Bpm.mp3'},
+  {id:22,name:'Draft Day - Future',genre:'Trap',bpm:140,key:'Abm',price:29,yt:'',file:'Draft%20Day%20-%20Future%20Type%20Beat%20Abm%20140%20Bpm(2).mp3'},
+];
+const DL=[
+  {id:'mp3',order:1,type:'Basic',name:'MP3 LEASE',price:'29',priceUnit:'e',multiplier:1.0,featured:false,inquire:false,features:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],disabled:['WAV File','Trackout Stems','Exclusive Rights']},
+  {id:'wav',order:2,type:'Standard',name:'WAV LEASE',price:'59',priceUnit:'e',multiplier:2.0,featured:true,inquire:false,features:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],disabled:['Trackout Stems','Exclusive Rights']},
+  {id:'trackout',order:3,type:'Premium',name:'TRACKOUT',price:'99',priceUnit:'e',multiplier:3.4,featured:false,inquire:false,features:['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],disabled:['Exclusive Rights']},
+  {id:'exclusive',order:4,type:'One-Time',name:'EXCLUSIVE',price:'499',priceUnit:'e+',multiplier:17.2,featured:false,inquire:true,features:['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price on request'],disabled:[]},
 ];
 
-const GENRES = ['Trap','Dark','Melodic','Drill','Boom Bap'];
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+let beats=[],lics=[],editId=null,delId=null,fmId=null;
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-const app  = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db   = getFirestore(app);
-
-let beats = [];
-let editingId = null;
-let deleteTargetId = null;
-
-// ─── AUTH STATE ───────────────────────────────────────────────────────────────
-onAuthStateChanged(auth, async user => {
-  if (user) {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('admin-screen').classList.add('visible');
-    document.getElementById('user-email').textContent = user.email;
-    await loadBeats();
-    await loadLicenses();
-  } else {
-    document.getElementById('login-screen').classList.remove('hidden');
-    document.getElementById('admin-screen').classList.remove('visible');
+onAuthStateChanged(auth,async u=>{
+  if(u){
+    document.getElementById('ls').classList.add('hidden');
+    document.getElementById('as').classList.add('visible');
+    document.getElementById('ue').textContent=u.email;
+    await loadBeats();await loadLics();
+  }else{
+    document.getElementById('ls').classList.remove('hidden');
+    document.getElementById('as').classList.remove('visible');
   }
 });
-
-// ─── LOGIN ────────────────────────────────────────────────────────────────────
-window.doLogin = async function() {
-  const email = document.getElementById('email-input').value.trim();
-  const pw    = document.getElementById('pw-input').value;
-  const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-  if (!email || !pw) { errEl.textContent = 'E-Mail und Passwort eingeben.'; return; }
-  try {
-    await signInWithEmailAndPassword(auth, email, pw);
-  } catch(e) {
-    errEl.textContent = e.code === 'auth/invalid-credential'
-      ? 'Falsche E-Mail oder Passwort.'
-      : 'Fehler: ' + e.message;
-  }
+window.doLogin=async function(){
+  const e=document.getElementById('ei').value.trim(),p=document.getElementById('pi').value,er=document.getElementById('le');
+  er.textContent='';if(!e||!p){er.textContent='E-Mail und Passwort eingeben.';return;}
+  try{await signInWithEmailAndPassword(auth,e,p);}
+  catch(x){er.textContent=x.code==='auth/invalid-credential'?'Falsche Zugangsdaten.':'Fehler: '+x.message;}
 };
+window.doLogout=async()=>await signOut(auth);
+document.getElementById('pi').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
+document.getElementById('ei').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('pi').focus();});
 
-window.doLogout = async function() {
-  await signOut(auth);
-};
-
-document.getElementById('pw-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') window.doLogin();
-});
-document.getElementById('email-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('pw-input').focus();
-});
-
-// ─── LOAD BEATS FROM FIRESTORE ────────────────────────────────────────────────
-async function loadBeats() {
-  showLoading(true);
-  try {
-    const snap = await getDocs(query(collection(db, 'beats'), orderBy('id')));
-    if (snap.empty) {
-      // Erste Nutzung: Default Beats zu Firestore migrieren
-      await migrateDefaults();
-    } else {
-      beats = snap.docs.map(d => d.data());
-    }
-  } catch(e) {
-    showToast('Fehler beim Laden: ' + e.message, 'error');
-  }
-  showLoading(false);
-  renderAll();
+async function loadBeats(){
+  showL(true);
+  try{
+    const s=await getDocs(query(collection(db,'beats'),orderBy('id')));
+    if(s.empty){const b=writeBatch(db);DB.forEach(x=>b.set(doc(db,'beats',String(x.id)),x));await b.commit();beats=[...DB];toast('22 Beats importiert!','s');}
+    else beats=s.docs.map(d=>d.data());
+  }catch(x){toast('Fehler: '+x.message,'e');}
+  showL(false);ra();
 }
-
-async function migrateDefaults() {
-  const batch = writeBatch(db);
-  DEFAULT_BEATS.forEach(b => {
-    const ref = doc(db, 'beats', String(b.id));
-    batch.set(ref, b);
-  });
-  await batch.commit();
-  beats = [...DEFAULT_BEATS];
-  showToast('✓ ' + DEFAULT_BEATS.length + ' Beats aus Backup importiert!', 'success');
+async function loadLics(){
+  try{
+    const s=await getDocs(collection(db,'licenses'));
+    if(s.empty){const b=writeBatch(db);DL.forEach(l=>b.set(doc(db,'licenses',l.id),l));await b.commit();lics=[...DL];}
+    else lics=s.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
+  }catch(x){toast('Fehler Liz: '+x.message,'e');}
+  renderLT();
 }
+const sb=async b=>await setDoc(doc(db,'beats',String(b.id)),b);
+const db2=async id=>await deleteDoc(doc(db,'beats',String(id)));
 
-// ─── SAVE SINGLE BEAT TO FIRESTORE ───────────────────────────────────────────
-async function saveBeatToFirestore(beat) {
-  await setDoc(doc(db, 'beats', String(beat.id)), beat);
+function ra(){rStats();rTable();}
+function rStats(){
+  const g={};beats.forEach(b=>{g[b.genre]=(g[b.genre]||0)+1;});
+  const t=Object.entries(g).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('sb').innerHTML=`
+    <div class="sc"><div class="sn">${beats.length}</div><div class="sl">Beats</div></div>
+    <div class="sc"><div class="sn">${t?t[0]:'-'}</div><div class="sl">Top Genre</div></div>
+    <div class="sc"><div class="sn">${beats.filter(b=>b.wavFile).length}</div><div class="sl">Mit WAV</div></div>
+    <div class="sc"><div class="sn">${beats.filter(b=>b.trackoutFile).length}</div><div class="sl">Mit Stems</div></div>`;
 }
-
-async function deleteBeatFromFirestore(id) {
-  await deleteDoc(doc(db, 'beats', String(id)));
-}
-
-// ─── RENDER ───────────────────────────────────────────────────────────────────
-function renderAll() { renderStats(); renderTable(); }
-
-function renderStats() {
-  const genres = {};
-  beats.forEach(b => { genres[b.genre] = (genres[b.genre]||0)+1; });
-  const topGenre = Object.entries(genres).sort((a,b)=>b[1]-a[1])[0];
-  const withYT = beats.filter(b=>b.yt).length;
-  document.getElementById('stats-bar').innerHTML = `
-    <div class="stat-card"><div class="stat-card-num">${beats.length}</div><div class="stat-card-label">Beats Total</div></div>
-    <div class="stat-card"><div class="stat-card-num">${topGenre?topGenre[0]:'-'}</div><div class="stat-card-label">Top Genre</div></div>
-    <div class="stat-card"><div class="stat-card-num">${withYT}</div><div class="stat-card-label">Mit YouTube</div></div>
-    <div class="stat-card"><div class="stat-card-num">${beats.filter(b=>b.price===29).length}</div><div class="stat-card-label">Standard (29€)</div></div>
-  `;
-}
-
-function renderTable() {
-  document.getElementById('beat-tbody').innerHTML = beats.map((b, i) => {
-    const isEditing = editingId === b.id;
-    return `<tr class="${isEditing?'editing':''}">
-      <td class="td-num">${i+1}</td>
-      <td style="min-width:200px;">
-        ${isEditing ? `<input class="edit-input" id="e-name" value="${escHtml(b.name)}">` : `<div class="display-text">${escHtml(b.name)}</div>`}
-      </td>
-      <td>
-        ${isEditing
-          ? `<select class="edit-select" id="e-genre">${GENRES.map(g=>`<option value="${g}"${b.genre===g?' selected':''}>${g}</option>`).join('')}</select>`
-          : `<span style="font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--grey);">${b.genre}</span>`}
-      </td>
-      <td>
-        ${isEditing ? `<input class="edit-input edit-input-sm" id="e-bpm" type="number" value="${b.bpm}">` : `<span class="display-meta">${b.bpm>0?b.bpm:'—'}</span>`}
-      </td>
-      <td>
-        ${isEditing ? `<input class="edit-input edit-input-sm" id="e-key" value="${escHtml(b.key)}">` : `<span class="display-meta">${b.key||'—'}</span>`}
-      </td>
-      <td>
-        ${isEditing ? `<input class="edit-input edit-input-xs" id="e-price" type="number" value="${b.price}">€` : `<span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${b.price}€</span>`}
-      </td>
-      <td style="text-align:center;">
-        ${isEditing
-          ? `<input class="edit-input" id="e-yt" value="${escHtml(b.yt||'')}" placeholder="YouTube URL" style="min-width:200px;">`
-          : `<span class="yt-dot ${b.yt?'active':''}" title="${b.yt||'Kein YouTube Link'}"></span>`}
-      </td>
-      <td class="td-file" title="${escHtml(b.file)}">${escHtml(decodeURIComponent(b.file))}</td>
-      <td>
-        <div class="action-cell">
-          ${isEditing ? `
-            <button class="btn-save" onclick="saveEdit(${b.id})">✓ Speichern</button>
-            <button class="btn-cancel" onclick="cancelEdit()">✕</button>
-          ` : `
-            <button class="btn-edit" onclick="startEdit(${b.id})">Bearbeiten</button>
-            <button class="btn-delete" onclick="openConfirm(${b.id})" title="Löschen">🗑</button>
-          `}
-        </div>
-      </td>
+function ft(ok,l){return ok?`<span class="tag-ok">+${l}</span>`:`<span class="tag-no">-${l}</span>`;}
+function rTable(){
+  document.getElementById('bt').innerHTML=[...beats].sort((a,b)=>(a.id||0)-(b.id||0)).map((b,i)=>{
+    const e=editId===b.id;
+    return`<tr class="${e?'ed':''}">
+      <td class="tn">${i+1}</td>
+      <td style="min-width:170px;">${e?`<input class="ei2" id="en" value="${x(b.name)}">`:`<div class="dt">${x(b.name)}</div>`}</td>
+      <td>${e?`<select class="es" id="eg">${GENRES.map(g=>`<option value="${g}"${b.genre===g?' selected':''}>${g}</option>`).join('')}</select>`:`<span class="dm">${b.genre}</span>`}</td>
+      <td>${e?`<input class="ei2 sm" id="ebpm" type="number" value="${b.bpm||0}">`:`<span class="dm">${b.bpm>0?b.bpm:'--'}</span>`}</td>
+      <td>${e?`<input class="ei2 sm" id="ek" value="${x(b.key||'')}">`:`<span class="dm">${b.key||'--'}</span>`}</td>
+      <td>${e?`<input class="ei2 xs" id="ep" type="number" value="${b.price||29}">EUR`:`<span class="big">${b.price||29}E</span>`}</td>
+      <td>${ft(!!b.file,'MP3')}${ft(!!b.wavFile,'WAV')}${ft(!!b.trackoutFile,'STM')}</td>
+      <td style="text-align:center;">${e?`<input class="ei2" id="eyt" value="${x(b.yt||'')}" placeholder="YT URL" style="min-width:140px;">`:`<span class="dot ${b.yt?'on':''}" title="${b.yt||'--'}"></span>`}</td>
+      <td><div class="ac">
+        ${e?`<button class="bs" onclick="se(${b.id})">SAVE</button><button class="bc" onclick="ce()">X</button>`
+           :`<button class="be" onclick="startE(${b.id})">Edit</button><button class="be" onclick="openFM(${b.id})" style="border-color:rgba(34,160,34,0.5);color:#22a022;">Files</button><button class="bd" onclick="oC(${b.id})">Del</button>`}
+      </div></td>
     </tr>`;
   }).join('');
 }
 
-// ─── EDIT ─────────────────────────────────────────────────────────────────────
-window.startEdit  = id => { editingId = id; renderTable(); document.getElementById('e-name')?.focus(); };
-window.cancelEdit = ()  => { editingId = null; renderTable(); };
+window.startE=id=>{editId=id;rTable();setTimeout(()=>document.getElementById('en')?.focus(),50);};
+window.ce=()=>{editId=null;rTable();};
+window.se=async function(id){
+  const b=beats.find(x=>x.id===id);if(!b)return;
+  b.name=document.getElementById('en').value.trim()||b.name;
+  b.genre=document.getElementById('eg').value;
+  b.bpm=parseInt(document.getElementById('ebpm').value)||0;
+  b.key=document.getElementById('ek').value.trim();
+  b.price=parseInt(document.getElementById('ep').value)||29;
+  b.yt=document.getElementById('eyt').value.trim();
+  editId=null;
+  try{await sb(b);ra();toast('Beat gespeichert!','s');}catch(e){toast('Fehler: '+e.message,'e');}
+};
 
-window.saveEdit = async function(id) {
-  const b = beats.find(x => x.id === id);
-  if (!b) return;
-  b.name  = document.getElementById('e-name').value.trim() || b.name;
-  b.genre = document.getElementById('e-genre').value;
-  b.bpm   = parseInt(document.getElementById('e-bpm').value)   || 0;
-  b.key   = document.getElementById('e-key').value.trim();
-  b.price = parseInt(document.getElementById('e-price').value) || 29;
-  b.yt    = document.getElementById('e-yt').value.trim();
-  editingId = null;
-  try {
-    await saveBeatToFirestore(b);
-    renderAll();
-    showToast('✓ Beat gespeichert', 'success');
-  } catch(e) {
-    showToast('Fehler: ' + e.message, 'error');
+window.oC=function(id){delId=id;const b=beats.find(x=>x.id===id);document.getElementById('ct').textContent=`"${b?.name}" loeschen?`;document.getElementById('co').classList.add('open');};
+window.cC=()=>{document.getElementById('co').classList.remove('open');delId=null;};
+window.doDel=async function(){
+  if(!delId)return;
+  try{await db2(delId);beats=beats.filter(b=>b.id!==delId);window.cC();editId=null;ra();toast('Beat geloescht','');}
+  catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+window.openAdd=()=>{document.getElementById('am').classList.add('open');setTimeout(()=>document.getElementById('nn').focus(),100);resetU(['mp3','wav','stems']);};
+window.closeAdd=()=>{
+  document.getElementById('am').classList.remove('open');
+  ['nn','nb','nk','ny'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('np').value='29';resetU(['mp3','wav','stems']);
+};
+window.addBeat=async function(){
+  const name=document.getElementById('nn').value.trim();
+  if(!name){toast('Titel ist Pflichtfeld','');return;}
+  if(!window._mp3){toast('MP3-Datei ist Pflicht!','');return;}
+  const maxId=beats.length?Math.max(...beats.map(b=>b.id)):0;
+  const nb={id:maxId+1,name,genre:document.getElementById('ng').value,bpm:parseInt(document.getElementById('nb').value)||0,key:document.getElementById('nk').value.trim(),price:parseInt(document.getElementById('np').value)||29,yt:document.getElementById('ny').value.trim(),file:encodeURIComponent(window._mp3)};
+  if(window._wav)   nb.wavFile=encodeURIComponent(window._wav);
+  if(window._stems) nb.trackoutFile=encodeURIComponent(window._stems);
+  try{await sb(nb);beats.push(nb);window.closeAdd();ra();toast('Beat hinzugefuegt!','s');}catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+window.openFM=function(id){
+  fmId=id;const b=beats.find(x=>x.id===id);
+  document.getElementById('fmt').textContent=b.name;
+  document.getElementById('fmm').textContent=b.file?'MP3: '+decodeURIComponent(b.file):'Keine MP3';
+  document.getElementById('fmw').textContent=b.wavFile?'WAV: '+decodeURIComponent(b.wavFile):'Keine WAV';
+  document.getElementById('fms').textContent=b.trackoutFile?'Stems: '+decodeURIComponent(b.trackoutFile):'Keine Stems';
+  resetU(['wavx','stmx']);
+  document.getElementById('fm').classList.add('open');
+};
+window.closeFM=()=>{document.getElementById('fm').classList.remove('open');fmId=null;};
+window.saveFM=async function(){
+  const b=beats.find(x=>x.id===fmId);if(!b)return;
+  if(window._wavx)  b.wavFile=encodeURIComponent(window._wavx);
+  if(window._stmx)  b.trackoutFile=encodeURIComponent(window._stmx);
+  try{await sb(b);window.closeFM();ra();toast('Dateien gespeichert!','s');}catch(e){toast('Fehler: '+e.message,'e');}
+};
+
+function resetU(types){types.forEach(t=>{window['_'+t]=null;['us','uf','ui'].forEach(p=>{const el=document.getElementById(p+t);if(el){if(p==='us')el.innerHTML='';else if(p==='uf')el.textContent='Keine Datei';else el.value='';}}); });}
+
+window.handleUp=async function(input,type){
+  const file=input.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  const ok={mp3:['mp3'],wav:['wav'],wavx:['wav'],stems:['zip','rar'],stmx:['zip','rar']};
+  if(!ok[type].includes(ext)){toast('Falscher Dateityp!','e');input.value='';return;}
+  const s=document.getElementById('us'+type),f=document.getElementById('uf'+type);
+  if(f)f.textContent=file.name;if(s)s.innerHTML='<span style="color:#888">Upload laeuft...</span>';
+  try{
+    const fd=new FormData();fd.append('file',file);fd.append('filename',file.name);
+    const res=await fetch(R2,{method:'POST',body:fd});
+    if(!res.ok)throw new Error(await res.text());
+    const data=await res.json();
+    window['_'+type]=data.filename||file.name;
+    if(s)s.innerHTML=`<span style="color:#22a022">OK: ${data.filename}</span>`;
+    toast('Hochgeladen!','s');
+  }catch(e){
+    if(s)s.innerHTML=`<span style="color:#e01a1a">Fehler: ${e.message}</span>`;
+    toast('Upload fehlgeschlagen','e');window['_'+type]=null;
   }
 };
 
-// ─── DELETE ───────────────────────────────────────────────────────────────────
-window.openConfirm = function(id) {
-  deleteTargetId = id;
-  const b = beats.find(x => x.id === id);
-  document.getElementById('confirm-text').textContent = `"${b?.name}" wird gelöscht.`;
-  document.getElementById('confirm-overlay').classList.add('open');
-};
-window.closeConfirm = () => { document.getElementById('confirm-overlay').classList.remove('open'); deleteTargetId = null; };
-
-window.confirmDelete = async function() {
-  if (!deleteTargetId) return;
-  try {
-    await deleteBeatFromFirestore(deleteTargetId);
-    beats = beats.filter(b => b.id !== deleteTargetId);
-    closeConfirm(); editingId = null;
-    renderAll();
-    showToast('Beat gelöscht', '');
-  } catch(e) {
-    showToast('Fehler beim Löschen: ' + e.message, 'error');
-  }
-};
-
-// ─── ADD BEAT ─────────────────────────────────────────────────────────────────
-window.openAddModal  = () => { document.getElementById('add-modal').classList.add('open'); document.getElementById('new-name').focus(); resetUploadState(); };
-window.closeAddModal = () => {
-  document.getElementById('add-modal').classList.remove('open');
-  ['new-name','new-bpm','new-key','new-yt'].forEach(id => { document.getElementById(id).value = ''; });
-  document.getElementById('new-price').value = '29';
-  resetUploadState();
-};
-
-function resetUploadState() {
-  document.getElementById('upload-status').innerHTML = '';
-  document.getElementById('upload-filename').textContent = 'Keine Datei ausgewählt';
-  document.getElementById('audio-file-input').value = '';
-  window._uploadedFileName = null;
-}
-
-window.addBeat = async function() {
-  const name = document.getElementById('new-name').value.trim();
-  if (!name) { showToast('Titel ist Pflichtfeld', ''); return; }
-  if (!window._uploadedFileName) { showToast('Bitte zuerst eine Audio-Datei hochladen', ''); return; }
-
-  const maxId = beats.length ? Math.max(...beats.map(b=>b.id)) : 0;
-  const newBeat = {
-    id: maxId + 1,
-    name,
-    genre: document.getElementById('new-genre').value,
-    bpm:   parseInt(document.getElementById('new-bpm').value)   || 0,
-    key:   document.getElementById('new-key').value.trim(),
-    price: parseInt(document.getElementById('new-price').value) || 29,
-    yt:    document.getElementById('new-yt').value.trim(),
-    file:  encodeURIComponent(window._uploadedFileName)
-  };
-
-  try {
-    await saveBeatToFirestore(newBeat);
-    beats.push(newBeat);
-    closeAddModal();
-    renderAll();
-    showToast('✓ Beat hinzugefügt!', 'success');
-  } catch(e) {
-    showToast('Fehler beim Speichern: ' + e.message, 'error');
-  }
-};
-
-// ─── R2 UPLOAD (via Cloudflare Worker – kein Secret im HTML) ─────────────────
-window.handleFileSelect = function(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const allowed = ['audio/mpeg','audio/wav','audio/x-wav','audio/mp3'];
-  const ext = file.name.split('.').pop().toLowerCase();
-  if (!['mp3','wav'].includes(ext)) {
-    showToast('Nur MP3 und WAV erlaubt', 'error'); return;
-  }
-  document.getElementById('upload-filename').textContent = file.name;
-  uploadToR2(file);
-};
-
-async function uploadToR2(file) {
-  const statusEl = document.getElementById('upload-status');
-  statusEl.innerHTML = '<span class="upload-progress">⏳ Upload läuft...</span>';
-
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('filename', file.name);
-
-    const res = await fetch(R2_UPLOAD_WORKER, {
-      method: 'POST',
-      body: formData
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err || 'Upload fehlgeschlagen');
-    }
-
-    const data = await res.json();
-    window._uploadedFileName = data.filename || file.name;
-    statusEl.innerHTML = `<span class="upload-ok">✓ Hochgeladen: ${window._uploadedFileName}</span>`;
-    showToast('✓ Datei erfolgreich hochgeladen', 'success');
-  } catch(e) {
-    statusEl.innerHTML = `<span class="upload-error">✕ Fehler: ${e.message}</span>`;
-    showToast('Upload fehlgeschlagen: ' + e.message, 'error');
-    window._uploadedFileName = null;
-  }
-}
-
-// ─── EXPORT ───────────────────────────────────────────────────────────────────
-window.openExport = function() {
-  document.getElementById('export-code').textContent = generateCode();
-  document.getElementById('copy-code-btn').textContent = 'Code kopieren';
-  document.getElementById('copy-code-btn').classList.remove('copied');
-  document.getElementById('export-modal').classList.add('open');
-};
-window.closeExport = () => document.getElementById('export-modal').classList.remove('open');
-
-function generateCode() {
-  const lines = beats.map((b, i) => {
-    const comma = i < beats.length - 1 ? ',' : '';
-    return `  { id:${b.id}, name:'${b.name.replace(/'/g,"\\'")}', genre:'${b.genre}', bpm:${b.bpm}, key:'${b.key}', price:${b.price}, yt:'${(b.yt||'').replace(/'/g,"\\'")}', file:'${b.file.replace(/'/g,"\\'")}' }${comma}`;
-  });
-  return `const beats = [\n${lines.join('\n')}\n];`;
-}
-
-window.copyExportCode = function() {
-  navigator.clipboard.writeText(generateCode()).then(() => {
-    const btn = document.getElementById('copy-code-btn');
-    btn.textContent = '✓ Kopiert! Jetzt in GitHub einfügen';
-    btn.classList.add('copied');
-  });
-};
-
-// ─── LIZENZEN ────────────────────────────────────────────────────────────────
-const DEFAULT_LICENSES = [
-  { id:'mp3',       order:1, type:'Basic',    name:'MP3 LEASE',  price:'29',  priceUnit:'€',  featured:false, inquire:false,
-    features:'MP3 High Quality (320kbps)\nUp to 100,000 Streams\nMusic videos allowed\nNon-profit performances',
-    disabled:'WAV File\nTrackout Stems\nExclusive Rights' },
-  { id:'wav',       order:2, type:'Standard', name:'WAV LEASE',  price:'59',  priceUnit:'€',  featured:true,  inquire:false,
-    features:'WAV + MP3 (Studio Quality)\nUp to 500,000 Streams\nMusic videos allowed\nCommercial performances\nRadio broadcasts',
-    disabled:'Trackout Stems\nExclusive Rights' },
-  { id:'trackout',  order:3, type:'Premium',  name:'TRACKOUT',   price:'99',  priceUnit:'€',  featured:false, inquire:false,
-    features:'All Stems / Individual Tracks\nWAV + MP3 included\nUnlimited Streams\nFull commercial use\nTV & Film Sync\nFree to edit',
-    disabled:'Exclusive Rights' },
-  { id:'exclusive', order:4, type:'One-Time', name:'EXCLUSIVE',  price:'499', priceUnit:'€+', featured:false, inquire:true,
-    features:'100% Exclusive Rights\nBeat removed from store\nAll stems & file formats\nFull commercial use\nLabel deals possible\nPrice on request',
-    disabled:'' },
-];
-
-let licenses = [];
-
-async function loadLicenses() {
-  try {
-    const snap = await getDocs(collection(db, 'licenses'));
-    if (!snap.empty) {
-      licenses = snap.docs.map(d => d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
-    } else {
-      // Defaults zu Firestore migrieren
-      const batch = writeBatch(db);
-      DEFAULT_LICENSES.forEach(l => batch.set(doc(db,'licenses',l.id), l));
-      await batch.commit();
-      licenses = [...DEFAULT_LICENSES];
-      showToast('✓ Standard-Lizenzen importiert', 'success');
-    }
-  } catch(e) { showToast('Fehler Lizenzen: '+e.message,'error'); }
-  renderLicenseTable();
-}
-
-function renderLicenseTable() {
-  document.getElementById('license-tbody').innerHTML = licenses.map(l => `
+function renderLT(){
+  document.getElementById('lt').innerHTML=lics.map(l=>`
     <tr>
-      <td><div class="display-text">${l.name}</div></td>
-      <td><span class="display-meta">${l.type}</span></td>
-      <td><span style="font-family:'Bebas Neue',sans-serif;font-size:18px;">${l.price}${l.priceUnit}</span></td>
-      <td style="text-align:center;"><span class="yt-dot ${l.featured?'active':''}"></span></td>
-      <td><div class="action-cell">
-        <button class="btn-edit" onclick="openLicenseModal('${l.id}')">Bearbeiten</button>
-      </div></td>
+      <td><div class="dt">${l.name}</div></td>
+      <td><span class="dm">${l.type}</span></td>
+      <td><span class="big">${l.price}${l.priceUnit}</span></td>
+      <td style="text-align:center;"><span class="dot ${l.featured?'on':''}"></span></td>
+      <td><button class="be" onclick="openLM('${l.id}')">Edit</button></td>
     </tr>`).join('');
 }
-
-window.openLicenseModal = function(id) {
-  const l = licenses.find(x=>x.id===id);
-  if (!l) return;
-  document.getElementById('lic-id').value = l.id;
-  document.getElementById('lic-name').value = l.name;
-  document.getElementById('lic-type').value = l.type;
-  document.getElementById('lic-price').value = l.price;
-  document.getElementById('lic-priceunit').value = l.priceUnit;
-  document.getElementById('lic-multiplier').value = l.multiplier || 1;
-  document.getElementById('lic-featured').checked = l.featured;
-  document.getElementById('lic-inquire').checked = l.inquire;
-  document.getElementById('lic-features').value = Array.isArray(l.features) ? l.features.join('\n') : (l.features||'');
-  document.getElementById('lic-disabled').value = Array.isArray(l.disabled) ? l.disabled.join('\n') : (l.disabled||'');
-  document.getElementById('license-modal').classList.add('open');
+window.openLM=function(id){
+  const l=lics.find(x=>x.id===id);if(!l)return;
+  document.getElementById('lid').value=l.id;document.getElementById('ln').value=l.name;
+  document.getElementById('lty').value=l.type;document.getElementById('lp').value=l.price;
+  document.getElementById('lpu').value=l.priceUnit;document.getElementById('lm').value=l.multiplier||1;
+  document.getElementById('lf').checked=l.featured;document.getElementById('li').checked=l.inquire;
+  document.getElementById('lfe').value=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)).join('\n');
+  document.getElementById('ld').value=(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)).join('\n');
+  document.getElementById('lm2').classList.add('open');
+};
+window.closeLM=()=>document.getElementById('lm2').classList.remove('open');
+window.saveLic=async function(){
+  const id=document.getElementById('lid').value;
+  const u={id,name:document.getElementById('ln').value.trim(),type:document.getElementById('lty').value.trim(),price:document.getElementById('lp').value.trim(),priceUnit:document.getElementById('lpu').value.trim(),multiplier:parseFloat(document.getElementById('lm').value)||1,featured:document.getElementById('lf').checked,inquire:document.getElementById('li').checked,features:document.getElementById('lfe').value.trim().split('\n').filter(x=>x),disabled:document.getElementById('ld').value.trim().split('\n').filter(x=>x),order:(lics.find(x=>x.id===id)?.order||0)};
+  try{await setDoc(doc(db,'licenses',id),u);const i=lics.findIndex(x=>x.id===id);if(i>=0)lics[i]=u;else lics.push(u);window.closeLM();renderLT();toast('Lizenz gespeichert!','s');}catch(e){toast('Fehler: '+e.message,'e');}
 };
 
-window.closeLicenseModal = () => document.getElementById('license-modal').classList.remove('open');
-
-window.saveLicense = async function() {
-  const id = document.getElementById('lic-id').value;
-  const updated = {
-    id,
-    name:       document.getElementById('lic-name').value.trim(),
-    type:       document.getElementById('lic-type').value.trim(),
-    price:      document.getElementById('lic-price').value.trim(),
-    priceUnit:  document.getElementById('lic-priceunit').value.trim(),
-    multiplier: parseFloat(document.getElementById('lic-multiplier').value) || 1,
-    featured:   document.getElementById('lic-featured').checked,
-    inquire:    document.getElementById('lic-inquire').checked,
-    features:   document.getElementById('lic-features').value.trim().split('\n').filter(x=>x),
-    disabled:   document.getElementById('lic-disabled').value.trim().split('\n').filter(x=>x),
-    order:      (licenses.find(x=>x.id===id)?.order||0),
-  };
-  try {
-    await setDoc(doc(db,'licenses',id), updated);
-    const idx = licenses.findIndex(x=>x.id===id);
-    if (idx>=0) licenses[idx]=updated; else licenses.push(updated);
-    closeLicenseModal();
-    renderLicenseTable();
-    showToast('✓ License saved', 'success');
-  } catch(e) { showToast('Error: '+e.message,'error'); }
-};
-
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function showLoading(on) {
-  document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
-}
-
-let toastTimer;
-function showToast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast show' + (type ? ' ' + type : '');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.className = 'toast'; }, 2800);
-}
+function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showL(on){document.getElementById('lo').style.display=on?'flex':'none';}
+let _tt2;
+function toast(msg,type){const t=document.getElementById('t');t.textContent=msg;t.className='toast show'+(type==='s'?' success':type==='e'?' error':'');clearTimeout(_tt2);_tt2=setTimeout(()=>{t.className='toast';},2800);}
 </script>
-
 <style>
-  :root {
-    --red: #e01a1a; --red-dark: #a01010; --red-glow: rgba(224,26,26,0.3);
-    --black: #080808; --black2: #111111; --black3: #1a1a1a; --black4: #222222;
-    --white: #f0f0f0; --grey: #888; --grey2: #555;
-    --green: #1a7a1a; --green-light: #22a022;
-  }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--black); color: var(--white); font-family: 'Barlow', sans-serif; min-height: 100vh; }
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--black2); }
-  ::-webkit-scrollbar-thumb { background: var(--red); }
-
-  /* LOGIN */
-  #login-screen { position: fixed; inset: 0; background: var(--black); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-  #login-screen.hidden { display: none; }
-  .login-box { background: var(--black2); border: 1px solid var(--black4); padding: 48px; width: 380px; text-align: center; }
-  .login-logo { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 4px; margin-bottom: 4px; }
-  .login-logo span { color: var(--red); }
-  .login-sub { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey); margin-bottom: 36px; }
-  .login-input { width: 100%; background: var(--black); border: 1px solid var(--black4); color: var(--white); padding: 14px 16px; font-family: 'Barlow', sans-serif; font-size: 15px; outline: none; margin-bottom: 12px; transition: border-color 0.2s; text-align: center; letter-spacing: 1px; }
-  .login-input:focus { border-color: var(--red); }
-  .login-btn { width: 100%; background: var(--red); border: none; color: var(--white); padding: 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
-  .login-btn:hover { background: var(--red-dark); }
-  .login-error { color: var(--red); font-size: 12px; margin-top: 10px; min-height: 16px; }
-  .login-note { font-size: 11px; color: var(--grey2); margin-top: 16px; line-height: 1.5; }
-
-  /* ADMIN */
-  #admin-screen { display: none; }
-  #admin-screen.visible { display: block; }
-
-  nav { position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; height: 60px; background: rgba(8,8,8,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(224,26,26,0.2); }
-  .nav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; }
-  .nav-logo span { color: var(--red); }
-  .nav-badge { background: var(--red); color: white; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 2px; padding: 3px 10px; text-transform: uppercase; }
-  .nav-right { display: flex; align-items: center; gap: 16px; }
-  .nav-email { font-size: 12px; color: var(--grey); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
-  .logout-btn { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 6px 16px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-  .logout-btn:hover { border-color: var(--red); color: var(--red); }
-
-  .main { padding: 40px; max-width: 1400px; margin: 0 auto; }
-  .stats-bar { display: flex; gap: 24px; margin-bottom: 36px; flex-wrap: wrap; }
-  .stat-card { background: var(--black2); border: 1px solid var(--black4); padding: 20px 28px; flex: 1; min-width: 140px; }
-  .stat-card-num { font-family: 'Bebas Neue', sans-serif; font-size: 36px; color: var(--red); line-height: 1; }
-  .stat-card-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-top: 4px; }
-
-  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
-  .toolbar-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; }
-  .toolbar-actions { display: flex; gap: 10px; align-items: center; }
-
-  .btn-add { background: var(--red); border: none; color: white; padding: 10px 24px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; display: flex; align-items: center; gap: 8px; }
-  .btn-add:hover { background: var(--red-dark); }
-  .btn-export { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 10px 20px; font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-  .btn-export:hover { border-color: var(--white); color: var(--white); }
-
-  .beat-table { width: 100%; border-collapse: collapse; }
-  .beat-table th { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--black4); background: var(--black2); white-space: nowrap; }
-  .beat-table td { padding: 8px 12px; border-bottom: 1px solid var(--black4); background: var(--black2); vertical-align: middle; }
-  .beat-table tr:hover td { background: var(--black3); }
-  .beat-table tr.editing td { background: #1a1500; border-bottom-color: rgba(224,26,26,0.3); }
-
-  .td-num { color: var(--grey2); font-family: 'Barlow Condensed', sans-serif; font-size: 13px; width: 40px; }
-  .td-file { font-size: 11px; color: var(--grey2); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .edit-input { background: var(--black); border: 1px solid var(--red); color: var(--white); padding: 5px 8px; font-family: 'Barlow', sans-serif; font-size: 13px; outline: none; width: 100%; }
-  .edit-input-sm { width: 70px; }
-  .edit-input-xs { width: 50px; }
-  .edit-select { background: var(--black); border: 1px solid var(--red); color: var(--white); padding: 5px 8px; font-family: 'Barlow', sans-serif; font-size: 13px; outline: none; appearance: none; cursor: pointer; }
-  .display-text { font-size: 14px; font-weight: 500; }
-  .display-meta { font-size: 12px; color: var(--grey); }
-  .yt-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--grey2); display: inline-block; }
-  .yt-dot.active { background: #ff0000; }
-  .action-cell { display: flex; gap: 6px; align-items: center; }
-
-  .btn-edit { background: transparent; border: 1px solid var(--black4); color: var(--grey); padding: 5px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-  .btn-edit:hover { border-color: var(--white); color: var(--white); }
-  .btn-save { background: var(--green); border: none; color: white; padding: 5px 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
-  .btn-save:hover { background: var(--green-light); }
-  .btn-cancel { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 5px 10px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-  .btn-cancel:hover { border-color: var(--grey); color: var(--white); }
-  .btn-delete { background: transparent; border: 1px solid transparent; color: var(--grey2); padding: 5px 8px; font-family: 'Barlow Condensed', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.2s; }
-  .btn-delete:hover { border-color: var(--red); color: var(--red); }
-
-  /* MODALS */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px); }
-  .modal-overlay.open { opacity: 1; pointer-events: all; }
-  .modal { background: var(--black2); border: 1px solid var(--black4); width: 90%; max-width: 580px; padding: 40px; position: relative; transform: translateY(20px); transition: transform 0.3s; max-height: 90vh; overflow-y: auto; }
-  .modal-overlay.open .modal { transform: translateY(0); }
-  .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: var(--grey); font-size: 20px; cursor: pointer; transition: color 0.2s; }
-  .modal-close:hover { color: var(--red); }
-  .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; margin-bottom: 28px; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-  .form-label { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); }
-  .form-input { background: var(--black); border: 1px solid var(--black4); color: var(--white); padding: 11px 14px; font-family: 'Barlow', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; width: 100%; }
-  .form-input:focus { border-color: var(--red); }
-  .form-select { background: var(--black); border: 1px solid var(--black4); color: var(--white); padding: 11px 14px; font-family: 'Barlow', sans-serif; font-size: 14px; outline: none; appearance: none; cursor: pointer; width: 100%; }
-  .form-select:focus { border-color: var(--red); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .form-note { font-size: 11px; color: var(--grey); margin-top: 2px; }
-  .btn-submit { width: 100%; background: var(--red); border: none; color: white; padding: 14px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
-  .btn-submit:hover { background: var(--red-dark); }
-
-  /* UPLOAD ZONE */
-  .upload-zone { border: 2px dashed var(--black4); padding: 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; position: relative; }
-  .upload-zone:hover { border-color: var(--red); }
-  .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .upload-icon { font-size: 28px; margin-bottom: 8px; }
-  .upload-hint { font-size: 13px; color: var(--grey); }
-  .upload-hint strong { color: var(--red); }
-  .upload-filename { font-size: 12px; color: var(--grey); margin-top: 8px; font-style: italic; }
-  .upload-status { margin-top: 8px; font-size: 12px; }
-  .upload-progress { color: var(--grey); }
-  .upload-ok { color: var(--green-light); }
-  .upload-error { color: var(--red); }
-
-  /* EXPORT */
-  .export-code { background: var(--black); border: 1px solid var(--black4); padding: 16px; font-family: monospace; font-size: 11px; color: #aaa; white-space: pre; overflow-x: auto; max-height: 300px; overflow-y: auto; line-height: 1.6; margin-bottom: 16px; }
-  .export-note { font-size: 12px; color: var(--grey); line-height: 1.7; margin-bottom: 16px; }
-  .export-steps { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
-  .export-steps li { font-size: 13px; color: var(--grey); display: flex; align-items: flex-start; gap: 10px; }
-  .export-steps li::before { content: attr(data-step); background: var(--red); color: white; font-family: 'Bebas Neue', sans-serif; font-size: 14px; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
-  .btn-copy-code { width: 100%; background: var(--red); border: none; color: white; padding: 12px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: background 0.2s; }
-  .btn-copy-code:hover { background: var(--red-dark); }
-  .btn-copy-code.copied { background: var(--green); }
-
-  /* CONFIRM */
-  .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 600; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-  .confirm-overlay.open { opacity: 1; pointer-events: all; }
-  .confirm-box { background: var(--black2); border: 1px solid var(--red); padding: 36px; max-width: 400px; text-align: center; }
-  .confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--red); margin-bottom: 8px; }
-  .confirm-text { font-size: 14px; color: var(--grey); margin-bottom: 28px; line-height: 1.6; }
-  .confirm-actions { display: flex; gap: 10px; justify-content: center; }
-  .btn-confirm-del { background: var(--red); border: none; color: white; padding: 10px 28px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-  .btn-confirm-cancel { background: transparent; border: 1px solid var(--grey2); color: var(--grey); padding: 10px 28px; font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
-  .btn-confirm-cancel:hover { border-color: var(--white); color: var(--white); }
-
-  /* LOADING */
-  #loading-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.9); z-index: 900; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
-  .loading-spinner { width: 40px; height: 40px; border: 3px solid var(--black4); border-top-color: var(--red); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  .loading-text { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; letter-spacing: 3px; text-transform: uppercase; color: var(--grey); }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* TOAST */
-  .toast { position: fixed; bottom: 32px; right: 32px; z-index: 9999; background: var(--black2); border: 1px solid var(--red); color: var(--white); padding: 14px 24px; font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 1px; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.success { border-color: var(--green); }
-  .toast.error { border-color: var(--red); background: rgba(224,26,26,0.1); }
-
-  /* SETUP HINT */
-  .setup-banner { background: rgba(224,26,26,0.08); border: 1px solid rgba(224,26,26,0.3); padding: 16px 20px; margin-bottom: 24px; font-size: 13px; color: var(--grey); line-height: 1.7; }
-  .setup-banner strong { color: var(--red); display: block; margin-bottom: 4px; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; font-size: 14px; }
-  .setup-banner code { background: var(--black); padding: 1px 6px; font-size: 12px; color: var(--white); }
+:root{--r:#e01a1a;--rd:#a01010;--b:#080808;--b2:#111;--b3:#1a1a1a;--b4:#222;--w:#f0f0f0;--g:#888;--g2:#555;--gr:#1a7a1a;--gl:#22a022;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--b);color:var(--w);font-family:'Barlow',sans-serif;min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--b2);}::-webkit-scrollbar-thumb{background:var(--r);}
+#ls{position:fixed;inset:0;background:var(--b);display:flex;align-items:center;justify-content:center;z-index:1000;}
+#ls.hidden{display:none;}
+.lb{background:var(--b2);border:1px solid var(--b4);padding:48px;width:380px;text-align:center;}
+.ll{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:4px;margin-bottom:4px;}
+.ll span{color:var(--r);}
+.ls2{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--g);margin-bottom:36px;}
+.li{width:100%;background:var(--b);border:1px solid var(--b4);color:var(--w);padding:14px 16px;font-family:'Barlow',sans-serif;font-size:15px;outline:none;margin-bottom:12px;transition:border-color .2s;text-align:center;}
+.li:focus{border-color:var(--r);}
+.lb2{width:100%;background:var(--r);border:none;color:var(--w);padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:4px;}
+.lb2:hover{background:var(--rd);}
+.le{color:var(--r);font-size:12px;margin-top:10px;min-height:16px;}
+#as{display:none;}#as.visible{display:block;}
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 40px;height:60px;background:rgba(8,8,8,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(224,26,26,.2);}
+.nl{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;}
+.nl span{color:var(--r);}
+.nb{background:var(--r);color:white;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:3px 10px;text-transform:uppercase;}
+.nr{display:flex;align-items:center;gap:16px;}
+.ue{font-size:12px;color:var(--g);font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;}
+.lo2{background:transparent;border:1px solid var(--g2);color:var(--g);padding:6px 16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s;}
+.lo2:hover{border-color:var(--r);color:var(--r);}
+.main{padding:40px;max-width:1400px;margin:0 auto;}
+#sb{display:flex;gap:24px;margin-bottom:36px;flex-wrap:wrap;}
+.sc{background:var(--b2);border:1px solid var(--b4);padding:20px 28px;flex:1;min-width:140px;}
+.sn{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--r);line-height:1;}
+.sl{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--g);margin-top:4px;}
+.tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap;}
+.tt{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;}
+.ba{background:var(--r);border:none;color:white;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .2s;}
+.ba:hover{background:var(--rd);}
+table{width:100%;border-collapse:collapse;}
+th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--g);padding:10px 12px;text-align:left;border-bottom:1px solid var(--b4);background:var(--b2);white-space:nowrap;}
+td{padding:8px 12px;border-bottom:1px solid var(--b4);background:var(--b2);vertical-align:middle;}
+tr:hover td{background:var(--b3);}
+tr.ed td{background:#1a1500;border-bottom-color:rgba(224,26,26,.3);}
+.tn{color:var(--g2);font-family:'Barlow Condensed',sans-serif;font-size:13px;width:40px;}
+.ei2{background:var(--b);border:1px solid var(--r);color:var(--w);padding:5px 8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;width:100%;}
+.sm{width:70px;}.xs{width:50px;}
+.es{background:var(--b);border:1px solid var(--r);color:var(--w);padding:5px 8px;font-family:'Barlow',sans-serif;font-size:13px;outline:none;appearance:none;cursor:pointer;}
+.dt{font-size:14px;font-weight:500;}
+.dm{font-size:12px;color:var(--g);}
+.big{font-family:'Bebas Neue',sans-serif;font-size:18px;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--g2);display:inline-block;}
+.dot.on{background:#f00;}
+.ac{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.be{background:transparent;border:1px solid var(--b4);color:var(--g);padding:4px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.be:hover{border-color:var(--w);color:var(--w);}
+.bs{background:var(--gr);border:none;color:white;padding:5px 12px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;}
+.bc{background:transparent;border:1px solid var(--g2);color:var(--g);padding:5px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;cursor:pointer;}
+.bd{background:transparent;border:1px solid transparent;color:var(--g2);padding:5px 8px;font-family:'Barlow Condensed',sans-serif;font-size:11px;cursor:pointer;}
+.bd:hover{border-color:var(--r);color:var(--r);}
+.tag-ok{background:rgba(34,160,34,.15);color:#22a022;font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;padding:2px 6px;border:1px solid #22a022;margin-right:2px;}
+.tag-no{background:var(--b4);color:var(--g2);font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;padding:2px 6px;border:1px solid var(--b4);margin-right:2px;}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(4px);}
+.mo.open{opacity:1;pointer-events:all;}
+.md{background:var(--b2);border:1px solid var(--b4);width:90%;max-width:580px;padding:40px;position:relative;transform:translateY(20px);transition:transform .3s;max-height:90vh;overflow-y:auto;}
+.mo.open .md{transform:translateY(0);}
+.mc{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--g);font-size:20px;cursor:pointer;}
+.mc:hover{color:var(--r);}
+.mt{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:28px;}
+.fg{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.fl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--g);}
+.fi{background:var(--b);border:1px solid var(--b4);color:var(--w);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color .2s;width:100%;}
+.fi:focus{border-color:var(--r);}
+.fs{background:var(--b);border:1px solid var(--b4);color:var(--w);padding:11px 14px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;appearance:none;cursor:pointer;width:100%;}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fn{font-size:11px;color:var(--g);margin-top:2px;}
+.bsu{width:100%;background:var(--r);border:none;color:white;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:8px;}
+.bsu:hover{background:var(--rd);}
+.ub{border:1px solid var(--b4);padding:14px;margin-bottom:12px;}
+.ubh{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.utag{padding:2px 8px;font-size:10px;font-weight:700;letter-spacing:1px;font-family:'Barlow Condensed',sans-serif;}
+.tm{background:rgba(224,26,26,.15);color:var(--r);border:1px solid var(--r);}
+.tw{background:rgba(34,160,34,.15);color:#22a022;border:1px solid #22a022;}
+.ts{background:rgba(100,100,255,.15);color:#9999ff;border:1px solid #9999ff;}
+.uz{border:2px dashed var(--b4);padding:16px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative;}
+.uz:hover{border-color:var(--r);}
+.uz input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.uzh{font-size:13px;color:var(--g);}
+.uzh strong{color:var(--r);}
+.ufn{font-size:11px;color:var(--g);margin-top:5px;font-style:italic;}
+.ust{margin-top:4px;font-size:12px;min-height:14px;}
+.co{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:600;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.co.open{opacity:1;pointer-events:all;}
+.cb{background:var(--b2);border:1px solid var(--r);padding:36px;max-width:400px;text-align:center;}
+.ct2{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--r);margin-bottom:8px;}
+.ctxt{font-size:14px;color:var(--g);margin-bottom:28px;line-height:1.6;}
+.cac{display:flex;gap:10px;justify-content:center;}
+.bcd{background:var(--r);border:none;color:white;padding:10px 28px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+.bcc{background:transparent;border:1px solid var(--g2);color:var(--g);padding:10px 28px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;}
+#lo{position:fixed;inset:0;background:rgba(8,8,8,.9);z-index:900;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;}
+.sp{width:40px;height:40px;border:3px solid var(--b4);border-top-color:var(--r);border-radius:50%;animation:spin .8s linear infinite;}
+.stxt{font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--g);}
+@keyframes spin{to{transform:rotate(360deg);}}
+.toast{position:fixed;bottom:32px;right:32px;z-index:9999;background:var(--b2);border:1px solid var(--r);color:var(--w);padding:14px 24px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;opacity:0;transform:translateY(10px);transition:all .3s;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.success{border-color:var(--gl);}
+.toast.error{border-color:var(--r);background:rgba(224,26,26,.1);}
 </style>
 </head>
 <body>
 
-<!-- LOADING -->
-<div id="loading-overlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">Beats werden geladen…</div>
-</div>
+<div id="lo"><div class="sp"></div><div class="stxt">Laedt...</div></div>
 
-<!-- LOGIN -->
-<div id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">DEAD<span>SHOT</span> BEATS</div>
-    <div class="login-sub">Admin Panel</div>
-    <input class="login-input" type="email" id="email-input" placeholder="admin@email.com" autocomplete="email">
-    <input class="login-input" type="password" id="pw-input" placeholder="••••••••" autocomplete="current-password">
-    <button class="login-btn" onclick="window.doLogin()">Einloggen</button>
-    <div class="login-error" id="login-error"></div>
-    <div class="login-note">Login via Firebase Authentication</div>
+<div id="ls">
+  <div class="lb">
+    <div class="ll">DEAD<span>SHOT</span> BEATS</div>
+    <div class="ls2">Admin Panel</div>
+    <input class="li" type="email" id="ei" placeholder="admin@email.com" autocomplete="email">
+    <input class="li" type="password" id="pi" placeholder="..." autocomplete="current-password">
+    <button class="lb2" onclick="window.doLogin()">Einloggen</button>
+    <div class="le" id="le"></div>
   </div>
 </div>
 
-<!-- ADMIN -->
-<div id="admin-screen">
+<div id="as">
   <nav>
     <div style="display:flex;align-items:center;gap:14px;">
-      <div class="nav-logo">DEAD<span>SHOT</span> BEATS</div>
-      <div class="nav-badge">Admin</div>
+      <div class="nl">DEAD<span>SHOT</span> BEATS</div>
+      <div class="nb">Admin</div>
     </div>
-    <div class="nav-right">
-      <span class="nav-email" id="user-email"></span>
-      <a href="/" style="color:var(--grey);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;" target="_blank">↗ Live-Seite</a>
-      <button class="logout-btn" onclick="window.doLogout()">Logout</button>
+    <div class="nr">
+      <span class="ue" id="ue"></span>
+      <a href="/" style="color:var(--g);font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;" target="_blank">Live-Seite</a>
+      <button class="lo2" onclick="window.doLogout()">Logout</button>
     </div>
   </nav>
-
   <div class="main">
-    <!-- SETUP HINWEIS (kann entfernt werden wenn alles konfiguriert ist) -->
-    <div class="setup-banner">
-      <strong>⚙ Einmalige Einrichtung erforderlich</strong>
-      1. Firebase Config oben im Script ersetzen (Firebase Console → Project Settings)<br>
-      2. Firebase Auth aktivieren (Email/Password) und Admin-Account anlegen<br>
-      3. Firestore Database anlegen (Testmode oder Rules setzen)<br>
-      4. Cloudflare Worker für R2-Upload deployen → URL oben als <code>R2_UPLOAD_WORKER</code> eintragen<br>
-      <span style="color:var(--grey2);font-size:11px;margin-top:4px;display:block;">→ Dieses Banner nach der Einrichtung aus dem HTML entfernen</span>
-    </div>
-
-    <div class="stats-bar" id="stats-bar"></div>
-    <div class="toolbar">
-      <div class="toolbar-title">BEATS VERWALTEN</div>
-      <div class="toolbar-actions">
-        <button class="btn-add" onclick="window.openAddModal()">+ Neuen Beat hinzufügen</button>
-      </div>
+    <div id="sb"></div>
+    <div class="tb">
+      <div class="tt">BEATS VERWALTEN</div>
+      <button class="ba" onclick="window.openAdd()">+ Neuen Beat</button>
     </div>
     <div style="overflow-x:auto;">
-      <table class="beat-table">
-        <thead>
-          <tr><th>#</th><th>Titel</th><th>Genre</th><th>BPM</th><th>Key</th><th>Preis</th><th>YouTube</th><th>Datei</th><th>Aktionen</th></tr>
-        </thead>
-        <tbody id="beat-tbody"></tbody>
+      <table>
+        <thead><tr><th>#</th><th>Titel</th><th>Genre</th><th>BPM</th><th>Key</th><th>Preis</th><th>Dateien</th><th>YT</th><th>Aktionen</th></tr></thead>
+        <tbody id="bt"></tbody>
       </table>
     </div>
-
-    <!-- LIZENZEN -->
-    <div style="margin-top:48px;">
-      <div class="toolbar">
-        <div class="toolbar-title">LIZENZEN VERWALTEN</div>
-      </div>
+    <div style="margin-top:48px;border-top:1px solid var(--b4);padding-top:40px;">
+      <div class="tb"><div class="tt">LIZENZEN</div></div>
       <div style="overflow-x:auto;">
-        <table class="beat-table">
-          <thead>
-            <tr><th>Name</th><th>Typ</th><th>Preis</th><th>Popular</th><th>Aktion</th></tr>
-          </thead>
-          <tbody id="license-tbody"></tbody>
+        <table>
+          <thead><tr><th>Name</th><th>Typ</th><th>Preis</th><th>Popular</th><th>Aktion</th></tr></thead>
+          <tbody id="lt"></tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
 
-<!-- LICENSE MODAL -->
-<div class="modal-overlay" id="license-modal" onclick="if(event.target===this)window.closeLicenseModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="window.closeLicenseModal()">✕</button>
-    <div class="modal-title">EDIT LICENSE</div>
-    <input type="hidden" id="lic-id">
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Name</label>
-        <input class="form-input" id="lic-name" placeholder="MP3 LEASE">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Type</label>
-        <input class="form-input" id="lic-type" placeholder="Basic">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Starting Price (€)</label>
-        <input class="form-input" id="lic-price" placeholder="29">
-        <div class="form-note">Shown as "from X€" on the website</div>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Price Unit (€ or €+)</label>
-        <input class="form-input" id="lic-priceunit" placeholder="€">
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Price Multiplier</label>
-      <input class="form-input" id="lic-multiplier" type="number" step="0.1" placeholder="1.0">
-      <div class="form-note">Beat base price × multiplier = final price. MP3=1, WAV=2, Trackout=3.5, Exclusive=17</div>
-    </div>
-    <div class="form-row">
-      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
-        <input type="checkbox" id="lic-featured" style="width:16px;height:16px;accent-color:var(--red);">
-        <label class="form-label" style="margin:0;">Popular (highlighted)</label>
-      </div>
-      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
-        <input type="checkbox" id="lic-inquire" style="width:16px;height:16px;accent-color:var(--red);">
-        <label class="form-label" style="margin:0;">Inquire instead of Buy</label>
-      </div>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Features / Rules (one per line)</label>
-      <textarea class="form-input" id="lic-features" rows="6" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="MP3 High Quality (320kbps)&#10;Up to 100,000 Streams&#10;Music videos allowed"></textarea>
-    </div>
-    <div class="form-group">
-      <label class="form-label">Disabled Features (one per line, shown crossed out)</label>
-      <textarea class="form-input" id="lic-disabled" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;" placeholder="WAV File&#10;Exclusive Rights"></textarea>
-    </div>
-    <button class="btn-submit" onclick="window.saveLicense()">Save License →</button>
-  </div>
-</div>
-
 <!-- ADD MODAL -->
-<div class="modal-overlay" id="add-modal" onclick="if(event.target===this)window.closeAddModal()">
-  <div class="modal">
-    <button class="modal-close" onclick="window.closeAddModal()">✕</button>
-    <div class="modal-title">NEUEN BEAT</div>
-
-    <!-- AUDIO UPLOAD -->
-    <div class="form-group">
-      <label class="form-label">Audio-Datei (MP3 / WAV) *</label>
-      <div class="upload-zone">
-        <input type="file" id="audio-file-input" accept=".mp3,.wav,audio/mpeg,audio/wav" onchange="window.handleFileSelect(this)">
-        <div class="upload-icon">🎵</div>
-        <div class="upload-hint">Datei hierher ziehen oder <strong>klicken</strong></div>
-        <div class="upload-hint" style="font-size:11px;margin-top:4px;">MP3 oder WAV · wird direkt zu Cloudflare R2 hochgeladen</div>
-      </div>
-      <div class="upload-filename" id="upload-filename">Keine Datei ausgewählt</div>
-      <div class="upload-status" id="upload-status"></div>
+<div class="mo" id="am" onclick="if(event.target===this)window.closeAdd()">
+  <div class="md">
+    <button class="mc" onclick="window.closeAdd()">X</button>
+    <div class="mt">NEUEN BEAT</div>
+    <div class="ub">
+      <div class="ubh"><span class="utag tm">MP3</span>MP3-Datei * (Pflicht)</div>
+      <div class="uz"><input type="file" id="uimp3" accept=".mp3,audio/mpeg" onchange="window.handleUp(this,'mp3')"><div class="uzh">MP3 ablegen oder <strong>klicken</strong></div></div>
+      <div class="ufn" id="ufmp3">Keine Datei</div><div class="ust" id="usmp3"></div>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">Titel *</label>
-      <input class="form-input" id="new-name" placeholder="z.B. Future x 21 Savage – Codein Rain">
+    <div class="ub">
+      <div class="ubh"><span class="utag tw">WAV</span>WAV-Datei (optional - aktiviert WAV Lease)</div>
+      <div class="uz"><input type="file" id="uiwav" accept=".wav,audio/wav" onchange="window.handleUp(this,'wav')"><div class="uzh">WAV ablegen oder <strong>klicken</strong></div></div>
+      <div class="ufn" id="ufwav">Keine Datei</div><div class="ust" id="uswav"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Genre</label>
-        <select class="form-select" id="new-genre">
-          <option value="Trap">Trap</option>
-          <option value="Dark">Dark</option>
-          <option value="Melodic">Melodic</option>
-          <option value="Drill">Drill</option>
-          <option value="Boom Bap">Boom Bap</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Preis (€)</label>
-        <input class="form-input" id="new-price" type="number" value="29" min="1">
-      </div>
+    <div class="ub">
+      <div class="ubh"><span class="utag ts">STEMS</span>Stems ZIP (optional - aktiviert Trackout und Exclusive)</div>
+      <div class="uz"><input type="file" id="uistems" accept=".zip,.rar" onchange="window.handleUp(this,'stems')"><div class="uzh">ZIP ablegen oder <strong>klicken</strong></div></div>
+      <div class="ufn" id="ufstems">Keine Datei</div><div class="ust" id="usstems"></div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">BPM</label>
-        <input class="form-input" id="new-bpm" type="number" placeholder="135">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Key</label>
-        <input class="form-input" id="new-key" placeholder="z.B. Cm, Ebm">
-      </div>
+    <div class="fg"><label class="fl">Titel *</label><input class="fi" id="nn" placeholder="z.B. Future x Southside - Night Invasion Am 145 Bpm"></div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Genre</label><select class="fs" id="ng"><option>Trap</option><option>Dark</option><option>Melodic</option><option>Drill</option><option>Boom Bap</option></select></div>
+      <div class="fg"><label class="fl">Basispreis MP3 (EUR)</label><input class="fi" id="np" type="number" value="29" min="1"></div>
     </div>
-    <div class="form-group">
-      <label class="form-label">YouTube URL (optional)</label>
-      <input class="form-input" id="new-yt" placeholder="https://www.youtube.com/watch?v=...">
+    <div class="fr">
+      <div class="fg"><label class="fl">BPM</label><input class="fi" id="nb" type="number" placeholder="135"></div>
+      <div class="fg"><label class="fl">Key</label><input class="fi" id="nk" placeholder="z.B. Cm, Ebm"></div>
     </div>
-    <button class="btn-submit" onclick="window.addBeat()">Beat hinzufügen →</button>
+    <div class="fg"><label class="fl">YouTube URL (optional)</label><input class="fi" id="ny" placeholder="https://www.youtube.com/watch?v=..."></div>
+    <button class="bsu" onclick="window.addBeat()">Beat hinzufuegen</button>
   </div>
 </div>
 
-<!-- EXPORT MODAL -->
-<div class="modal-overlay" id="export-modal" onclick="if(event.target===this)window.closeExport()">
-  <div class="modal">
-    <button class="modal-close" onclick="window.closeExport()">✕</button>
-    <div class="modal-title">CODE EXPORTIEREN</div>
-    <div class="export-note">
-      Kopiere diesen Code und ersetze den <code style="color:var(--red)">const beats = [...]</code> Block in deiner <strong>index.html</strong> auf GitHub.
+<!-- FILES MODAL -->
+<div class="mo" id="fm" onclick="if(event.target===this)window.closeFM()">
+  <div class="md">
+    <button class="mc" onclick="window.closeFM()">X</button>
+    <div class="mt">DATEIEN VERWALTEN</div>
+    <div style="font-family:'Barlow Condensed',sans-serif;font-size:14px;color:var(--r);letter-spacing:1px;margin-bottom:20px;" id="fmt"></div>
+    <div style="background:var(--b3);border:1px solid var(--b4);padding:16px;margin-bottom:20px;">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--g);margin-bottom:10px;">Aktuelle Dateien</div>
+      <div style="font-size:12px;color:var(--g2);line-height:2;" id="fmm"></div>
+      <div style="font-size:12px;color:var(--g2);line-height:2;" id="fmw"></div>
+      <div style="font-size:12px;color:var(--g2);line-height:2;" id="fms"></div>
     </div>
-    <ul class="export-steps">
-      <li data-step="1">Code unten kopieren (Button klicken)</li>
-      <li data-step="2">GitHub → index.html öffnen → Bleistift-Icon (Edit)</li>
-      <li data-step="3">Den alten <code style="color:var(--red)">const beats = [...]</code> Block suchen und ersetzen</li>
-      <li data-step="4">Commit → Vercel/Cloudflare deployed automatisch</li>
-    </ul>
-    <div class="export-code" id="export-code"></div>
-    <button class="btn-copy-code" id="copy-code-btn" onclick="window.copyExportCode()">Code kopieren</button>
+    <div class="ub">
+      <div class="ubh"><span class="utag tw">WAV</span>WAV hochladen / ersetzen</div>
+      <div class="uz"><input type="file" id="uiwavx" accept=".wav,audio/wav" onchange="window.handleUp(this,'wavx')"><div class="uzh">WAV ablegen oder <strong>klicken</strong></div></div>
+      <div class="ufn" id="ufwavx">Keine Datei</div><div class="ust" id="uswavx"></div>
+    </div>
+    <div class="ub">
+      <div class="ubh"><span class="utag ts">STEMS</span>Stems ZIP hochladen / ersetzen</div>
+      <div class="uz"><input type="file" id="uistmx" accept=".zip,.rar" onchange="window.handleUp(this,'stmx')"><div class="uzh">ZIP ablegen oder <strong>klicken</strong></div></div>
+      <div class="ufn" id="ufstmx">Keine Datei</div><div class="ust" id="usstmx"></div>
+    </div>
+    <button class="bsu" onclick="window.saveFM()">Speichern und Live</button>
+  </div>
+</div>
+
+<!-- LICENSE MODAL -->
+<div class="mo" id="lm2" onclick="if(event.target===this)window.closeLM()">
+  <div class="md">
+    <button class="mc" onclick="window.closeLM()">X</button>
+    <div class="mt">LIZENZ BEARBEITEN</div>
+    <input type="hidden" id="lid">
+    <div class="fr">
+      <div class="fg"><label class="fl">Name</label><input class="fi" id="ln"></div>
+      <div class="fg"><label class="fl">Typ</label><input class="fi" id="lty"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label class="fl">Startpreis</label><input class="fi" id="lp"><div class="fn">Wird als "ab X EUR" angezeigt</div></div>
+      <div class="fg"><label class="fl">Einheit (e oder e+)</label><input class="fi" id="lpu"></div>
+    </div>
+    <div class="fg"><label class="fl">Multiplikator</label><input class="fi" id="lm" type="number" step="0.1"><div class="fn">MP3=1.0 / WAV=2.0 / Trackout=3.4 / Exclusive=17.2</div></div>
+    <div class="fr">
+      <div class="fg" style="flex-direction:row;align-items:center;gap:10px;margin-top:8px;"><input type="checkbox" id="lf" style="width:16px;height:16px;accent-color:var(--r);"><label class="fl" style="margin:0;">Popular</label></div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:10px;margin-top:8px;"><input type="checkbox" id="li" style="width:16px;height:16px;accent-color:var(--r);"><label class="fl" style="margin:0;">Anfrage statt Kauf</label></div>
+    </div>
+    <div class="fg"><label class="fl">Features (eine pro Zeile)</label><textarea class="fi" id="lfe" rows="6" style="resize:vertical;font-size:13px;line-height:1.6;"></textarea></div>
+    <div class="fg"><label class="fl">Deaktivierte Features</label><textarea class="fi" id="ld" rows="3" style="resize:vertical;font-size:13px;line-height:1.6;"></textarea></div>
+    <button class="bsu" onclick="window.saveLic()">Lizenz speichern</button>
   </div>
 </div>
 
 <!-- DELETE CONFIRM -->
-<div class="confirm-overlay" id="confirm-overlay">
-  <div class="confirm-box">
-    <div class="confirm-title">Beat löschen?</div>
-    <div class="confirm-text" id="confirm-text">Dieser Beat wird gelöscht.</div>
-    <div class="confirm-actions">
-      <button class="btn-confirm-cancel" onclick="window.closeConfirm()">Abbrechen</button>
-      <button class="btn-confirm-del" onclick="window.confirmDelete()">Löschen</button>
+<div class="co" id="co">
+  <div class="cb">
+    <div class="ct2">Beat loeschen?</div>
+    <div class="ctxt" id="ct">Dieser Beat wird geloescht.</div>
+    <div class="cac">
+      <button class="bcc" onclick="window.cC()">Abbrechen</button>
+      <button class="bcd" onclick="window.doDel()">Loeschen</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
+<div class="toast" id="t"></div>
 </body>
 </html>
