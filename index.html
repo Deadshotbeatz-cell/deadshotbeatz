@@ -603,7 +603,7 @@ async function loadAll(){
     setTimeout(()=>{
       const b=beats.find(x=>String(x.id)===urlBeat);
       if(b){document.getElementById('beats').scrollIntoView();window._playBeat(b.id);}
-    },300);
+    },800);
   }
 }
 loadAll();
