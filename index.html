@@ -12,6 +12,7 @@
   body{background:var(--black);color:var(--white);font-family:'Barlow',sans-serif;overflow-x:hidden;}
   ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--black2);}::-webkit-scrollbar-thumb{background:var(--red);}
   body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4;}
+  
   nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:64px;background:rgba(8,8,8,0.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(224,26,26,0.15);}
   .nav-logo{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:4px;color:var(--white);text-decoration:none;}
   .nav-logo span{color:var(--red);}
@@ -19,179 +20,72 @@
   .nav-links a{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--grey);text-decoration:none;transition:color 0.2s;}
   .nav-links a:hover{color:var(--red);}
   .nav-cta{background:var(--red);color:var(--white)!important;padding:8px 20px;font-size:12px!important;}
-  .nav-cta:hover{background:var(--red-dark)!important;}
+
   .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 48px 80px;position:relative;overflow:hidden;}
   .hero::after{content:'DS';position:absolute;right:-60px;top:50%;transform:translateY(-50%);font-family:'Bebas Neue',sans-serif;font-size:480px;color:rgba(224,26,26,0.04);line-height:1;pointer-events:none;user-select:none;}
-  .hero-tag{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--red);margin-bottom:20px;display:flex;align-items:center;gap:12px;animation:fadeInUp 0.6s ease both;}
+  .hero-tag{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--red);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
   .hero-tag::before{content:'';display:block;width:32px;height:1px;background:var(--red);}
-  .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,12vw,160px);line-height:0.9;letter-spacing:4px;margin-bottom:32px;animation:fadeInUp 0.6s 0.1s ease both;}
+  .hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(72px,12vw,160px);line-height:0.9;letter-spacing:4px;margin-bottom:32px;}
   .hero h1 span{color:var(--red);}
-  .hero-sub{font-size:16px;color:var(--grey);font-weight:300;max-width:480px;line-height:1.7;margin-bottom:48px;animation:fadeInUp 0.6s 0.2s ease both;}
-  .hero-actions{display:flex;gap:16px;align-items:center;animation:fadeInUp 0.6s 0.3s ease both;}
+  .hero-sub{font-size:16px;color:var(--grey);font-weight:300;max-width:480px;line-height:1.7;margin-bottom:48px;}
+  
   .btn-primary{background:var(--red);color:var(--white);border:none;padding:14px 32px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
   .btn-primary:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:0 8px 24px var(--red-glow);}
   .btn-secondary{background:transparent;color:var(--white);border:1px solid var(--grey2);padding:14px 32px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;text-decoration:none;display:inline-block;}
-  .btn-secondary:hover{border-color:var(--red);color:var(--red);}
-  .hero-stats{display:flex;gap:48px;margin-top:72px;padding-top:48px;border-top:1px solid var(--black4);animation:fadeInUp 0.6s 0.4s ease both;}
+
+  .hero-stats{display:flex;gap:48px;margin-top:72px;padding-top:48px;border-top:1px solid var(--black4);}
   .stat-num{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--red);line-height:1;}
   .stat-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--grey);margin-top:4px;}
-  .crosshair{position:absolute;width:80px;height:80px;opacity:0.15;bottom:120px;right:160px;}
-  .crosshair::before,.crosshair::after{content:'';position:absolute;background:var(--red);}
-  .crosshair::before{width:1px;height:100%;left:50%;top:0;}
-  .crosshair::after{height:1px;width:100%;top:50%;left:0;}
-  .crosshair-circle{position:absolute;width:32px;height:32px;border:1px solid var(--red);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);}
+
   section{padding:100px 48px;}
   .section-header{display:flex;align-items:baseline;gap:20px;margin-bottom:48px;}
   .section-title{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:3px;}
   .section-line{flex:1;height:1px;background:linear-gradient(to right,var(--red),transparent);}
   .section-count{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:2px;color:var(--grey);}
+
   .filters{display:flex;gap:8px;margin-bottom:32px;flex-wrap:wrap;}
   .filter-btn{background:transparent;border:1px solid var(--black4);color:var(--grey);padding:7px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
   .filter-btn:hover,.filter-btn.active{border-color:var(--red);color:var(--red);background:rgba(224,26,26,0.05);}
+
   .beat-list{display:flex;flex-direction:column;gap:2px;}
-
-  /* ── NUR DIESE ZEILE GEÄNDERT: auto auto auto → auto auto (Share+Buy = 1 Spalte) ── */
   .beat-row{display:grid;grid-template-columns:40px 56px 1fr auto auto;align-items:center;gap:16px;padding:12px 20px;background:var(--black2);border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative;overflow:hidden;}
-
-  .beat-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:var(--red);transition:width 0.2s;}
   .beat-row:hover{background:var(--black3);border-color:rgba(224,26,26,0.2);}
-  .beat-row:hover::before,.beat-row.playing::before{width:2px;}
   .beat-row.playing{background:var(--black3);border-color:rgba(224,26,26,0.3);}
-  .beat-num{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--grey2);text-align:center;user-select:none;}
-  .beat-row.playing .beat-num{color:var(--red);}
-  .beat-cover{width:44px;height:44px;background:var(--black4);position:relative;overflow:hidden;flex-shrink:0;}
-  .beat-cover-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--red);background:linear-gradient(135deg,var(--black4),var(--black3));}
-  .play-overlay{position:absolute;inset:0;background:rgba(224,26,26,0.85);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;}
-  .beat-row:hover .play-overlay,.beat-row.playing .play-overlay{opacity:1;}
-  .play-icon{width:0;height:0;border-style:solid;border-width:6px 0 6px 10px;border-color:transparent transparent transparent white;margin-left:2px;}
-  .pause-icon{display:flex;gap:3px;}.pause-bar{width:3px;height:12px;background:white;}
-  .beat-info{min-width:0;}
-  .beat-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;letter-spacing:0.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--white);transition:color 0.2s;}
-  .beat-row:hover .beat-name,.beat-row.playing .beat-name{color:var(--red);}
-  .beat-meta{font-size:12px;color:var(--grey);margin-top:2px;display:flex;gap:12px;}
-  .beat-tag{display:inline-block;background:var(--black4);color:var(--grey);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;}
-  .beat-duration{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--grey);white-space:nowrap;}
-  .beat-price{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);white-space:nowrap;}
-  .beat-price span{font-family:'Barlow',sans-serif;font-size:10px;color:var(--grey);font-weight:300;letter-spacing:1px;}
-  .buy-btn{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
-  .buy-btn:hover{background:var(--red);color:var(--white);}
+  .beat-cover{width:44px;height:44px;background:var(--black4);display:flex;align-items:center;justify-content:center;color:var(--red);font-family:'Bebas Neue';}
+  .beat-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;color:var(--white);}
+  .beat-tag{background:var(--black4);color:var(--grey);font-size:10px;padding:2px 8px;text-transform:uppercase;}
+  .beat-price{font-family:'Bebas Neue',sans-serif;font-size:22px;}
+  
+  .buy-btn{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 16px;cursor:pointer;font-family:'Barlow Condensed';font-size:11px;font-weight:700;}
+  .buy-btn:hover{background:var(--red);color:white;}
+  .share-btn{background:transparent;border:1px solid var(--grey2);color:var(--grey);width:32px;height:32px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;}
 
-  /* ── NEU: Share + Buy als Flex-Container ganz rechts ── */
-  .beat-actions{display:flex;align-items:center;gap:8px;}
-  .share-btn{background:transparent;border:1px solid var(--grey2);color:var(--grey);padding:6px 10px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;height:32px;width:32px;flex-shrink:0;}
-  .share-btn:hover{border-color:var(--white);color:var(--white);}
+  .sticky-player{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);padding:0 48px;height:80px;display:none;align-items:center;gap:32px;border-top:1px solid var(--red);}
+  .sticky-player.visible{display:flex;}
+  .player-main{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .progress-area{width:100%;max-width:600px;display:flex;align-items:center;gap:12px;}
+  .progress-bar{flex:1;height:4px;background:var(--black4);cursor:pointer;position:relative;}
+  .progress-fill{height:100%;background:var(--red);width:0%;}
 
-  .licenses{background:var(--black2);border-top:1px solid var(--black3);border-bottom:1px solid var(--black3);}
-  .license-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:48px;}
-  .license-card{background:var(--black);padding:36px 28px;border:1px solid var(--black4);position:relative;transition:all 0.3s;}
-  .license-card:hover{border-color:rgba(224,26,26,0.4);transform:translateY(-4px);box-shadow:0 20px 40px rgba(0,0,0,0.5);}
-  .license-card.featured{border-color:var(--red);background:rgba(224,26,26,0.04);}
-  .license-badge{position:absolute;top:-1px;right:20px;background:var(--red);color:var(--white);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;padding:4px 12px;text-transform:uppercase;}
-  .license-type{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:8px;}
-  .license-name{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:12px;}
-  .license-from-label{font-size:11px;color:var(--grey);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
-  .license-from-price{font-family:'Bebas Neue',sans-serif;font-size:44px;line-height:1;margin-bottom:4px;}
-  .license-from-price span{font-family:'Barlow',sans-serif;font-size:13px;font-weight:300;color:var(--grey);}
-  .license-divider{height:1px;background:var(--black4);margin:20px 0;}
-  .license-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
-  .license-features li{font-size:13px;color:var(--grey);display:flex;align-items:center;gap:10px;}
-  .license-features li::before{content:'';width:4px;height:4px;background:var(--red);flex-shrink:0;}
-  .license-features li.disabled{opacity:0.3;text-decoration:line-through;}
-  .license-features li.disabled::before{background:var(--grey2);}
-  .sticky-player{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(10,10,10,0.97);backdrop-filter:blur(20px);border-top:1px solid rgba(224,26,26,0.3);padding:0 48px;height:80px;display:flex;align-items:center;gap:32px;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);}
-  .sticky-player.visible{transform:translateY(0);}
-  .player-info{display:flex;align-items:center;gap:16px;min-width:200px;}
-  .player-cover{width:44px;height:44px;background:var(--black4);flex-shrink:0;}
-  .player-cover-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--red);background:linear-gradient(135deg,var(--black4),var(--black3));}
-  .player-beat-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;color:var(--white);}
-  .player-beat-tag{font-size:11px;color:var(--grey);}
-  .player-controls{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;}
-  .player-buttons{display:flex;align-items:center;gap:20px;}
-  .ctrl-btn{background:none;border:none;cursor:pointer;color:var(--grey);transition:color 0.2s;display:flex;align-items:center;justify-content:center;padding:4px;}
-  .ctrl-btn:hover{color:var(--white);}
-  .ctrl-btn.main-play{width:36px;height:36px;border-radius:50%;background:var(--red);color:var(--white);}
-  .ctrl-btn.main-play:hover{background:var(--red-dark);}
-  .progress-container{display:flex;align-items:center;gap:12px;width:100%;max-width:500px;}
-  .time-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--grey);white-space:nowrap;min-width:36px;}
-  .progress-bar{flex:1;height:3px;background:var(--black4);cursor:pointer;position:relative;border-radius:2px;}
-  .progress-fill{height:100%;background:var(--red);border-radius:2px;width:0%;pointer-events:none;}
-  .player-volume{display:flex;align-items:center;gap:10px;min-width:140px;justify-content:flex-end;}
-  .volume-slider{-webkit-appearance:none;width:80px;height:3px;background:var(--black4);outline:none;border-radius:2px;cursor:pointer;}
-  .volume-slider::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:var(--red);cursor:pointer;}
-  .about{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
-  .about-visual{position:relative;aspect-ratio:3/4;max-height:500px;}
-  .about-img-placeholder{width:100%;height:100%;background:var(--black3);border:1px solid var(--black4);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:80px;color:rgba(224,26,26,0.2);letter-spacing:4px;}
-  .about-accent{position:absolute;bottom:-20px;right:-20px;width:120px;height:120px;border:2px solid var(--red);z-index:-1;}
-  .about-tag{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:4px;text-transform:uppercase;color:var(--red);margin-bottom:16px;}
-  .about h2{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:3px;line-height:0.95;margin-bottom:24px;}
-  .about p{font-size:15px;line-height:1.8;color:var(--grey);margin-bottom:16px;}
-  .contact-section{background:var(--black2);border-top:1px solid var(--black3);}
-  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:48px;}
-  .contact-info h3{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;margin-bottom:16px;}
-  .contact-info p{font-size:14px;color:var(--grey);line-height:1.7;margin-bottom:32px;}
-  .contact-links{display:flex;flex-direction:column;gap:12px;}
-  .contact-link{display:flex;align-items:center;gap:12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;color:var(--grey);text-decoration:none;transition:color 0.2s;}
-  .contact-link:hover{color:var(--red);}
-  .contact-link-icon{width:32px;height:32px;border:1px solid var(--black4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:0;transition:all 0.2s;}
-  .contact-link:hover .contact-link-icon{border-color:var(--red);background:rgba(224,26,26,0.1);}
-  .contact-form{display:flex;flex-direction:column;gap:16px;}
-  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  .form-group{display:flex;flex-direction:column;gap:6px;}
-  .form-group label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--grey);}
-  .form-group input,.form-group textarea,.form-group select{background:var(--black);border:1px solid var(--black4);color:var(--white);padding:12px 16px;font-family:'Barlow',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s;width:100%;resize:none;appearance:none;}
-  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--red);}
-  .form-group textarea{height:100px;}
-  .send-btn{background:var(--red);border:none;color:var(--white);padding:14px 40px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;align-self:flex-start;}
-  .send-btn:hover{background:var(--red-dark);}
-  .send-btn:disabled{opacity:0.6;cursor:not-allowed;}
-  .form-feedback{font-size:13px;padding:10px 14px;border:1px solid;display:none;margin-top:-4px;}
-  .form-feedback.success{color:#22a022;border-color:#22a022;background:rgba(34,160,34,0.05);}
-  .form-feedback.error{color:var(--red);border-color:var(--red);background:rgba(224,26,26,0.05);}
-  footer{padding:40px 48px;border-top:1px solid var(--black3);display:flex;align-items:center;justify-content:space-between;}
-  .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;}
-  .footer-logo span{color:var(--red);}
-  .footer-copy{font-size:12px;color:var(--grey2);letter-spacing:1px;}
-  .footer-links{display:flex;gap:24px;}
-  .footer-links a{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--grey2);text-decoration:none;transition:color 0.2s;}
-  .footer-links a:hover{color:var(--red);}
-  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;backdrop-filter:blur(4px);}
-  .modal-overlay.open{opacity:1;pointer-events:all;}
-  .modal{background:var(--black2);border:1px solid var(--black4);width:90%;max-width:560px;padding:40px;position:relative;transform:translateY(20px);transition:transform 0.3s;}
-  .modal-overlay.open .modal{transform:translateY(0);}
-  .modal-close{position:absolute;top:16px;right:20px;background:none;border:none;color:var(--grey);font-size:20px;cursor:pointer;transition:color 0.2s;}
-  .modal-close:hover{color:var(--red);}
-  .modal-title{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:2px;margin-bottom:4px;}
-  .modal-beat-name{color:var(--red);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;margin-bottom:28px;}
-  .license-options{display:flex;flex-direction:column;gap:8px;margin-bottom:28px;}
-  .license-option{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border:1px solid var(--black4);cursor:pointer;transition:all 0.2s;}
-  .license-option:hover,.license-option.selected{border-color:var(--red);background:rgba(224,26,26,0.05);}
-  .license-option-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:600;letter-spacing:1px;}
-  .license-option-desc{font-size:11px;color:var(--grey);margin-top:2px;}
-  .license-option-price{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--red);}
-  .modal-checkout-btn{width:100%;background:var(--red);color:var(--white);border:none;padding:16px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
-  .modal-checkout-btn:hover{background:var(--red-dark);}
-  .modal-note{text-align:center;font-size:11px;color:var(--grey2);margin-top:12px;}
-  @keyframes pulse-bar{0%,100%{transform:scaleY(0.4);}50%{transform:scaleY(1);}}
-  .eq-bars{display:flex;gap:2px;align-items:flex-end;height:12px;}
-  .eq-bar{width:3px;background:var(--red);transform-origin:bottom;animation:pulse-bar 0.8s ease-in-out infinite;}
-  .eq-bar:nth-child(2){animation-delay:0.2s;}.eq-bar:nth-child(3){animation-delay:0.1s;}
-  @keyframes fadeInUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
-  .checkout-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  @media(max-width:900px){
-    nav{padding:0 24px;}.nav-links{display:none;}
-    section{padding:72px 24px;}.hero{padding:100px 24px 72px;}
-    .license-grid{grid-template-columns:1fr 1fr;}
-    .about{grid-template-columns:1fr;gap:40px;}
-    .contact-grid{grid-template-columns:1fr;gap:40px;}
-    footer{flex-direction:column;gap:20px;text-align:center;}
-    .beat-row{grid-template-columns:40px 44px 1fr auto;gap:8px;}
-    .beat-price{display:none;}
-    .buy-btn{padding:6px 10px;font-size:10px;}
-    .sticky-player{padding:0 20px;gap:16px;}.player-volume{display:none;}
-    .hero::after{font-size:240px;right:-30px;}
-    .form-row{grid-template-columns:1fr;}
-  }
+  .licenses-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px;}
+  .license-card{background:var(--black2);border:1px solid var(--black4);padding:40px;transition:0.3s;}
+  .license-card.featured{border-color:var(--red);}
+  .lic-name{font-family:'Bebas Neue',sans-serif;font-size:32px;margin-bottom:8px;}
+  .lic-price{font-family:'Bebas Neue',sans-serif;font-size:48px;color:var(--red);margin-bottom:24px;}
+  .lic-features{list-style:none;margin-bottom:32px;}
+  .lic-features li{font-size:13px;color:var(--grey);margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+  .lic-features li::before{content:'✓';color:var(--red);}
+
+  .contact-section{display:grid;grid-template-columns:1fr 1fr;gap:80px;}
+  .social-links{display:flex;gap:16px;margin-top:40px;}
+  .social-btn{width:48px;height:48px;border:1px solid var(--black4);display:flex;align-items:center;justify-content:center;color:var(--white);text-decoration:none;}
+  .social-btn:hover{border-color:var(--red);color:var(--red);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;display:none;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--black2);width:100%;max-width:500px;padding:40px;border:1px solid var(--black4);}
+  .lic-opt{border:1px solid var(--black4);padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;cursor:pointer;}
+  .lic-opt.active{border-color:var(--red);background:rgba(224,26,26,0.05);}
 </style>
 </head>
 <body>
@@ -201,405 +95,166 @@
   <ul class="nav-links">
     <li><a href="#beats">Beats</a></li>
     <li><a href="#licenses">Licenses</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#contact" class="nav-cta">Contact</a></li>
+    <li><a href="#contact">Contact</a></li>
   </ul>
 </nav>
 
-<section class="hero" id="home">
+<section class="hero">
   <div class="hero-tag">Official Beat Store</div>
   <h1>DEAD<span>SHOT</span><br>BEATS</h1>
-  <p class="hero-sub">Premium beats engineered for artists who don't miss. Every track is a precision strike — dark, hard, uncompromising.</p>
-  <div class="hero-actions">
-    <a href="#beats" class="btn-primary">Browse Beats</a>
-    <a href="#licenses" class="btn-secondary">View Licenses</a>
-  </div>
+  <p class="hero-sub">Premium beats engineered for artists who don't miss.</p>
   <div class="hero-stats">
-    <div><div class="stat-num" id="hero-beat-count">—</div><div class="stat-label">Beats Available</div></div>
-    <div><div class="stat-num">4</div><div class="stat-label">License Types</div></div>
-    <div><div class="stat-num">24H</div><div class="stat-label">Delivery</div></div>
+    <div><div class="stat-num" id="hero-beat-count">0</div><div class="stat-label">Beats</div></div>
   </div>
-  <div class="crosshair"><div class="crosshair-circle"></div></div>
 </section>
 
 <section id="beats">
-  <div class="section-header">
-    <div class="section-title">BEATS</div>
-    <div class="section-line"></div>
-    <div class="section-count" id="beats-shown">— TRACKS</div>
-  </div>
-  <div class="filters">
-    <button class="filter-btn active" data-filter="all">All</button>
-    <button class="filter-btn" data-filter="trap">Trap</button>
-    <button class="filter-btn" data-filter="drill">Drill</button>
-    <button class="filter-btn" data-filter="boom bap">Boom Bap</button>
-    <button class="filter-btn" data-filter="dark">Dark</button>
-    <button class="filter-btn" data-filter="melodic">Melodic</button>
-  </div>
-  <div class="beat-list" id="beat-list">
-    <div style="padding:40px;text-align:center;color:var(--grey);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;">LOADING BEATS...</div>
-  </div>
+  <div class="section-header"><div class="section-title">BEAT STORE</div><div class="section-line"></div><div class="section-count" id="beats-shown">0 TRACKS</div></div>
+  <div class="beat-list" id="beat-list">Loading...</div>
 </section>
 
-<section class="licenses" id="licenses">
-  <div class="section-header">
-    <div class="section-title">LICENSES</div>
-    <div class="section-line"></div>
-  </div>
-  <p style="color:var(--grey);font-size:14px;max-width:560px;line-height:1.7;">Choose the license that fits your project. Prices shown are starting prices — select a beat to see the exact price.</p>
-  <div class="license-grid" id="license-grid">
-    <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--grey);font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;">LOADING...</div>
-  </div>
-</section>
-
-<section id="about">
-  <div class="about">
-    <div class="about-visual">
-      <div class="about-img-placeholder">DS</div>
-      <div class="about-accent"></div>
+<section id="licenses" style="background:var(--black2);">
+  <div class="section-header"><div class="section-title">LICENSING</div><div class="section-line"></div></div>
+  <div class="licenses-grid">
+    <div class="license-card">
+      <div class="lic-name">MP3 LEASE</div><div class="lic-price">29.99€</div>
+      <ul class="lic-features"><li>High Quality MP3</li><li>Sell up to 2000 units</li></ul>
     </div>
-    <div class="about-content">
-      <div class="about-tag">The Producer</div>
-      <h2>DEAD<span style="color:var(--red)">SHOT</span><br>BEATS</h2>
-      <p>Precision is not an option — it's the standard. Every beat is crafted with the goal of delivering a distinctive sound that takes artists to the next level.</p>
-      <p>From dark trap bangers to melodic cinematic beats — the sound is versatile but always with an unmistakable edge.</p>
-      <p style="color:var(--grey2)">Custom beats, mixing, features — just reach out.</p>
-      <div style="margin-top:36px;display:flex;gap:12px;flex-wrap:wrap;">
-        <a href="#beats" class="btn-primary">Listen to Beats</a>
-        <a href="#contact" class="btn-secondary">Request Custom Beat</a>
-      </div>
+    <div class="license-card featured">
+      <div class="lic-name">WAV LEASE</div><div class="lic-price">49.99€</div>
+      <ul class="lic-features"><li>WAV + MP3</li><li>Sell up to 5000 units</li></ul>
+    </div>
+    <div class="license-card">
+      <div class="lic-name">STEMS</div><div class="lic-price">99.99€</div>
+      <ul class="lic-features"><li>Full Trackouts (Stems)</li><li>Unlimited Distribution</li></ul>
+    </div>
+    <div class="license-card">
+      <div class="lic-name">EXCLUSIVE</div><div class="lic-price">INQUIRE</div>
+      <ul class="lic-features"><li>Full Ownership</li><li>Custom Production</li></ul>
     </div>
   </div>
 </section>
 
-<section class="contact-section" id="contact">
-  <div class="section-header">
-    <div class="section-title">CONTACT</div>
-    <div class="section-line"></div>
+<section id="contact" class="contact-section">
+  <div class="contact-info">
+    <h2>LET'S WORK.</h2>
+    <div class="social-links">
+      <a href="#" class="social-btn">IG</a><a href="#" class="social-btn">YT</a>
+    </div>
   </div>
-  <div class="contact-grid">
-    <div class="contact-info">
-      <h3>LET'S WORK</h3>
-      <p>Custom beats, exclusive deals, features, mixing & mastering — reach out anytime. Response within 24h guaranteed.</p>
-      <div class="contact-links">
-        <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
-          <div class="contact-link-icon">IG</div>@deadshotbeats
-        </a>
-        <a href="https://www.youtube.com/@prod.deadshotbeats" class="contact-link" target="_blank">
-          <div class="contact-link-icon">YT</div>@prod.deadshotbeats
-        </a>
-        <a href="https://x.com/deadshotbeatz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">X</div>@deadshotbeatz
-        </a>
-        <a href="https://www.tiktok.com/@deadshotbeaz" class="contact-link" target="_blank">
-          <div class="contact-link-icon">TT</div>@deadshotbeaz
-        </a>
-        <a href="mailto:Deadshotbeatz@outlook.com" class="contact-link">
-          <div class="contact-link-icon">✉</div>Deadshotbeatz@outlook.com
-        </a>
-      </div>
-    </div>
-    <div class="contact-form">
-      <div class="form-row">
-        <div class="form-group"><label>Name</label><input type="text" id="cf-name" placeholder="Your Name"></div>
-        <div class="form-group"><label>Email</label><input type="email" id="cf-email" placeholder="your@email.com"></div>
-      </div>
-      <div class="form-group">
-        <label>Subject</label>
-        <select id="cf-subject">
-          <option value="">Please select...</option>
-          <option>Custom Beat</option><option>Exclusive Deal</option>
-          <option>Feature / Collab</option><option>Mixing & Mastering</option><option>Other</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Message</label><textarea id="cf-message" placeholder="Describe your project..."></textarea></div>
-      <div class="form-feedback" id="form-feedback"></div>
-      <button class="send-btn" id="send-btn" onclick="sendContactForm()">Send Message →</button>
-    </div>
+  <div class="contact-form">
+    <input type="text" placeholder="NAME" style="background:var(--black3); border:1px solid var(--black4); padding:16px; color:white; width:100%; margin-bottom:10px;">
+    <textarea placeholder="MESSAGE" rows="5" style="background:var(--black3); border:1px solid var(--black4); padding:16px; color:white; width:100%; margin-bottom:10px;"></textarea>
+    <button class="btn-primary">Send</button>
   </div>
 </section>
 
-<footer>
-  <div class="footer-logo">DEAD<span>SHOT</span> BEATS</div>
-  <div class="footer-copy">© 2026 DeadshotBeats. All rights reserved.</div>
-  <div class="footer-links"><a href="#">Imprint</a><a href="#">Privacy</a><a href="#">Terms</a></div>
-</footer>
-
-<div class="sticky-player" id="sticky-player">
-  <div class="player-info">
-    <div class="player-cover"><div class="player-cover-placeholder">DS</div></div>
-    <div><div class="player-beat-name" id="player-name">—</div><div class="player-beat-tag" id="player-tag">—</div></div>
+<div class="sticky-player" id="player">
+  <div style="min-width:200px">
+    <div class="beat-name" id="p-name">Track</div>
+    <div class="beat-tag" id="p-tag">Genre</div>
   </div>
-  <div class="player-controls">
-    <div class="player-buttons">
-      <button class="ctrl-btn" onclick="prevBeat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg></button>
-      <button class="ctrl-btn main-play" onclick="togglePlay()">
-        <svg id="play-svg" width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
-        <svg id="pause-svg" width="14" height="14" viewBox="0 0 24 24" fill="white" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-      </button>
-      <button class="ctrl-btn" onclick="nextBeat()"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+  <div class="player-main">
+    <button onclick="window._toggle()" id="p-play-btn" style="background:var(--red); border:none; color:white; padding:8px 20px; cursor:pointer; font-weight:bold;">PLAY</button>
+    <div class="progress-area">
+      <span style="font-size:10px" id="p-cur">0:00</span>
+      <div class="progress-bar" onclick="window._seek(event)"><div class="progress-fill" id="p-fill"></div></div>
+      <span style="font-size:10px" id="p-dur">0:00</span>
     </div>
-    <div class="progress-container">
-      <span class="time-label" id="current-time">0:00</span>
-      <div class="progress-bar" id="progress-bar" onclick="seekAudio(event)"><div class="progress-fill" id="progress-fill"></div></div>
-      <span class="time-label" id="total-time">0:00</span>
-    </div>
-  </div>
-  <div class="player-volume">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--grey)"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-    <input type="range" class="volume-slider" id="vol" min="0" max="1" step="0.01" value="0.8" oninput="setVolume(this.value)">
   </div>
 </div>
 
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">✕</button>
-    <div class="modal-title">CHOOSE LICENSE</div>
-    <div class="modal-beat-name" id="modal-beat-name"></div>
-    <div class="license-options" id="modal-options"></div>
-    <button class="modal-checkout-btn" id="checkout-btn" onclick="proceedCheckout()">Proceed to Checkout →</button>
-    <div class="modal-note">🔒 Secure payment via Stripe · Instant download after purchase</div>
-  </div>
-</div>
-
-<audio id="audio-player" preload="none"></audio>
+<audio id="audio-el"></audio>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey:"AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
-  authDomain:"deadshot-beats.firebaseapp.com",
-  projectId:"deadshot-beats",
-  storageBucket:"deadshot-beats.firebasestorage.app",
-  messagingSenderId:"252096563375",
-  appId:"1:252096563375:web:58193b52e325147f592c5a"
+  apiKey: "AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
+  authDomain: "deadshot-beats.firebaseapp.com",
+  projectId: "deadshot-beats",
+  storageBucket: "deadshot-beats.firebasestorage.app",
+  messagingSenderId: "252096563375",
+  appId: "1:252096563375:web:58193b52e325147f592c5a"
 };
 
 const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-const BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
+const db = getFirestore(app);
+const STORAGE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
 
-const MULT = { mp3:1.0, wav:2.0, trackout:3.4, exclusive:17.2 };
-function calcPrices(base) {
-  return {
-    mp3:       Math.round(base * MULT.mp3),
-    wav:       Math.round(base * MULT.wav),
-    trackout:  Math.round(base * MULT.trackout),
-    exclusive: Math.round(base * MULT.exclusive),
-  };
+let beats = [], current = null;
+const audio = document.getElementById('audio-el');
+
+function render() {
+  const list = document.getElementById('beat-list');
+  list.innerHTML = beats.map((b, i) => `
+    <div class="beat-row" onclick="window._play('${b.id}')">
+      <div style="color:var(--grey)">${i+1}</div>
+      <div class="beat-cover">DS</div>
+      <div class="beat-info"><div class="beat-name">${b.name}</div><div class="beat-tag">${b.genre||'Beat'}</div></div>
+      <div class="beat-price">${b.price||'29.99'}€</div>
+      <div style="display:flex; gap:10px;">
+        <button class="share-btn" onclick="window._share(event, '${b.id}', '${b.name}')">SHR</button>
+        <button class="buy-btn">BUY</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-let beats=[], licenses=[], currentBeat=null, isPlaying=false, currentFilter='all', selectedLicense='mp3', currentBeatForModal=null;
-const audio = document.getElementById('audio-player');
-
-audio.addEventListener('timeupdate',()=>{
-  if(!audio.duration)return;
-  document.getElementById('progress-fill').style.width=(audio.currentTime/audio.duration*100)+'%';
-  document.getElementById('current-time').textContent=fmt(audio.currentTime);
-});
-audio.addEventListener('loadedmetadata',()=>{document.getElementById('total-time').textContent=fmt(audio.duration);});
-audio.addEventListener('ended',()=>nextBeat());
-audio.addEventListener('play', ()=>{isPlaying=true; updatePlayBtn(true); renderBeats(currentFilter);});
-audio.addEventListener('pause',()=>{isPlaying=false;updatePlayBtn(false);renderBeats(currentFilter);});
-
-function fmt(s){if(isNaN(s))return'0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');}
-
-function renderBeats(filter){
-  const filtered=filter==='all'?beats:beats.filter(b=>(b.genre||'').toLowerCase()===filter);
-  document.getElementById('beats-shown').textContent=filtered.length+' TRACKS';
-  document.getElementById('beat-list').innerHTML=filtered.length===0
-    ?'<div style="padding:40px;text-align:center;color:var(--grey);font-family:\'Barlow Condensed\',sans-serif;letter-spacing:2px;">NO BEATS IN THIS GENRE YET</div>'
-    :filtered.map((b,i)=>{
-      const p=calcPrices(b.price||29);
-      return`<div class="beat-row ${currentBeat?.id===b.id?'playing':''}" onclick="window._playBeat(${b.id})">
-        <div class="beat-num">${currentBeat?.id===b.id?'<div class="eq-bars"><div class="eq-bar" style="height:8px"></div><div class="eq-bar" style="height:12px"></div><div class="eq-bar" style="height:6px"></div></div>':(i+1)}</div>
-        <div class="beat-cover"><div class="beat-cover-placeholder">DS</div>
-          <div class="play-overlay">${currentBeat?.id===b.id&&isPlaying?'<div class="pause-icon"><div class="pause-bar"></div><div class="pause-bar"></div></div>':'<div class="play-icon"></div>'}</div>
-        </div>
-        <div class="beat-info">
-          <div class="beat-name">${b.name}</div>
-          <div class="beat-meta">
-            <span class="beat-tag">${b.genre||''}</span>
-            ${b.bpm>0?`<span>${b.bpm} BPM</span>`:''}
-            ${b.key?`<span>${b.key}</span>`:''}
-          </div>
-        </div>
-        <div class="beat-price">${p.mp3}<span>€</span></div>
-        <div class="beat-actions">
-          <button class="share-btn" onclick="window._shareBeat(event,${b.id})" title="Link kopieren"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16c-.8 0-1.5.3-2 .8l-7.1-4.1c0-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2c.5.5 1.2.8 2 .8 1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3c0 .2 0 .5.1.7L8 9.8C7.5 9.3 6.8 9 6 9c-1.7 0-3 1.3-3 3s1.3 3 3 3c.8 0 1.5-.3 2-.8l7.1 4.1c0 .2-.1.4-.1.7 0 1.6 1.3 2.9 2.9 2.9s2.9-1.3 2.9-2.9S19.6 16 18 16z"/></svg></button>
-          <button class="buy-btn" onclick="window._openBuyModal(event,${b.id})">Buy</button>
-        </div>
-      </div>`;
-    }).join('');
-}
-
-window._playBeat=function(id){
-  const b=beats.find(x=>x.id===id);if(!b)return;
-  if(currentBeat?.id===id){window._togglePlay();return;}
-  currentBeat=b;audio.src=BASE+b.file;audio.volume=document.getElementById('vol').value;audio.play();
-  document.getElementById('player-name').textContent=b.name;
-  document.getElementById('player-tag').textContent=(b.genre||'')+(b.bpm>0?' · '+b.bpm+' BPM':'')+(b.key?' · '+b.key:'');
-  document.getElementById('sticky-player').classList.add('visible');
-  renderBeats(currentFilter);
+window._play = (id) => {
+  const b = beats.find(x => String(x.id) === String(id));
+  if(!b) return;
+  if(current?.id === b.id) return window._toggle();
+  current = b;
+  audio.src = STORAGE + b.file;
+  audio.play();
+  document.getElementById('p-name').textContent = b.name;
+  document.getElementById('p-tag').textContent = b.genre || 'Beat';
+  document.getElementById('player').classList.add('visible');
+  document.getElementById('p-play-btn').textContent = 'PAUSE';
 };
-window._togglePlay=()=>{if(!currentBeat)return;audio.paused?audio.play():audio.pause();};
-window.togglePlay=window._togglePlay;
-window.nextBeat=()=>{if(!beats.length)return;const i=beats.findIndex(b=>b.id===currentBeat?.id);window._playBeat(beats[(i+1)%beats.length].id);};
-window.prevBeat=()=>{if(!beats.length)return;const i=beats.findIndex(b=>b.id===currentBeat?.id);window._playBeat(beats[(i-1+beats.length)%beats.length].id);};
-window.seekAudio=e=>{if(!audio.duration)return;audio.currentTime=(e.offsetX/document.getElementById('progress-bar').offsetWidth)*audio.duration;};
-window.setVolume=v=>{audio.volume=v;};
-function updatePlayBtn(p){document.getElementById('play-svg').style.display=p?'none':'block';document.getElementById('pause-svg').style.display=p?'block':'none';}
 
-document.querySelectorAll('.filter-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');currentFilter=btn.dataset.filter;renderBeats(currentFilter);
-  });
+window._toggle = () => {
+  if(audio.paused) { audio.play(); document.getElementById('p-play-btn').textContent = 'PAUSE'; }
+  else { audio.pause(); document.getElementById('p-play-btn').textContent = 'PLAY'; }
+};
+
+window._share = async (e, id, name) => {
+  e.stopPropagation();
+  const url = window.location.origin + window.location.pathname + '?beat=' + id;
+  if (navigator.share) {
+    await navigator.share({ title: 'Deadshot Beats', text: name, url: url });
+  } else {
+    await navigator.clipboard.writeText(url);
+    e.currentTarget.textContent = 'OK';
+    setTimeout(() => e.currentTarget.textContent = 'SHR', 1500);
+  }
+};
+
+window._seek = (e) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+};
+
+audio.addEventListener('timeupdate', () => {
+  document.getElementById('p-fill').style.width = (audio.currentTime / audio.duration * 100) + '%';
+  document.getElementById('p-cur').textContent = fmt(audio.currentTime);
+  if(!isNaN(audio.duration)) document.getElementById('p-dur').textContent = fmt(audio.duration);
 });
 
-window._openBuyModal=function(e,id){
-  e.stopPropagation();
-  currentBeatForModal=beats.find(b=>b.id===id);if(!currentBeatForModal)return;
-  const b=currentBeatForModal;
-  const p=calcPrices(b.price||29);
-  document.getElementById('modal-beat-name').textContent=b.name;
-  selectedLicense='mp3';
+const fmt = (s) => Math.floor(s/60) + ":" + Math.floor(s%60).toString().padStart(2, '0');
 
-  const hasWav=!!b.wavFile;
-  const hasTrackout=!!b.trackoutFile;
-  const hasAll=hasWav&&hasTrackout;
-
-  const defs=[
-    {key:'mp3',      name:'MP3 LEASE', desc:'MP3 320kbps · up to 100k Streams',    available:true},
-    {key:'wav',      name:'WAV LEASE', desc:'WAV + MP3 · up to 500k Streams',       available:hasWav},
-    {key:'trackout', name:'TRACKOUT',  desc:'All Stems · Unlimited Streams',         available:hasTrackout},
-    {key:'exclusive',name:'EXCLUSIVE', desc:'100% Exclusive Rights · Beat removed', available:hasAll},
-  ];
-
-  document.getElementById('modal-options').innerHTML=defs.map(l=>{
-    if(l.available){
-      return '<div class="license-option '+(l.key==="mp3"?"selected":"")+'" data-license="'+l.key+'" onclick="window._selectLicense(this)"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+'</div></div><div class="license-option-price">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
-    }else{
-      return '<div class="license-option" style="opacity:0.35;cursor:not-allowed;" title="Coming soon for this beat"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+' · Coming soon</div></div><div class="license-option-price" style="color:var(--grey);">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
-    }
-  }).join('');
-  document.getElementById('modal').classList.add('open');
-};
-window._selectLicense=function(el){
-  document.querySelectorAll('.license-option').forEach(o=>o.classList.remove('selected'));
-  el.classList.add('selected');selectedLicense=el.dataset.license;
-};
-
-window.proceedCheckout=async function(){
-  if(!currentBeatForModal)return;
-  const p=calcPrices(currentBeatForModal.price||29);
-  const btn=document.getElementById('checkout-btn');
-  btn.disabled=true;btn.innerHTML='<span class="checkout-spinner"></span>Loading...';
-  try{
-    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({beatName:currentBeatForModal.name,beatId:currentBeatForModal.id,license:selectedLicense,price:p[selectedLicense]})});
-    const data=await res.json();
-    if(data.url){window.location.href=data.url;}
-    else{throw new Error(data.error||'Unknown error');}
-  }catch(err){
-    btn.disabled=false;btn.innerHTML='Proceed to Checkout →';alert('Error: '+err.message);
-  }
-};
-
-window.sendContactForm=async function(){
-  const name=document.getElementById('cf-name').value.trim();
-  const email=document.getElementById('cf-email').value.trim();
-  const subject=document.getElementById('cf-subject').value;
-  const message=document.getElementById('cf-message').value.trim();
-  const fb=document.getElementById('form-feedback');
-  const btn=document.getElementById('send-btn');
-  if(!name||!email||!subject||!message){
-    fb.textContent='Please fill in all fields.';fb.className='form-feedback error';fb.style.display='block';return;
-  }
-  btn.disabled=true;btn.textContent='Sending...';fb.style.display='none';
-  try{
-    const res=await fetch('https://lively-wood-2e7c.deadshotbeatz.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name,email,subject,message})});
-    if(res.ok){
-      fb.textContent='✓ Message sent! I\'ll get back to you within 24h.';fb.className='form-feedback success';fb.style.display='block';
-      ['cf-name','cf-email','cf-message'].forEach(id=>{document.getElementById(id).value='';});
-      document.getElementById('cf-subject').value='';
-    }else{const d=await res.json();throw new Error(d.error||'Send failed');}
-  }catch(err){
-    fb.textContent='Error: '+err.message+'. Email us at Deadshotbeatz@outlook.com';
-    fb.className='form-feedback error';fb.style.display='block';
-  }
-  btn.disabled=false;btn.textContent='Send Message →';
-};
-
-const LIC_FEATURES={
-  mp3:     {f:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],d:['WAV File','Trackout Stems','Exclusive Rights']},
-  wav:     {f:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],d:['Trackout Stems','Exclusive Rights']},
-  trackout:{f:['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],d:['Exclusive Rights']},
-  exclusive:{f:['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price negotiable'],d:[]},
-};
-
-function renderLicenses(list){
-  const minBase=beats.length?Math.min(...beats.map(b=>b.price||29)):29;
-  const minP=calcPrices(minBase);
-  document.getElementById('license-grid').innerHTML=list.map(l=>{
-    const def=LIC_FEATURES[l.id]||{f:[],d:[]};
-    const feats=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)).length
-      ?(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)):def.f;
-    const disab=(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)).length
-      ?(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)):def.d;
-    const from=minP[l.id]||29;
-    return`<div class="license-card ${l.featured?'featured':''}">
-      ${l.featured?'<div class="license-badge">Popular</div>':''}
-      <div class="license-type">${l.type}</div>
-      <div class="license-name">${l.name}</div>
-      <div class="license-from-label">Starting price</div>
-      <div class="license-from-price">${from}<span>€${l.id==='exclusive'?'+':''}</span></div>
-      <div class="license-divider"></div>
-      <ul class="license-features">
-        ${feats.map(f=>`<li>${f}</li>`).join('')}
-        ${disab.map(f=>`<li class="disabled">${f}</li>`).join('')}
-      </ul>
-      ${l.inquire
-        ?`<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire →</button>`
-        :`<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById('beats').scrollIntoView({behavior:'smooth'})">Select a Beat →</button>`}
-    </div>`;
-  }).join('');
+async function init() {
+  const snap = await getDocs(query(collection(db, 'beats'), orderBy('id')));
+  beats = snap.docs.map(d => d.data());
+  document.getElementById('hero-beat-count').textContent = beats.length;
+  document.getElementById('beats-shown').textContent = beats.length + " TRACKS";
+  render();
+  const urlId = new URLSearchParams(window.location.search).get('beat');
+  if(urlId) setTimeout(() => window._play(urlId), 1000);
 }
-
-const DEFAULT_LICENSES=[
-  {id:'mp3',order:1,type:'Basic',name:'MP3 LEASE',featured:false,inquire:false,features:[],disabled:[]},
-  {id:'wav',order:2,type:'Standard',name:'WAV LEASE',featured:true,inquire:false,features:[],disabled:[]},
-  {id:'trackout',order:3,type:'Premium',name:'TRACKOUT',featured:false,inquire:false,features:[],disabled:[]},
-  {id:'exclusive',order:4,type:'One-Time',name:'EXCLUSIVE',featured:false,inquire:true,features:[],disabled:[]},
-];
-
-window._shareBeat=function(e,id){
-  e.stopPropagation();
-  const url=window.location.origin+'/#beats?beat='+id;
-  navigator.clipboard.writeText(url).then(()=>{
-    const btn=e.currentTarget;
-    btn.style.borderColor='#22a022';btn.style.color='#22a022';
-    setTimeout(()=>{btn.style.borderColor='';btn.style.color='';},1500);
-  });
-};
-
-async function loadAll(){
-  try{
-    const snap=await getDocs(query(collection(db,'beats'),orderBy('id')));
-    beats=snap.docs.map(d=>d.data());
-  }catch(e){console.error('Beats error:',e);}
-  document.getElementById('hero-beat-count').textContent=beats.length||'—';
-  renderBeats('all');
-  try{
-    const snap=await getDocs(collection(db,'licenses'));
-    licenses=snap.empty?DEFAULT_LICENSES:snap.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
-  }catch(e){licenses=DEFAULT_LICENSES;}
-  renderLicenses(licenses);
-}
-loadAll();
+init();
 </script>
 </body>
 </html>
