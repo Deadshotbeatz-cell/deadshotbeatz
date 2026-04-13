@@ -578,7 +578,7 @@ const DEFAULT_LICENSES=[
 
 window._shareBeat=function(e,id){
   e.stopPropagation();
-  const url=window.location.origin+window.location.pathname+'?beat='+id;
+  const url=window.location.origin+'/#beats?beat='+id;
   navigator.clipboard.writeText(url).then(()=>{
     const btn=e.currentTarget;
     btn.style.borderColor='#22a022';btn.style.color='#22a022';
@@ -598,14 +598,7 @@ async function loadAll(){
     licenses=snap.empty?DEFAULT_LICENSES:snap.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
   }catch(e){licenses=DEFAULT_LICENSES;}
   renderLicenses(licenses);
-  const urlBeat=new URLSearchParams(window.location.search).get('beat');
-if(urlBeat){
-  setTimeout(()=>{
-    const b=beats.find(x=>String(x.id)===urlBeat);
-    if(b){document.getElementById('beats').scrollIntoView();window._playBeat(b.id);}
-  },300);
 }
-
 loadAll();
 </script>
 </body>
