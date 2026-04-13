@@ -49,8 +49,7 @@
   .filter-btn{background:transparent;border:1px solid var(--black4);color:var(--grey);padding:7px 18px;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
   .filter-btn:hover,.filter-btn.active{border-color:var(--red);color:var(--red);background:rgba(224,26,26,0.05);}
   .beat-list{display:flex;flex-direction:column;gap:2px;}
-  /* FIX: 5 columns, last one is the action group (share+buy together) */
-  .beat-row{display:grid;grid-template-columns:40px 56px 1fr auto auto;align-items:center;gap:16px;padding:12px 20px;background:var(--black2);border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative;overflow:hidden;}
+  .beat-row{display:grid;grid-template-columns:40px 56px 1fr auto auto auto;align-items:center;gap:16px;padding:12px 20px;background:var(--black2);border:1px solid transparent;transition:all 0.2s;cursor:pointer;position:relative;overflow:hidden;}
   .beat-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:var(--red);transition:width 0.2s;}
   .beat-row:hover{background:var(--black3);border-color:rgba(224,26,26,0.2);}
   .beat-row:hover::before,.beat-row.playing::before{width:2px;}
@@ -68,13 +67,9 @@
   .beat-row:hover .beat-name,.beat-row.playing .beat-name{color:var(--red);}
   .beat-meta{font-size:12px;color:var(--grey);margin-top:2px;display:flex;gap:12px;}
   .beat-tag{display:inline-block;background:var(--black4);color:var(--grey);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;}
+  .beat-duration{font-family:'Barlow Condensed',sans-serif;font-size:13px;color:var(--grey);white-space:nowrap;}
   .beat-price{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--white);white-space:nowrap;}
   .beat-price span{font-family:'Barlow',sans-serif;font-size:10px;color:var(--grey);font-weight:300;letter-spacing:1px;}
-  /* Share + Buy as a group */
-  .beat-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;}
-  .share-btn{background:transparent;border:1px solid var(--grey2);color:var(--grey);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;flex-shrink:0;}
-  .share-btn:hover{border-color:var(--white);color:var(--white);}
-  .share-btn.copied{border-color:#22a022;color:#22a022;}
   .buy-btn{background:transparent;border:1px solid var(--red);color:var(--red);padding:6px 16px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
   .buy-btn:hover{background:var(--red);color:var(--white);}
   .licenses{background:var(--black2);border-top:1px solid var(--black3);border-bottom:1px solid var(--black3);}
@@ -128,7 +123,7 @@
   .contact-links{display:flex;flex-direction:column;gap:12px;}
   .contact-link{display:flex;align-items:center;gap:12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;color:var(--grey);text-decoration:none;transition:color 0.2s;}
   .contact-link:hover{color:var(--red);}
-  .contact-link-icon{width:32px;height:32px;border:1px solid var(--black4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;transition:all 0.2s;}
+  .contact-link-icon{width:32px;height:32px;border:1px solid var(--black4);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'Barlow Condensed',sans-serif;letter-spacing:0;transition:all 0.2s;}
   .contact-link:hover .contact-link-icon{border-color:var(--red);background:rgba(224,26,26,0.1);}
   .contact-form{display:flex;flex-direction:column;gap:16px;}
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -167,10 +162,6 @@
   .modal-checkout-btn{width:100%;background:var(--red);color:var(--white);border:none;padding:16px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:background 0.2s;}
   .modal-checkout-btn:hover{background:var(--red-dark);}
   .modal-note{text-align:center;font-size:11px;color:var(--grey2);margin-top:12px;}
-  /* TOAST */
-  .toast-msg{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.95);border:1px solid rgba(255,255,255,0.1);color:var(--white);padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:600;letter-spacing:1px;border-radius:100px;z-index:9999;opacity:0;transition:opacity 0.3s;pointer-events:none;white-space:nowrap;}
-  .toast-msg.show{opacity:1;}
-  .toast-msg.success{border-color:rgba(34,160,34,0.4);color:#22a022;}
   @keyframes pulse-bar{0%,100%{transform:scaleY(0.4);}50%{transform:scaleY(1);}}
   .eq-bars{display:flex;gap:2px;align-items:flex-end;height:12px;}
   .eq-bar{width:3px;background:var(--red);transform-origin:bottom;animation:pulse-bar 0.8s ease-in-out infinite;}
@@ -185,13 +176,14 @@
     .about{grid-template-columns:1fr;gap:40px;}
     .contact-grid{grid-template-columns:1fr;gap:40px;}
     footer{flex-direction:column;gap:20px;text-align:center;}
-    .beat-row{grid-template-columns:40px 44px 1fr auto;gap:8px;}
+    .beat-row{grid-template-columns:40px 44px 1fr auto auto;gap:8px;}
     .beat-price{display:none;}
+    .buy-btn{padding:6px 10px;font-size:10px;}
     .sticky-player{padding:0 20px;gap:16px;}.player-volume{display:none;}
     .hero::after{font-size:240px;right:-30px;}
     .form-row{grid-template-columns:1fr;}
-    .buy-btn{padding:6px 10px;font-size:10px;}
-    .share-btn{width:28px;height:28px;}
+    .share-btn{background:transparent;border:1px solid var(--grey2);color:var(--grey);padding:6px 10px;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;}
+.share-btn:hover{border-color:var(--white);color:var(--white);}
   }
 </style>
 </head>
@@ -283,11 +275,21 @@
       <h3>LET'S WORK</h3>
       <p>Custom beats, exclusive deals, features, mixing & mastering — reach out anytime. Response within 24h guaranteed.</p>
       <div class="contact-links">
-        <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank"><div class="contact-link-icon">IG</div>@deadshotbeats</a>
-        <a href="https://www.youtube.com/@prod.deadshotbeats" class="contact-link" target="_blank"><div class="contact-link-icon">YT</div>@prod.deadshotbeats</a>
-        <a href="https://x.com/deadshotbeatz" class="contact-link" target="_blank"><div class="contact-link-icon">X</div>@deadshotbeatz</a>
-        <a href="https://www.tiktok.com/@deadshotbeaz" class="contact-link" target="_blank"><div class="contact-link-icon">TT</div>@deadshotbeaz</a>
-        <a href="mailto:beats@deadshotbeats.com" class="contact-link"><div class="contact-link-icon">✉</div>beats@deadshotbeats.com</a>
+        <a href="https://instagram.com/deadshotbeats" class="contact-link" target="_blank">
+          <div class="contact-link-icon">IG</div>@deadshotbeats
+        </a>
+        <a href="https://www.youtube.com/@prod.deadshotbeats" class="contact-link" target="_blank">
+          <div class="contact-link-icon">YT</div>@prod.deadshotbeats
+        </a>
+        <a href="https://x.com/deadshotbeatz" class="contact-link" target="_blank">
+          <div class="contact-link-icon">X</div>@deadshotbeatz
+        </a>
+        <a href="https://www.tiktok.com/@deadshotbeaz" class="contact-link" target="_blank">
+          <div class="contact-link-icon">TT</div>@deadshotbeaz
+        </a>
+        <a href="mailto:beats@deadshotbeats.com" class="contact-link">
+          <div class="contact-link-icon">✉</div>Deadshotbeatz@outlook.com
+        </a>
       </div>
     </div>
     <div class="contact-form">
@@ -297,7 +299,11 @@
       </div>
       <div class="form-group">
         <label>Subject</label>
-        <select id="cf-subject"><option value="">Please select...</option><option>Custom Beat</option><option>Exclusive Deal</option><option>Feature / Collab</option><option>Mixing & Mastering</option><option>Other</option></select>
+        <select id="cf-subject">
+          <option value="">Please select...</option>
+          <option>Custom Beat</option><option>Exclusive Deal</option>
+          <option>Feature / Collab</option><option>Mixing & Mastering</option><option>Other</option>
+        </select>
       </div>
       <div class="form-group"><label>Message</label><textarea id="cf-message" placeholder="Describe your project..."></textarea></div>
       <div class="form-feedback" id="form-feedback"></div>
@@ -349,53 +355,50 @@
   </div>
 </div>
 
-<div class="toast-msg" id="toast"></div>
 <audio id="audio-player" preload="none"></audio>
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getFirestore, collection, getDocs, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-const firebaseConfig={apiKey:"AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",authDomain:"deadshot-beats.firebaseapp.com",projectId:"deadshot-beats",storageBucket:"deadshot-beats.firebasestorage.app",messagingSenderId:"252096563375",appId:"1:252096563375:web:58193b52e325147f592c5a"};
-const app=initializeApp(firebaseConfig),db=getFirestore(app);
-const BASE='https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
-const MULT={mp3:1.0,wav:2.0,trackout:3.4,exclusive:17.2};
-function calcPrices(base){return{mp3:Math.round(base*MULT.mp3),wav:Math.round(base*MULT.wav),trackout:Math.round(base*MULT.trackout),exclusive:Math.round(base*MULT.exclusive)};}
+const firebaseConfig = {
+  apiKey:"AIzaSyB8P57XfDSlGkVrn3hTkKdB4YpfT435CYU",
+  authDomain:"deadshot-beats.firebaseapp.com",
+  projectId:"deadshot-beats",
+  storageBucket:"deadshot-beats.firebasestorage.app",
+  messagingSenderId:"252096563375",
+  appId:"1:252096563375:web:58193b52e325147f592c5a"
+};
 
-let beats=[],licenses=[],currentBeat=null,isPlaying=false,currentFilter='all',selectedLicense='mp3',currentBeatForModal=null;
-const audio=document.getElementById('audio-player');
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+const BASE = 'https://pub-3a53df11fb5549bd97511bdef51a3c33.r2.dev/';
 
-audio.addEventListener('timeupdate',()=>{if(!audio.duration)return;document.getElementById('progress-fill').style.width=(audio.currentTime/audio.duration*100)+'%';document.getElementById('current-time').textContent=fmt(audio.currentTime);});
+// ── PRICE MULTIPLIERS (Option A) ──────────────────────────
+const MULT = { mp3:1.0, wav:2.0, trackout:3.4, exclusive:17.2 };
+function calcPrices(base) {
+  return {
+    mp3:       Math.round(base * MULT.mp3),
+    wav:       Math.round(base * MULT.wav),
+    trackout:  Math.round(base * MULT.trackout),
+    exclusive: Math.round(base * MULT.exclusive),
+  };
+}
+
+let beats=[], licenses=[], currentBeat=null, isPlaying=false, currentFilter='all', selectedLicense='mp3', currentBeatForModal=null;
+const audio = document.getElementById('audio-player');
+
+audio.addEventListener('timeupdate',()=>{
+  if(!audio.duration)return;
+  document.getElementById('progress-fill').style.width=(audio.currentTime/audio.duration*100)+'%';
+  document.getElementById('current-time').textContent=fmt(audio.currentTime);
+});
 audio.addEventListener('loadedmetadata',()=>{document.getElementById('total-time').textContent=fmt(audio.duration);});
 audio.addEventListener('ended',()=>nextBeat());
-audio.addEventListener('play',()=>{isPlaying=true;updatePlayBtn(true);renderBeats(currentFilter);});
+audio.addEventListener('play', ()=>{isPlaying=true; updatePlayBtn(true); renderBeats(currentFilter);});
 audio.addEventListener('pause',()=>{isPlaying=false;updatePlayBtn(false);renderBeats(currentFilter);});
+
 function fmt(s){if(isNaN(s))return'0:00';return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');}
-
-// FIX: _shareBeat defined at top level, BEFORE renderBeats
-window._shareBeat=function(e,id){
-  e.stopPropagation();
-  const url=window.location.origin+'/#beat-'+id;
-  if(navigator.clipboard&&window.isSecureContext){
-    navigator.clipboard.writeText(url).then(()=>{
-      showToast('Link copied!','success');
-      const btn=document.getElementById('sb-'+id);
-      if(btn){btn.classList.add('copied');setTimeout(()=>btn.classList.remove('copied'),2000);}
-    }).catch(()=>fallbackCopy(url));
-  }else{fallbackCopy(url);}
-};
-function fallbackCopy(text){
-  const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
-  document.body.appendChild(ta);ta.focus();ta.select();
-  try{document.execCommand('copy');showToast('Link copied!','success');}catch(e){showToast('Copy: '+text,'');}
-  document.body.removeChild(ta);
-}
-
-let _toastTimer;
-function showToast(msg,type){
-  const t=document.getElementById('toast');t.textContent=msg;t.className='toast-msg show'+(type==='success'?' success':'');
-  clearTimeout(_toastTimer);_toastTimer=setTimeout(()=>{t.className='toast-msg';},2500);
-}
 
 function renderBeats(filter){
   const filtered=filter==='all'?beats:beats.filter(b=>(b.genre||'').toLowerCase()===filter);
@@ -411,15 +414,16 @@ function renderBeats(filter){
         </div>
         <div class="beat-info">
           <div class="beat-name">${b.name}</div>
-          <div class="beat-meta"><span class="beat-tag">${b.genre||''}</span>${b.bpm>0?`<span>${b.bpm} BPM</span>`:''}${b.key?`<span>${b.key}</span>`:''}</div>
+          <div class="beat-meta">
+            <span class="beat-tag">${b.genre||''}</span>
+            ${b.bpm>0?`<span>${b.bpm} BPM</span>`:''}
+            ${b.key?`<span>${b.key}</span>`:''}
+          </div>
         </div>
+        <div class="beat-duration">—</div>
         <div class="beat-price">${p.mp3}<span>€</span></div>
-        <div class="beat-actions">
-          <button class="share-btn" id="sb-${b.id}" onclick="window._shareBeat(event,${b.id})" title="Copy link">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16c-.8 0-1.5.3-2 .8l-7.1-4.1c0-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2c.5.5 1.2.8 2 .8 1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3c0 .2 0 .5.1.7L8 9.8C7.5 9.3 6.8 9 6 9c-1.7 0-3 1.3-3 3s1.3 3 3 3c.8 0 1.5-.3 2-.8l7.1 4.1c0 .2-.1.4-.1.7 0 1.6 1.3 2.9 2.9 2.9s2.9-1.3 2.9-2.9S19.6 16 18 16z"/></svg>
-          </button>
-          <button class="buy-btn" onclick="window._openBuyModal(event,${b.id})">Buy</button>
-        </div>
+        <button class="share-btn" onclick="window._shareBeat(event,${b.id})" title="Link kopieren"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 16c-.8 0-1.5.3-2 .8l-7.1-4.1c0-.2.1-.5.1-.7s0-.5-.1-.7L16 7.2c.5.5 1.2.8 2 .8 1.7 0 3-1.3 3-3s-1.3-3-3-3-3 1.3-3 3c0 .2 0 .5.1.7L8 9.8C7.5 9.3 6.8 9 6 9c-1.7 0-3 1.3-3 3s1.3 3 3 3c.8 0 1.5-.3 2-.8l7.1 4.1c0 .2-.1.4-.1.7 0 1.6 1.3 2.9 2.9 2.9s2.9-1.3 2.9-2.9S19.6 16 18 16z"/></svg></button>
+        <button class="buy-btn" onclick="window._openBuyModal(event,${b.id})">Buy</button>
       </div>`;
     }).join('');
 }
@@ -442,79 +446,119 @@ window.setVolume=v=>{audio.volume=v;};
 function updatePlayBtn(p){document.getElementById('play-svg').style.display=p?'none':'block';document.getElementById('pause-svg').style.display=p?'block':'none';}
 
 document.querySelectorAll('.filter-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');currentFilter=btn.dataset.filter;renderBeats(currentFilter);});
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');currentFilter=btn.dataset.filter;renderBeats(currentFilter);
+  });
 });
 
 window._openBuyModal=function(e,id){
   e.stopPropagation();
   currentBeatForModal=beats.find(b=>b.id===id);if(!currentBeatForModal)return;
-  const b=currentBeatForModal,p=calcPrices(b.price||29);
-  document.getElementById('modal-beat-name').textContent=b.name;selectedLicense='mp3';
-  const hasWav=!!b.wavFile,hasTrackout=!!b.trackoutFile,hasAll=hasWav&&hasTrackout;
+  const b=currentBeatForModal;
+  const p=calcPrices(b.price||29);
+  document.getElementById('modal-beat-name').textContent=b.name;
+  selectedLicense='mp3';
+
+  const hasWav=!!b.wavFile;
+  const hasTrackout=!!b.trackoutFile;
+  const hasAll=hasWav&&hasTrackout;
+
   const defs=[
-    {key:'mp3',name:'MP3 LEASE',desc:'MP3 320kbps · up to 100k Streams',available:true},
-    {key:'wav',name:'WAV LEASE',desc:'WAV + MP3 · up to 500k Streams',available:hasWav},
-    {key:'trackout',name:'TRACKOUT',desc:'All Stems · Unlimited Streams',available:hasTrackout},
-    {key:'exclusive',name:'EXCLUSIVE',desc:'100% Exclusive Rights · Beat removed',available:hasAll},
+    {key:'mp3',      name:'MP3 LEASE', desc:'MP3 320kbps · up to 100k Streams',    available:true},
+    {key:'wav',      name:'WAV LEASE', desc:'WAV + MP3 · up to 500k Streams',       available:hasWav},
+    {key:'trackout', name:'TRACKOUT',  desc:'All Stems · Unlimited Streams',         available:hasTrackout},
+    {key:'exclusive',name:'EXCLUSIVE', desc:'100% Exclusive Rights · Beat removed', available:hasAll},
   ];
+
   document.getElementById('modal-options').innerHTML=defs.map(l=>{
-    if(l.available)return'<div class="license-option '+(l.key==="mp3"?"selected":"")+'" data-license="'+l.key+'" onclick="window._selectLicense(this)"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+'</div></div><div class="license-option-price">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
-    return'<div class="license-option" style="opacity:0.35;cursor:not-allowed" title="Coming soon"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+' · Coming soon</div></div><div class="license-option-price" style="color:var(--grey)">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
+    if(l.available){
+      return '<div class="license-option '+(l.key==="mp3"?"selected":"")+'" data-license="'+l.key+'" onclick="window._selectLicense(this)"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+'</div></div><div class="license-option-price">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
+    }else{
+      return '<div class="license-option" style="opacity:0.35;cursor:not-allowed;" title="Coming soon for this beat"><div><div class="license-option-name">'+l.name+'</div><div class="license-option-desc">'+l.desc+' · Coming soon</div></div><div class="license-option-price" style="color:var(--grey);">'+p[l.key]+'\u20ac'+(l.key==="exclusive"?"+":"")+'</div></div>';
+    }
   }).join('');
   document.getElementById('modal').classList.add('open');
 };
-window._selectLicense=function(el){document.querySelectorAll('.license-option').forEach(o=>o.classList.remove('selected'));el.classList.add('selected');selectedLicense=el.dataset.license;};
+window._selectLicense=function(el){
+  document.querySelectorAll('.license-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');selectedLicense=el.dataset.license;
+};
 
 window.proceedCheckout=async function(){
   if(!currentBeatForModal)return;
-  const p=calcPrices(currentBeatForModal.price||29),btn=document.getElementById('checkout-btn');
+  const p=calcPrices(currentBeatForModal.price||29);
+  const btn=document.getElementById('checkout-btn');
   btn.disabled=true;btn.innerHTML='<span class="checkout-spinner"></span>Loading...';
   try{
-    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({beatName:currentBeatForModal.name,beatId:currentBeatForModal.id,license:selectedLicense,price:p[selectedLicense]})});
+    const res=await fetch('/api/create-checkout',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({beatName:currentBeatForModal.name,beatId:currentBeatForModal.id,license:selectedLicense,price:p[selectedLicense]})});
     const data=await res.json();
-    if(data.url)window.location.href=data.url;else throw new Error(data.error||'Unknown error');
-  }catch(err){btn.disabled=false;btn.innerHTML='Proceed to Checkout →';alert('Error: '+err.message);}
+    if(data.url){window.location.href=data.url;}
+    else{throw new Error(data.error||'Unknown error');}
+  }catch(err){
+    btn.disabled=false;btn.innerHTML='Proceed to Checkout →';alert('Error: '+err.message);
+  }
 };
 
 window.sendContactForm=async function(){
-  const name=document.getElementById('cf-name').value.trim(),email=document.getElementById('cf-email').value.trim(),subject=document.getElementById('cf-subject').value,message=document.getElementById('cf-message').value.trim();
-  const fb=document.getElementById('form-feedback'),btn=document.getElementById('send-btn');
-  if(!name||!email||!subject||!message){fb.textContent='Please fill in all fields.';fb.className='form-feedback error';fb.style.display='block';return;}
+  const name=document.getElementById('cf-name').value.trim();
+  const email=document.getElementById('cf-email').value.trim();
+  const subject=document.getElementById('cf-subject').value;
+  const message=document.getElementById('cf-message').value.trim();
+  const fb=document.getElementById('form-feedback');
+  const btn=document.getElementById('send-btn');
+  if(!name||!email||!subject||!message){
+    fb.textContent='Please fill in all fields.';fb.className='form-feedback error';fb.style.display='block';return;
+  }
   btn.disabled=true;btn.textContent='Sending...';fb.style.display='none';
   try{
-    const res=await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,email,subject,message})});
-    if(res.ok){fb.textContent='Message sent! I\'ll get back to you within 24h.';fb.className='form-feedback success';fb.style.display='block';['cf-name','cf-email','cf-message'].forEach(id=>{document.getElementById(id).value='';});document.getElementById('cf-subject').value='';}
-    else{const d=await res.json();throw new Error(d.error||'Send failed');}
-  }catch(err){fb.textContent='Error: '+err.message;fb.className='form-feedback error';fb.style.display='block';}
-  btn.disabled=false;btn.textContent='Send Message \u2192';
+    const res=await fetch('https://lively-wood-2e7c.deadshotbeatz.workers.dev',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name,email,subject,message})});
+    if(res.ok){
+      fb.textContent='✓ Message sent! I\'ll get back to you within 24h.';fb.className='form-feedback success';fb.style.display='block';
+      ['cf-name','cf-email','cf-message'].forEach(id=>{document.getElementById(id).value='';});
+      document.getElementById('cf-subject').value='';
+    }else{const d=await res.json();throw new Error(d.error||'Send failed');}
+  }catch(err){
+    fb.textContent='Error: '+err.message+'. Email us at beats@deadshotbeats.com';
+    fb.className='form-feedback error';fb.style.display='block';
+  }
+  btn.disabled=false;btn.textContent='Send Message →';
 };
 
+// ── DEFAULT LICENSE FEATURES ──────────────────────────────
 const LIC_FEATURES={
-  mp3:{f:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],d:['WAV File','Trackout Stems','Exclusive Rights']},
-  wav:{f:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],d:['Trackout Stems','Exclusive Rights']},
+  mp3:     {f:['MP3 High Quality (320kbps)','Up to 100,000 Streams','Music videos allowed','Non-profit performances'],d:['WAV File','Trackout Stems','Exclusive Rights']},
+  wav:     {f:['WAV + MP3 (Studio Quality)','Up to 500,000 Streams','Music videos allowed','Commercial performances','Radio broadcasts'],d:['Trackout Stems','Exclusive Rights']},
   trackout:{f:['All Stems / Individual Tracks','WAV + MP3 included','Unlimited Streams','Full commercial use','TV & Film Sync','Free to edit'],d:['Exclusive Rights']},
   exclusive:{f:['100% Exclusive Rights','Beat removed from store','All stems & file formats','Full commercial use','Label deals possible','Price negotiable'],d:[]},
 };
+
 function renderLicenses(list){
   const minBase=beats.length?Math.min(...beats.map(b=>b.price||29)):29;
   const minP=calcPrices(minBase);
   document.getElementById('license-grid').innerHTML=list.map(l=>{
     const def=LIC_FEATURES[l.id]||{f:[],d:[]};
-    const feats=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)).length?(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)):def.f;
-    const disab=(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)).length?(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)):def.d;
+    const feats=(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)).length
+      ?(Array.isArray(l.features)?l.features:(l.features||'').split('\n').filter(x=>x)):def.f;
+    const disab=(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)).length
+      ?(Array.isArray(l.disabled)?l.disabled:(l.disabled||'').split('\n').filter(x=>x)):def.d;
     const from=minP[l.id]||29;
     return`<div class="license-card ${l.featured?'featured':''}">
       ${l.featured?'<div class="license-badge">Popular</div>':''}
       <div class="license-type">${l.type}</div>
       <div class="license-name">${l.name}</div>
       <div class="license-from-label">Starting price</div>
-      <div class="license-from-price">${from}<span>\u20ac${l.id==='exclusive'?'+':''}</span></div>
+      <div class="license-from-price">${from}<span>€${l.id==='exclusive'?'+':''}</span></div>
       <div class="license-divider"></div>
       <ul class="license-features">
         ${feats.map(f=>`<li>${f}</li>`).join('')}
         ${disab.map(f=>`<li class="disabled">${f}</li>`).join('')}
       </ul>
-      ${l.inquire?`<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire \u2192</button>`:`<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById('beats').scrollIntoView({behavior:'smooth'})">Select a Beat \u2192</button>`}
+      ${l.inquire
+        ?`<button class="btn-secondary" style="width:100%;text-align:center;" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Inquire →</button>`
+        :`<button class="btn-primary" style="width:100%;text-align:center;" onclick="document.getElementById('beats').scrollIntoView({behavior:'smooth'})">Select a Beat →</button>`}
     </div>`;
   }).join('');
 }
@@ -527,13 +571,28 @@ const DEFAULT_LICENSES=[
 ];
 
 async function loadAll(){
-  try{const snap=await getDocs(query(collection(db,'beats'),orderBy('id')));beats=snap.docs.map(d=>d.data());}
-  catch(e){console.error('Beats error:',e);}
+  try{
+    const snap=await getDocs(query(collection(db,'beats'),orderBy('id')));
+    beats=snap.docs.map(d=>d.data());
+  }catch(e){console.error('Beats error:',e);}
   document.getElementById('hero-beat-count').textContent=beats.length||'—';
   renderBeats('all');
-  try{const snap=await getDocs(collection(db,'licenses'));licenses=snap.empty?DEFAULT_LICENSES:snap.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0));}
-  catch(e){licenses=DEFAULT_LICENSES;}
+  try{
+    const snap=await getDocs(collection(db,'licenses'));
+    licenses=snap.empty?DEFAULT_LICENSES:snap.docs.map(d=>d.data()).sort((a,b)=>(a.order||0)-(b.order||0));
+  }catch(e){licenses=DEFAULT_LICENSES;}
   renderLicenses(licenses);
+  window._shareBeat=function(e,id){
+  e.stopPropagation();
+  const url=window.location.origin+'/#beats?beat='+id;
+  navigator.clipboard.writeText(url).then(()=>{
+    const btn=e.currentTarget;
+    btn.style.borderColor='#22a022';btn.style.color='#22a022';
+    setTimeout(()=>{btn.style.borderColor='';btn.style.color='';},1500);
+  });
+};
+
+loadAll();
 }
 loadAll();
 </script>
